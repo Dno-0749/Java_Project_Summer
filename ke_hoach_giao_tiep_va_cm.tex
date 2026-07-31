@@ -1,0 +1,164 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{vietnamese}
+\setmainfont{DejaVu Serif}
+\setsansfont{DejaVu Sans}
+\setmonofont{DejaVu Sans Mono}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{seqsplit}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue
+}
+
+\titleformat{\section}{\Large\bfseries}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{0.6em}{}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\title{\textbf{Kế hoạch Giao tiếp Nhóm \& Configuration Management}\\[4pt]
+\large Dự án: Hệ thống Quản lý Du thuyền (Cruise Management System)\\
+\normalsize Jira: SCRUM-14 -- Project Communications \& Configuration Management}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\vspace{-1.5cm}
+\tableofcontents
+\vspace{0.5cm}
+
+\section{Mục tiêu}
+
+Tài liệu này quy định cách nhóm phối hợp, trao đổi thông tin và quản lý phiên bản mã nguồn/tài liệu trong suốt vòng đời dự án, nhằm:
+
+\begin{itemize}[leftmargin=1.2cm]
+  \item Đảm bảo thông tin thông suốt giữa các thành viên phụ trách các module khác nhau.
+  \item Giảm xung đột code khi nhiều người cùng làm việc trên Git.
+  \item Đảm bảo có thể truy vết (traceability) giữa task trên Jira, nhánh Git và commit.
+\end{itemize}
+
+\section{Kế hoạch Giao tiếp Nhóm}
+
+\subsection{Kênh giao tiếp}
+
+\begin{longtable}{L{4.2cm} L{5.3cm} L{3.5cm}}
+\toprule
+\textbf{Kênh} & \textbf{Mục đích} & \textbf{Đối tượng} \\
+\midrule
+\endhead
+Zalo/Slack nhóm (kênh chính) & Trao đổi nhanh, thông báo hằng ngày, hỏi đáp kỹ thuật & Toàn team \\
+Jira (comment trong task) & Trao đổi liên quan trực tiếp đến 1 task/issue cụ thể, cập nhật trạng thái & Toàn team \\
+Git (commit message, Pull Request comment) & Trao đổi liên quan đến thay đổi code cụ thể & Dev liên quan + reviewer \\
+Email & Thông báo chính thức, báo cáo với giảng viên/khách hàng, biên bản họp & Toàn team + bên liên quan \\
+Google Meet/Zoom & Họp định kỳ, demo, giải quyết vấn đề phức tạp & Toàn team \\
+LaTeX (source trên Git) & Soạn thảo và lưu trữ tài liệu thiết kế, biên bản họp, tài liệu đặc tả dưới dạng mã nguồn \texttt{.tex} & Toàn team \\
+\bottomrule
+\end{longtable}
+
+\subsection{Tần suất họp}
+
+\begin{longtable}{L{3.8cm} L{3.8cm} L{6.5cm}}
+\toprule
+\textbf{Loại họp} & \textbf{Tần suất} & \textbf{Nội dung} \\
+\midrule
+\endhead
+Daily standup & Hằng ngày (15 phút, đầu giờ làm việc/tối) & Hôm qua làm gì -- hôm nay làm gì -- có vướng mắc gì \\
+Sprint Planning & Đầu mỗi sprint (1--2 tuần/sprint) & Chọn task từ Backlog, ước lượng, phân công \\
+Sprint Review/Demo & Cuối mỗi sprint & Demo tính năng đã hoàn thành cho cả nhóm \\
+Sprint Retrospective & Cuối mỗi sprint & Rút kinh nghiệm: cái gì tốt, cái gì cần cải thiện \\
+Họp đột xuất & Khi có blocker nghiêm trọng & Giải quyết vấn đề gấp ảnh hưởng tiến độ \\
+\bottomrule
+\end{longtable}
+
+\subsection{Quy tắc giao tiếp}
+
+\begin{itemize}[leftmargin=1.2cm]
+  \item Mỗi thành viên cập nhật trạng thái task trên Jira (To Do $\rightarrow$ In Progress $\rightarrow$ Review $\rightarrow$ Done) \textbf{ít nhất 1 lần/ngày}.
+  \item Khi gặp blocker, báo ngay trên kênh chat chính và tag người liên quan, không chờ đến buổi họp.
+  \item Biên bản họp (đặc biệt Sprint Planning/Retro) được viết bằng LaTeX, commit vào thư mục \texttt{docs/} trong repository để tra cứu sau này.
+  \item Phản hồi tin nhắn liên quan công việc trong vòng 24h (giờ làm việc).
+\end{itemize}
+
+\section{Configuration Management}
+
+\subsection{Quản lý version tài liệu bằng LaTeX}
+
+\begin{itemize}[leftmargin=1.2cm]
+  \item Toàn bộ tài liệu (đặc tả yêu cầu, thiết kế CSDL, biên bản họp...) được soạn thảo bằng \textbf{LaTeX} (\texttt{.tex}) và lưu trong repository Git, thay vì Google Docs/Word, để version được quản lý cùng cơ chế với code (commit, diff, branch, PR).
+  \item Cấu trúc thư mục đề xuất trong repo:
+\begin{verbatim}
+docs/
+├── dac-ta-yeu-cau/       # Dac ta yeu cau
+├── thiet-ke-csdl/        # ERD, thiet ke CSDL
+├── bien-ban-hop/         # Bien ban hop theo tung sprint
+└── shared/               # File .sty, hinh anh, template dung chung
+\end{verbatim}
+  \item Mỗi tài liệu là một file \texttt{.tex} riêng; ảnh minh họa/sơ đồ đặt trong thư mục con \texttt{images/} tương ứng.
+  \item Đặt tên file theo quy ước: \texttt{ten-tai-lieu\_vX.Y.tex} (ví dụ: \texttt{erd-cruise-system\_v1.2.tex}). Số phiên bản (X.Y) tăng theo mỗi lần thay đổi nội dung đáng kể; lịch sử chi tiết đã có sẵn qua \texttt{git log}/\texttt{git blame} nên không cần ghi ngày tháng trong tên file.
+  \item Commit message cho tài liệu tuân theo cùng quy ước với code: \texttt{SCRUM-XX: mô tả thay đổi tài liệu} (xem mục 3.2).
+  \item Build ra PDF bằng \texttt{pdflatex}/\texttt{latexmk}; file PDF \textbf{không} commit vào repo (thêm vào \texttt{.gitignore}), chỉ build khi cần chia sẻ bản đọc hoặc đính kèm vào Jira/Drive tạm thời để nộp báo cáo.
+  \item Thay đổi lớn ở tài liệu quan trọng (đặc tả, ERD) phải mở Pull Request để cả nhóm review nội dung trước khi merge, và thông báo trên kênh chat chính.
+\end{itemize}
+
+\subsection{Quản lý code qua Git/Jira}
+
+\begin{itemize}[leftmargin=1.2cm]
+  \item Repository chính đặt trên \textbf{GitHub/GitLab}, liên kết với Jira để mỗi commit/PR có thể trỏ về đúng issue (dùng mã issue, ví dụ \texttt{SCRUM-21}, trong tên nhánh và commit message).
+  \item \textbf{Commit message} theo dạng: \texttt{SCRUM-21: mô tả ngắn gọn thay đổi}.
+  \item \textbf{Pull Request} bắt buộc có ít nhất 1 người review trước khi merge vào \texttt{develop}/\texttt{main}.
+  \item Nhánh \texttt{main} luôn ở trạng thái ổn định, chỉ merge từ \texttt{develop} sau khi test.
+\end{itemize}
+
+\subsection{Quy ước đặt nhánh (branch naming) theo module}
+
+Cấu trúc chung:
+\begin{verbatim}
+<loai>/<module>/<ma-issue>-<mo-ta-ngan>
+\end{verbatim}
+
+\begin{longtable}{L{3.5cm} L{9.5cm}}
+\toprule
+\textbf{Loại nhánh} & \textbf{Khi dùng} \\
+\midrule
+\endhead
+\texttt{feature/...} & Phát triển tính năng mới \\
+\texttt{bugfix/...} & Sửa lỗi \\
+\texttt{hotfix/...} & Sửa lỗi khẩn cấp trên production \\
+\texttt{refactor/...} & Tái cấu trúc code, không đổi chức năng \\
+\bottomrule
+\end{longtable}
+
+\textbf{Ví dụ cụ thể cho module của Trọng Hải (Hành khách \& Đăng ký):}
+
+\begingroup
+\small
+\begin{longtable}{L{3.8cm} L{9.2cm}}
+\toprule
+\textbf{Bảng CSDL phụ trách} & \textbf{Ví dụ tên nhánh} \\
+\midrule
+\endhead
+Passenger & \texttt{\seqsplit{feature/passenger/SCRUM-21-quan-ly-thong-tin-hanh-khach}} \\
+Booking & \texttt{\seqsplit{feature/booking/SCRUM-22-quan-ly-booking}} \\
+Cabin & \texttt{\seqsplit{feature/cabin/SCRUM-23-quan-ly-cabin}} \\
+ActivityRegistration & \texttt{\seqsplit{feature/activity-registration/SCRUM-24-dang-ky-hoat-dong}} \\
+ExcursionRegistration & \texttt{\seqsplit{feature/excursion-registration/SCRUM-25-dang-ky-tour}} \\
+CheckIn & \texttt{\seqsplit{feature/checkin/SCRUM-26-checkin-qr-rfid}} \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\noindent\textit{Áp dụng cùng quy ước cho các module khác của nhóm (ví dụ: \texttt{feature/finance/...}, \texttt{feature/crew/...}, \texttt{feature/schedule/...} tùy theo phân công thực tế).}
+
+\end{document}
