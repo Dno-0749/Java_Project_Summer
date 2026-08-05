@@ -1,22 +1,27 @@
-\documentclass[12pt]{report}
+\documentclass[a4paper,12pt]{book}
 \usepackage{fontspec}
 \usepackage{graphicx}
-\usepackage{hyperref}
-\usepackage{bookmark}
 \usepackage{microtype}
+\usepackage[unicode]{hyperref}
+\usepackage{bookmark}
+\usepackage[main=vietnamese,english]{babel}
 
-% Use XeLaTeX for unicode fonts
+% Use XeLaTeX for Unicode fonts
 \defaultfontfeatures{Ligatures=TeX}
 \setmainfont{Times New Roman}
+\setsansfont{Arial}
 
-% Use \include to separate chapters (starts new page)
 \begin{document}
+\frontmatter
 \title{Báo cáo dự án}
 \author{Nhóm: (tên nhóm)}
 \date{\today}
 \maketitle
+
 \tableofcontents
 \clearpage
+
+\mainmatter
 
 % Include five chapter files (one per team member)
 \include{chapters/chapter1}
