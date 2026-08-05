@@ -18,6 +18,10 @@
 # build output
 report/build/
 *.pdf
+compile1.txt
+compile2.txt
+compile-output.txt
+full-compile.txt
 
 # OS files
 Thumbs.db
