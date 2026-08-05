@@ -1,0 +1,31 @@
+\documentclass[12pt]{report}
+\usepackage{fontspec}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{microtype}
+
+% Use XeLaTeX for unicode fonts
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont{Times New Roman}
+
+% Use \include to separate chapters (starts new page)
+\begin{document}
+\title{Báo cáo dự án}
+\author{Nhóm: (tên nhóm)}
+\date{\today}
+\maketitle
+\tableofcontents
+\clearpage
+
+% Include five chapter files (one per team member)
+\include{chapters/chapter1}
+\include{chapters/chapter2}
+\include{chapters/chapter3}
+\include{chapters/chapter4}
+\include{chapters/chapter5}
+
+\clearpage
+\bibliographystyle{plain}
+\bibliography{bib/references}
+\end{document}
