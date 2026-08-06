@@ -1,0 +1,192 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage{geometry}
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{hyperref}
+
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue,
+}
+
+\begin{document}
+	
+	\section*{2. User Requirements}
+	Phần này trình bày chi tiết các yêu cầu của người dùng cho Hệ thống Quản lý Hoạt động và Dịch vụ Trên Du thuyền. Nó xác định các tác nhân (actor) và định nghĩa các trường hợp sử dụng (use case) cụ thể cho module \textbf{Bảng điều khiển \& Quản trị hệ thống}, module này rất quan trọng để giám sát, cấu hình và cung cấp thông tin vận hành. Các module này chủ yếu được sử dụng bởi Trưởng bộ phận Vận hành và Quản trị viên Hệ thống.
+	
+	\subsection*{2.1 Actors}
+	\begin{longtable}{|c|p{3.5cm}|p{8cm}|}
+		\hline
+		\textbf{\#} & \textbf{Actor} & \textbf{Description} \\
+		\hline
+		1 & Quản trị viên Hệ thống & Chịu trách nhiệm về cấu hình tổng thể, bảo mật và bảo trì hệ thống. Quản lý tài khoản người dùng, chính sách hệ thống, thiết bị và cơ sở hạ tầng kỹ thuật. \\
+		\hline
+		2 & Trưởng bộ phận Vận hành & Giám sát hiệu suất hoạt động của du thuyền theo thời gian thực. Theo dõi các chỉ số hiệu suất chính (KPI), tỷ lệ tham gia, doanh thu và rủi ro vận hành thông qua các bảng điều khiển và báo cáo. \\
+		\hline
+		3 & Quản lý BLE (Tùy chọn) & Vai trò quản trị với các quyền cụ thể để quản lý thiết bị đeo Bluetooth Low Energy (BLE), xem dữ liệu vị trí của hành khách (ở cấp độ khu vực) trong các trường hợp khẩn cấp và phân tích các mô hình di chuyển. \\
+		\hline
+		\caption*{Danh sách Actors}
+	\end{longtable}
+	
+	\subsection*{2.2 Use Cases}
+	
+	\subsubsection*{2.2.1 Diagram}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.9\textwidth,keepaspectratio]{image.png}
+		\caption*{Use Case Diagram}
+	\end{figure}
+	
+	\subsubsection*{2.2.2 Descriptions}
+	
+	\paragraph{A. Dashboard -- Bảng điều khiển}
+	\begin{longtable}{|c|p{4.5cm}|p{3.5cm}|p{4.5cm}|}
+		\hline
+		\textbf{\#} & \textbf{Tên Use Case} & \textbf{Tác nhân} & \textbf{Mô tả} \\
+		\hline
+		1 & Xem Dashboard Doanh thu & Trưởng bộ phận Vận hành & Hiển thị tổng quan doanh thu theo thời gian thực, biểu đồ, KPI. \\
+		\hline
+		2 & Xem Dashboard Tham gia Hoạt động & Trưởng bộ phận Vận hành & Hiển thị tỷ lệ tham gia và công suất của hoạt động và tham quan. \\
+		\hline
+		3 & Xem Dashboard Rủi ro Vận hành & Trưởng bộ phận Vận hành & Hiển thị cảnh báo rủi ro: hành khách trở về trễ, hoạt động trễ giờ. \\
+		\hline
+		4 & Xem Dashboard Hiệu suất Dịch vụ & Trưởng bộ phận Vận hành & Hiển thị đánh giá, điểm hài lòng của khách hàng theo từng dịch vụ. \\
+		\hline
+		5 & Xem Dashboard Vị trí Hành khách (BLE) & Quản lý BLE (Tùy chọn) & Hiển thị vị trí khu vực của hành khách trên bản đồ boong tàu. \\
+		\hline
+		6 & Xem Dashboard An toàn \& Khẩn cấp & Quản lý BLE, Trưởng bộ phận Vận hành & Hiển thị trạng thái an toàn, danh sách hành khách chưa điểm danh. \\
+		\hline
+		7 & Xem Dashboard Nhân sự \& Ca làm việc & Trưởng bộ phận Vận hành & Hiển thị tình trạng nhân sự, ca làm việc, tỷ lệ vắng mặt. \\
+		\hline
+		8 & Xem Dashboard Tồn kho & Trưởng bộ phận Vận hành & Hiển thị tình trạng tồn kho, cảnh báo hết hàng. \\
+		\hline
+		9 & Xem Dashboard Thiết bị \& Công nghệ & Quản trị viên Hệ thống & Hiển thị trạng thái thiết bị POS, BLE, máy chủ, kết nối. \\
+		\hline
+		10 & Xem Dashboard Tổng hợp Điều hành & Trưởng bộ phận Vận hành & Tổng hợp tất cả chỉ số quan trọng trên một màn hình duy nhất. \\
+		\hline
+		\caption*{A. Dashboard}
+	\end{longtable}
+	
+	\paragraph{B. Báo cáo thống kê - Reports}
+	\begin{longtable}{|c|p{4.5cm}|p{3.5cm}|p{4.5cm}|}
+		\hline
+		\textbf{\#} & \textbf{Tên Use Case} & \textbf{Tác nhân} & \textbf{Mô tả} \\
+		\hline
+		11 & Tạo Báo cáo Doanh thu & Trưởng bộ phận Vận hành & Tạo báo cáo doanh thu chi tiết theo chuyến đi/thời gian. \\
+		\hline
+		12 & Tạo Báo cáo Tham gia Hoạt động & Trưởng bộ phận Vận hành & Tạo báo cáo tỷ lệ tham gia, công suất sử dụng. \\
+		\hline
+		13 & Tạo Báo cáo Phản hồi Khách hàng & Trưởng bộ phận Vận hành & Tạo báo cáo tổng hợp đánh giá, phản hồi và khiếu nại. \\
+		\hline
+		14 & Tạo Báo cáo Vận hành Tổng hợp & Trưởng bộ phận Vận hành & Tạo báo cáo toàn diện về mọi mặt hoạt động của chuyến đi. \\
+		\hline
+		15 & Tạo Báo cáo Chi phí \& Lợi nhuận & Trưởng bộ phận Vận hành & Tạo báo cáo phân tích chi phí, lợi nhuận và hiệu quả tài chính. \\
+		\hline
+		16 & Tạo Báo cáo Nhân sự & Trưởng bộ phận Vận hành & Tạo báo cáo về nhân sự, năng suất lao động. \\
+		\hline
+		17 & Tạo Báo cáo Sự cố \& Rủi ro & Trưởng bộ phận Vận hành & Tạo báo cáo về các sự cố, rủi ro đã xảy ra trong chuyến đi. \\
+		\hline
+		18 & Xuất Báo cáo (PDF/Excel) & Trưởng bộ phận Vận hành & Xuất bất kỳ báo cáo nào ra định dạng PDF hoặc Excel. \\
+		\hline
+		\caption*{B. Reports}
+	\end{longtable}
+	
+	\paragraph{C. Phản hồi khách hàng - Feedback}
+	\begin{longtable}{|c|p{4.5cm}|p{3.5cm}|p{4.5cm}|}
+		\hline
+		\textbf{\#} & \textbf{Tên Use Case} & \textbf{Tác nhân} & \textbf{Mô tả} \\
+		\hline
+		19 & Xem Danh sách Phản hồi & Quản trị viên Hệ thống, Trưởng bộ phận Vận hành & Xem danh sách phản hồi với bộ lọc theo thời gian, hoạt động, đánh giá. \\
+		\hline
+		20 & Xem Chi tiết Phản hồi & Quản trị viên Hệ thống, Trưởng bộ phận Vận hành & Xem nội dung chi tiết và thông tin của một phản hồi cụ thể. \\
+		\hline
+		21 & Trả lời Phản hồi Khách hàng & Quản trị viên Hệ thống, Trưởng bộ phận Vận hành & Soạn và gửi phản hồi cho khách hàng. \\
+		\hline
+		22 & Phân loại Phản hồi & Quản trị viên Hệ thống & Phân loại phản hồi theo chủ đề (dịch vụ, hoạt động, ăn uống...). \\
+		\hline
+		23 & Gắn cờ Phản hồi Khẩn cấp & Quản trị viên Hệ thống & Đánh dấu phản hồi nghiêm trọng cần xử lý khẩn cấp. \\
+		\hline
+		24 & Xóa Phản hồi & Quản trị viên Hệ thống & Xóa phản hồi vi phạm hoặc không phù hợp. \\
+		\hline
+		\caption*{C. Feedback}
+	\end{longtable}
+	
+	\paragraph{D. Nhật kí hệ thống - System log}
+	\begin{longtable}{|c|p{4.5cm}|p{3.5cm}|p{4.5cm}|}
+		\hline
+		\textbf{\#} & \textbf{Tên Use Case} & \textbf{Tác nhân} & \textbf{Mô tả} \\
+		\hline
+		25 & Xem Nhật ký Hệ thống & Quản trị viên Hệ thống & Xem nhật ký ghi lại tất cả hoạt động của hệ thống. \\
+		\hline
+		26 & Lọc Nhật ký Hệ thống & Quản trị viên Hệ thống & Lọc theo thời gian, người dùng, loại sự kiện, mức độ. \\
+		\hline
+		27 & Tìm kiếm Nhật ký Hệ thống & Quản trị viên Hệ thống & Tìm kiếm theo từ khóa, ID giao dịch, tên người dùng. \\
+		\hline
+		28 & Xuất Nhật ký Hệ thống & Quản trị viên Hệ thống & Xuất nhật ký ra file CSV/Excel để phân tích. \\
+		\hline
+		29 & Xóa Nhật ký Hệ thống Cũ & Quản trị viên Hệ thống & Xóa tự động nhật ký cũ để tiết kiệm dung lượng lưu trữ. \\
+		\hline
+		\caption*{D. System Log}
+	\end{longtable}
+	
+	\paragraph{E. Quản lý thiết bị - Device management}
+	\begin{longtable}{|c|p{4.5cm}|p{3.5cm}|p{4.5cm}|}
+		\hline
+		\textbf{\#} & \textbf{Tên Use Case} & \textbf{Tác nhân} & \textbf{Mô tả} \\
+		\hline
+		30 & Quản lý Thiết bị Mã QR & Quản lý Thiết bị Mã QR & Tạo, gán, thu hồi mã QR cho hành khách và nhân viên. \\
+		\hline
+		31 & Quản lý Thẻ Du thuyền & Quản trị viên Hệ thống & Tạo, gán, thu hồi thẻ vật lý cho hành khách. \\
+		\hline
+		32 & Quản lý Thiết bị RFID/NFC & Quản trị viên Hệ thống & Cấu hình, gán, theo dõi trạng thái thiết bị RFID/NFC. \\
+		\hline
+		33 & Quản lý Thiết bị Đeo BLE & Quản trị viên Hệ thống, Quản lý BLE & Quản lý kho, gán, theo dõi pin và trạng thái thiết bị BLE. \\
+		\hline
+		34 & Theo dõi Vị trí Hành khách (BLE) & Quản lý BLE (Tùy chọn) & Xem vị trí khu vực ước tính của hành khách trên tàu. \\
+		\hline
+		35 & Cảnh báo Vị trí BLE & Quản lý BLE (Tùy chọn) & Thiết lập cảnh báo khi hành khách rời khỏi khu vực an toàn. \\
+		\hline
+		36 & Theo dõi Hành khách Trong Khẩn cấp & Quản lý BLE (Tùy chọn) & Sử dụng BLE để định vị hành khách trong tình huống khẩn cấp. \\
+		\hline
+		\caption*{E. Device Management}
+	\end{longtable}
+	
+	\paragraph{F. Quản lý chính sách - Policy}
+	\begin{longtable}{|c|p{4.5cm}|p{3.5cm}|p{4.5cm}|}
+		\hline
+		\textbf{\#} & \textbf{Tên Use Case} & \textbf{Tác nhân} & \textbf{Mô tả} \\
+		\hline
+		37 & Cấu hình Chính sách Đăng ký & Quản trị viên Hệ thống & Thiết lập thời hạn, điều kiện đăng ký hoạt động/dịch vụ. \\
+		\hline
+		38 & Cấu hình Chính sách Hủy \& Hoàn tiền & Quản trị viên Hệ thống & Thiết lập chính sách hủy, thời hạn hủy, tỷ lệ hoàn tiền. \\
+		\hline
+		39 & Cấu hình Chính sách Giá & Quản trị viên Hệ thống & Thiết lập giá dịch vụ, phí tham gia hoạt động. \\
+		\hline
+		40 & Cấu hình Chính sách Dịch vụ & Quản trị viên Hệ thống & Phân loại dịch vụ bao gồm/không bao gồm trong gói tour. \\
+		\hline
+		41 & Cấu hình Chính sách Hủy Chuyến đi & Quản trị viên Hệ thống & Thiết lập quy trình và chính sách khi hủy chuyến đi do thời tiết. \\
+		\hline
+		\caption*{F. Policy Management}
+	\end{longtable}
+	
+	\paragraph{G. Quản lý tàu \& cấu hình hệ thống}
+	\begin{longtable}{|c|p{4.5cm}|p{3.5cm}|p{4.5cm}|}
+		\hline
+		\textbf{\#} & \textbf{Tên Use Case} & \textbf{Tác nhân} & \textbf{Mô tả} \\
+		\hline
+		42 & Quản lý Tàu Du thuyền & Quản trị viên Hệ thống & Thêm, sửa, xóa thông tin tàu du thuyền. \\
+		\hline
+		43 & Quản lý Boong/Khu vực Trên Tàu & Quản trị viên Hệ thống & Thêm, sửa, xóa boong tàu, khu vực, địa điểm dịch vụ. \\
+		\hline
+		44 & Quản lý Cảng \& Điểm Dừng & Quản trị viên Hệ thống & Thêm, sửa, xóa danh sách cảng và điểm dừng của du thuyền. \\
+		\hline
+		\caption*{G. Ship \& System Configuration}
+	\end{longtable}
+	
+\end{document}
