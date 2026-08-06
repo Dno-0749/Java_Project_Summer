@@ -1,0 +1,137 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[vietnamese]{babel}
+\usepackage{fontenc}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+
+\title{\textbf{Management Approach (Quy trình Scrum)}}
+\author{}
+\date{}
+
+\begin{document}
+	
+	\maketitle
+	
+	\section{Project Process}
+	
+	Sau khi xem xét và đánh giá các mô hình phát triển phần mềm khác nhau, nhóm dự án quyết định áp dụng \textbf{Mô hình phát triển Scrum}, một khuôn khổ Agile. Scrum cho phép nhóm phát triển phần mềm một cách linh hoạt, hiệu quả và đáp ứng nhanh với các thay đổi, đặc biệt phù hợp với các dự án có yêu cầu phức tạp và thay đổi thường xuyên như hệ thống quản lý hoạt động và dịch vụ trên du thuyền.
+	
+	Mô hình Scrum được lựa chọn dựa trên các lý do sau:
+	
+	\begin{itemize}
+		\item \textbf{Phát triển theo từng Sprint ngắn:} Dự án được chia thành các chu kỳ phát triển ngắn (Sprint), thường kéo dài từ 1-2 tuần. Điều này cho phép nhóm tập trung vào các tính năng cụ thể và bàn giao sản phẩm có giá trị theo từng đợt, thay vì chờ đến cuối dự án.
+		
+		\item \textbf{Khả năng thích ứng cao:} Với các cuộc họp Sprint Planning và Sprint Review thường xuyên, Scrum giúp nhóm dễ dàng điều chỉnh kế hoạch và ưu tiên khi có yêu cầu mới từ các bên liên quan hoặc khi có sự thay đổi về nghiệp vụ của ngành du thuyền.
+		
+		\item \textbf{Cải tiến liên tục:} Các cuộc họp Sprint Retrospective sau mỗi Sprint là cơ hội để nhóm nhìn lại quy trình làm việc, xác định điểm mạnh, điểm yếu và đề xuất các cải tiến, đảm bảo hiệu suất làm việc không ngừng được nâng cao.
+		
+		\item \textbf{Giảm thiểu rủi ro:} Việc bàn giao sản phẩm theo từng phần nhỏ và liên tục giúp phát hiện sớm các vấn đề kỹ thuật hoặc yêu cầu chưa rõ ràng, từ đó có thể giải quyết kịp thời, giảm thiểu rủi ro cho toàn bộ dự án.
+		
+		\item \textbf{Minh bạch và phối hợp:} Các buổi họp hàng ngày (Daily Stand-up) giúp các thành viên trong nhóm nắm được tiến độ, khó khăn của nhau và phối hợp nhịp nhàng hơn. Đồng thời, sự tham gia của các bên liên quan trong các cuộc họp Sprint Review đảm bảo sản phẩm được xây dựng đúng với nhu cầu mong đợi.
+	\end{itemize}
+	
+	\subsection*{Quy trình vận hành Sprint}
+	
+	Nhóm gồm 5 thành viên sẽ vận hành Scrum với các vai trò và sự kiện như sau:
+	
+	\begin{enumerate}
+		\item \textbf{Sản phẩm tồn đọng (Product Backlog):}
+		\begin{itemize}
+			\item Đây là danh sách tất cả các tính năng, yêu cầu và công việc cần thực hiện cho hệ thống. Product Backlog được ưu tiên dựa trên giá trị kinh doanh và nhu cầu của khách hàng.
+			\item Trong bối cảnh hệ thống quản lý du thuyền, các tính năng cốt lõi như Quản lý lịch trình, Quản lý đặt chỗ, POS và Dashboard sẽ được ưu tiên cao nhất.
+		\end{itemize}
+		
+		\item \textbf{Kế hoạch Sprint (Sprint Planning):}
+		\begin{itemize}
+			\item Đầu mỗi Sprint, nhóm họp để chọn các mục từ Product Backlog có độ ưu tiên cao và có thể hoàn thành trong Sprint đó. Họ sẽ cùng nhau phân tích, chia nhỏ các mục này thành các công việc cụ thể (Tasks) và cam kết hoàn thành.
+		\end{itemize}
+		
+		\item \textbf{Phát triển Sprint (Sprint Execution):}
+		\begin{itemize}
+			\item Nhóm sẽ tập trung vào việc phát triển các tính năng được chọn. Mỗi thành viên sẽ đảm nhận các nhiệm vụ cụ thể. Các module của hệ thống sẽ được phát triển song song và được tích hợp liên tục để đảm bảo tính đồng bộ.
+			\item \textbf{Họp Scrum hàng ngày (Daily Scrum):} Mỗi ngày, nhóm họp nhanh (15 phút) để mỗi thành viên trả lời ba câu hỏi: "Hôm qua tôi đã làm gì?", "Hôm nay tôi sẽ làm gì?", và "Tôi đang gặp khó khăn gì?". Điều này giúp nhóm phối hợp nhịp nhàng và nhanh chóng tháo gỡ các vướng mắc.
+		\end{itemize}
+		
+		\item \textbf{Đánh giá Sprint (Sprint Review):}
+		\begin{itemize}
+			\item Vào cuối Sprint, nhóm trình bày các tính năng đã hoàn thành cho các bên liên quan (khách hàng, ban quản lý). Các bên liên quan sẽ xem xét và đưa ra phản hồi, giúp nhóm điều chỉnh các ưu tiên cho các Sprint tiếp theo.
+		\end{itemize}
+		
+		\item \textbf{Họp cải tiến Sprint (Sprint Retrospective):}
+		\begin{itemize}
+			\item Sau Sprint Review, nhóm sẽ tổ chức một cuộc họp nội bộ để thảo luận về quy trình làm việc. Họ sẽ trả lời các câu hỏi: "Chúng ta đã làm tốt điều gì?", "Chúng ta có thể cải thiện điều gì?", và "Chúng ta sẽ làm gì khác trong Sprint tới?". Đây là bước then chốt để liên tục cải tiến quy trình.
+		\end{itemize}
+	\end{enumerate}
+	
+	\section{Quality Management}
+	
+	\subsection{Defect Prevention}
+	
+	Để ngăn ngừa và quản lý lỗi hiệu quả, các biện pháp sau được áp dụng:
+	
+	\begin{itemize}
+		\item Khi một lỗi được phát hiện, người chịu trách nhiệm phải được thông báo ngay lập tức.
+		\item Mỗi lỗi cần được đánh giá mức độ nghiêm trọng và thời gian dự kiến để sửa chữa.
+		\item Một kế hoạch chủ động luôn được duy trì để dự đoán và phòng ngừa các rủi ro có thể phát sinh trong quá trình phát triển.
+	\end{itemize}
+	
+	\subsection{Reviewing}
+	
+	\begin{itemize}
+		\item Quá trình xem xét mã nguồn và tài liệu phải được thực hiện một cách khách quan, công bằng cho mọi thành viên trong nhóm.
+		\item Khi phát hiện lỗi, người chịu trách nhiệm phải được thông báo và các lỗi phải được ghi lại trong hệ thống theo dõi lỗi (Bug Tracking) với đầy đủ chi tiết và mức độ ưu tiên.
+		\item Người chịu trách nhiệm phải đưa ra giải pháp và khắc phục lỗi một cách nhanh chóng.
+	\end{itemize}
+	
+	\subsection{Unit Testing}
+	
+	\begin{itemize}
+		\item Các ca kiểm thử đơn vị phải được chuẩn bị kỹ lưỡng và chính xác, bao phủ mọi kịch bản có thể xảy ra, đặc biệt là cho các module quan trọng như POS, tính toán chi phí, và xác thực.
+		\item Các ca kiểm thử này phải phù hợp với chức năng của hệ thống và được viết trước hoặc song song với mã nguồn (Test-Driven Development - TDD).
+		\item Mọi lỗi phát hiện trong quá trình kiểm thử đơn vị phải được ghi lại trong hệ thống theo dõi lỗi và được khắc phục ngay lập tức.
+	\end{itemize}
+	
+	\subsection{Integration Testing}
+	
+	\begin{itemize}
+		\item Các ca kiểm thử tích hợp phải được chuẩn bị cẩn thận để đảm bảo các module khác nhau như POS, Dashboard, và đặt chỗ hoạt động trơn tru với nhau.
+		\item Mọi lỗi phát hiện trong giai đoạn kiểm thử tích hợp phải được ghi lại và ưu tiên giải quyết.
+		\item Đặc biệt chú trọng kiểm thử khả năng đồng bộ dữ liệu offline của POS, một yêu cầu phi chức năng quan trọng.
+	\end{itemize}
+	
+	\subsection{System Testing}
+	
+	\begin{itemize}
+		\item Kiểm thử hệ thống được thực hiện trên toàn bộ hệ thống để đảm bảo đáp ứng tất cả các yêu cầu chức năng và phi chức năng.
+		\item Các ca kiểm thử phải bao phủ các luồng nghiệp vụ chính (End-to-end), từ việc thiết lập hành trình, đăng ký hoạt động, ghi nhận giao dịch POS, đến tạo báo cáo trên Dashboard.
+		\item Các lỗi phát hiện phải được ghi lại và khắc phục một cách nhanh chóng.
+	\end{itemize}
+	
+	\section{Training Plan}
+	
+	\begin{longtable}{p{4cm} p{4cm} p{4cm} p{4cm}}
+		\toprule
+		\textbf{Training Area} & \textbf{Thành viên} & \textbf{Thời gian, Thời lượng} & \textbf{Tiêu chí} \\
+		\midrule
+		\endfirsthead
+		\toprule
+		\textbf{Training Area} & \textbf{Thành viên} & \textbf{Thời gian, Thời lượng} & \textbf{Tiêu chí} \\
+		\midrule
+		\endhead
+		\bottomrule
+		\endfoot
+		Frontend (ReactJS/VueJS) & Tất cả thành viên nhóm & Tuần 1 - 7 ngày & Bắt buộc \\
+		Backend (.NET/Java/NodeJS) & Tất cả thành viên nhóm & Tuần 1 - 7 ngày & Bắt buộc \\
+		Database (PostgreSQL/MySQL) & Tất cả thành viên nhóm & Tuần 1 - 5 ngày & Bắt buộc \\
+		Git, GitHub & Tất cả thành viên nhóm & Tuần 1 - 3 ngày & Bắt buộc \\
+		POS System \& Offline Sync concept & Tất cả thành viên nhóm & Tuần 2 - 3 ngày & Bắt buộc \\
+		BLE Technology (Optional) & Nhóm Backend & Tuần 3 - 3 ngày & Tùy thuộc vào thời gian rảnh / Mức độ khả thi \\
+		\hline
+	\end{longtable}
+	
+\end{document}
