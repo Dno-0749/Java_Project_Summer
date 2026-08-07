@@ -1,0 +1,36 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{vietnam} % Thư viện xử lý tiếng Việt hoàn chỉnh cho pdflatex
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{xcolor}
+
+\begin{document}
+	
+	\section*{Bảng Ước Lượng Effort (8 Tuần / 40 Man-Days)}
+	
+	Dưới đây là bảng phân bổ công sức (Man-days) cho từng module qua 4 giai đoạn chính của quy trình SDLC trong thời lượng 8 tuần:
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Bảng ước lượng Effort theo Module và Giai đoạn (Đơn vị: Man-days)}
+		\vspace{0.3cm}
+		\small
+		\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X c c c c c}
+			\toprule
+			\textbf{Module / Chức năng} & \textbf{Analysis} & \textbf{Design} & \textbf{Implementation} & \textbf{Testing} & \textbf{Tổng cộng} \\
+			& \textit{(15\%)} & \textit{(15\%)} & \textit{(50\%)} & \textit{(20\%)} & \textit{(Man-days)} \\
+			\midrule
+			1. Cruise / Itinerary & 1.0 & 1.0 & 3.5 & 1.5 & \textbf{7.0} \\
+			2. Activity / Excursion & 1.0 & 1.0 & 3.0 & 1.0 & \textbf{6.0} \\
+			3. Passenger / Booking & 1.5 & 1.5 & 4.5 & 1.5 & \textbf{9.0} \\
+			4. POS / Payment \textit{(Offline Sync)} & 1.5 & 1.5 & 5.5 & 2.5 & \textbf{11.0} \\
+			5. Dashboard / Admin & 1.0 & 1.0 & 3.5 & 1.5 & \textbf{7.0} \\
+			\midrule
+			\textbf{Tổng Effort (Man-days)} & \textbf{6.0} & \textbf{6.0} & \textbf{20.0} & \textbf{8.0} & \textbf{40.0} \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+\end{document}

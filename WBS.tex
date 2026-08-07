@@ -1,0 +1,79 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage{geometry}
+\geometry{a4paper, margin=1cm, landscape} % Giữ khổ giấy nằm ngang
+\usepackage{xcolor}
+\usepackage[edges]{forest} % Thêm tùy chọn [edges] để dùng style folder
+
+\definecolor{primary}{RGB}{31, 78, 121}    % Xanh dương đậm cho Root
+\definecolor{secondary}{RGB}{89, 131, 146}  % Xanh vừa cho Level 1 (Module)
+\definecolor{phase}{RGB}{240, 244, 248}    % Xanh rất nhạt cho Level 2 (Phase)
+
+\begin{document}
+	
+	\begin{figure}[h!]
+		\centering
+		\caption{\textbf{Cấu trúc phân chia công việc (WBS) cho Hệ thống Cruise Management System}}
+		\vspace{0.5cm}
+		
+		\begin{forest}
+			for tree={
+				font=\sffamily\small,
+				draw,
+				rounded corners=3pt,
+				line width=0.8pt,
+				align=center,
+				edge={line width=0.8pt, draw=gray!70},
+				s sep=10pt, % Khoảng cách giữa các Module
+				l sep=18pt, % Khoảng cách giữa cấp Root và Module
+			},
+			where level=0{
+				fill=primary, text=white, inner sep=6pt,
+			}{},
+			where level=1{
+				fill=secondary, text=white, inner sep=5pt,
+				% Chuyển các nhánh con (Analysis, Design...) thành dạng thư mục xếp dọc
+				for tree={
+					folder,
+					grow'=0,
+				}
+			}{},
+			where level=2{
+				fill=phase, text=black, inner sep=3pt
+			}{}
+			[ \textbf{Cruise Management System} \\ \footnotesize(Project Root)
+			[ \textbf{1. Cruise / Itinerary}
+			[ Analysis ]
+			[ Design ]
+			[ Implementation ]
+			[ Testing ]
+			]
+			[ \textbf{2. Activity / Excursion}
+			[ Analysis ]
+			[ Design ]
+			[ Implementation ]
+			[ Testing ]
+			]
+			[ \textbf{3. Passenger / Booking}
+			[ Analysis ]
+			[ Design ]
+			[ Implementation ]
+			[ Testing ]
+			]
+			[ \textbf{4. POS / Payment}
+			[ Analysis ]
+			[ Design ]
+			[ Implementation ]
+			[ Testing ]
+			]
+			[ \textbf{5. Dashboard / Admin}
+			[ Analysis ]
+			[ Design ]
+			[ Implementation ]
+			[ Testing ]
+			]
+			]
+		\end{forest}
+	\end{figure}
+	
+\end{document}
