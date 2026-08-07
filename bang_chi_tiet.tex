@@ -1,0 +1,181 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2cm]{geometry}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage[table]{xcolor}
+\usepackage{colortbl}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+
+% Định nghĩa màu sắc
+\definecolor{primary}{HTML}{1A365D}
+\definecolor{secondary}{HTML}{2B6CB0}
+\definecolor{tablehead}{HTML}{EBF8FF}
+
+\titleformat{\section}{\large\bfseries\color{primary}}{}{0pt}{}[\titlerule]
+\titleformat{\subsection}{\normalfont\bfseries\color{secondary}}{}{0pt}{}
+
+\begin{document}
+	
+	\begin{center}
+		{\LARGE \bfseries \color{primary} THIẾT KẾ CHI TIẾT CƠ SỞ DỮ LIỆU}\\[0.5em]
+		{\Large \color{secondary} Module POS, Payment, Invoice \& Refund}\\[1em]
+		\hrulefill
+	\end{center}
+	
+	\vspace{1em}
+	
+	\renewcommand{\arraystretch}{1.2}
+	
+	% --------------------------------------------------
+	% 1. BẢNG SERVICE
+	% --------------------------------------------------
+	\section{1. Bảng Service (Dịch vụ/Sản phẩm)}
+	Lưu trữ thông tin các dịch vụ hoặc sản phẩm mà hệ thống cung cấp.
+	
+	\begin{tabularx}{\textwidth}{|>{\bfseries}p{3.5cm}|p{2.5cm}|p{1.5cm}|p{1.8cm}|X|}
+		\hline
+		\rowcolor{tablehead} Tên trường & Kiểu dữ liệu & Bắt buộc & Khóa & Mô tả \\ \hline
+		Id & VARCHAR(255) & Yes & PK & Khóa chính định danh dịch vụ \\ \hline
+		Code & VARCHAR(50) & Yes & Unique & Mã dịch vụ (dùng trong POS) \\ \hline
+		ServiceName & VARCHAR(255) & Yes & No & Tên dịch vụ \\ \hline
+		Description & TEXT & No & No & Mô tả chi tiết dịch vụ \\ \hline
+		Price & DECIMAL(18,2) & Yes & No & Đơn giá niêm yết \\ \hline
+		Status & VARCHAR(50) & Yes & No & Trạng thái (Active/Inactive) \\ \hline
+		CreatedDate & DATETIME & Yes & No & Ngày tạo bản ghi \\ \hline
+		CreatedBy & VARCHAR(255) & No & No & Người tạo \\ \hline
+		UpdatedDate & DATETIME & No & No & Ngày cập nhật gần nhất \\ \hline
+		UpdatedBy & VARCHAR(255) & No & No & Người cập nhật \\ \hline
+		IsDeleted & BIT & Yes & No & Cờ xóa mềm (0: Active, 1: Deleted) \\ \hline
+	\end{tabularx}
+	
+	\vspace{1.5em}
+	
+	% --------------------------------------------------
+	% 2. BẢNG ONBOARDACCOUNT
+	% --------------------------------------------------
+	\section{2. Bảng OnboardAccount (Tài khoản Onboarding/Merchant)}
+	Lưu trữ tài khoản của đối tác/merchant hoặc tài khoản liên kết thanh toán tích hợp vào hệ thống.
+	
+	\begin{tabularx}{\textwidth}{|>{\bfseries}p{3.5cm}|p{2.5cm}|p{1.5cm}|p{1.8cm}|X|}
+		\hline
+		\rowcolor{tablehead} Tên trường & Kiểu dữ liệu & Bắt buộc & Khóa & Mô tả \\ \hline
+		Id & VARCHAR(255) & Yes & PK & Khóa chính tài khoản onboarding \\ \hline
+		MerchantName & VARCHAR(255) & Yes & No & Tên cửa hàng/Merchant \\ \hline
+		AccountEmail & VARCHAR(255) & Yes & Unique & Email liên kết tài khoản \\ \hline
+		PhoneNumber & VARCHAR(50) & No & No & Số điện thoại liên hệ \\ \hline
+		BankCode & VARCHAR(50) & No & No & Mã ngân hàng thụ hưởng \\ \hline
+		BankAccountNo & VARCHAR(50) & No & No & Số tài khoản ngân hàng \\ \hline
+		BankAccountName & VARCHAR(255) & No & No & Tên chủ tài khoản \\ \hline
+		GatewayApiKey & TEXT & No & No & API Key tích hợp cổng thanh toán \\ \hline
+		Status & VARCHAR(50) & Yes & No & Trạng thái (Pending/Approved/Rejected) \\ \hline
+		CreatedDate & DATETIME & Yes & No & Ngày tạo \\ \hline
+		UpdatedDate & DATETIME & No & No & Ngày cập nhật \\ \hline
+		IsDeleted & BIT & Yes & No & Cờ xóa mềm \\ \hline
+	\end{tabularx}
+	
+	\vspace{1.5em}
+	
+	% --------------------------------------------------
+	% 3. BẢNG POS_TRANSACTION
+	% --------------------------------------------------
+	\section{3. Bảng POS\_Transaction (Giao dịch POS)}
+	Ghi nhận thông tin giao dịch phát sinh tại quầy thu ngân (bao gồm cả giao dịch Online và Offline).
+	
+	\begin{tabularx}{\textwidth}{|>{\bfseries}p{3.5cm}|p{2.5cm}|p{1.5cm}|p{1.8cm}|X|}
+		\hline
+		\rowcolor{tablehead} Tên trường & Kiểu dữ liệu & Bắt buộc & Khóa & Mô tả \\ \hline
+		Id & VARCHAR(255) & Yes & PK & Khóa chính giao dịch POS \\ \hline
+		TransactionCode & VARCHAR(100) & Yes & Unique & Mã giao dịch POS \\ \hline
+		OnboardAccountId & VARCHAR(255) & Yes & FK & Kết nối tới Bảng OnboardAccount \\ \hline
+		CashierId & VARCHAR(255) & Yes & FK & Mã thu ngân thực hiện \\ \hline
+		TotalAmount & DECIMAL(18,2) & Yes & No & Tổng tiền giao dịch \\ \hline
+		DiscountAmount & DECIMAL(18,2) & No & No & Số tiền giảm giá \\ \hline
+		FinalAmount & DECIMAL(18,2) & Yes & No & Số tiền phải thanh toán \\ \hline
+		PaymentMethod & VARCHAR(50) & Yes & No & CASH, QR, BANKING, CARD \\ \hline
+		SyncStatus & VARCHAR(50) & Yes & No & Synced / Pending\_Sync \\ \hline
+		IdempotencyKey & VARCHAR(255) & No & Unique & Mã chống trùng lặp khi đồng bộ \\ \hline
+		TransactionDate & DATETIME & Yes & No & Thời gian phát sinh giao dịch \\ \hline
+		Status & VARCHAR(50) & Yes & No & Success, Failed, Pending, Cancelled \\ \hline
+		CreatedDate & DATETIME & Yes & No & Ngày tạo \\ \hline
+		IsDeleted & BIT & Yes & No & Cờ xóa mềm \\ \hline
+	\end{tabularx}
+	
+	\vspace{1.5em}
+	
+	% --------------------------------------------------
+	% 4. BẢNG INVOICE
+	% --------------------------------------------------
+	\section{4. Bảng Invoice (Hóa đơn)}
+	Lưu trữ hóa đơn bán hàng xuất cho khách hàng dựa trên giao dịch.
+	
+	\begin{tabularx}{\textwidth}{|>{\bfseries}p{3.5cm}|p{2.5cm}|p{1.5cm}|p{1.8cm}|X|}
+		\hline
+		\rowcolor{tablehead} Tên trường & Kiểu dữ liệu & Bắt buộc & Khóa & Mô tả \\ \hline
+		Id & VARCHAR(255) & Yes & PK & Khóa chính hóa đơn \\ \hline
+		InvoiceNumber & VARCHAR(100) & Yes & Unique & Số hóa đơn (VD: INV-2026-0001) \\ \hline
+		PosTransactionId & VARCHAR(255) & Yes & FK & Khóa ngoại tới Bảng POS\_Transaction \\ \hline
+		CustomerId & VARCHAR(255) & No & FK & Khóa ngoại tới Khách hàng (nếu có) \\ \hline
+		CustomerName & VARCHAR(255) & No & No & Tên khách hàng in trên hóa đơn \\ \hline
+		SubTotal & DECIMAL(18,2) & Yes & No & Tiền hàng trước thuế/giảm giá \\ \hline
+		TaxAmount & DECIMAL(18,2) & No & No & Tiền thuế (VAT) \\ \hline
+		TotalAmount & DECIMAL(18,2) & Yes & No & Tổng tiền thanh toán trên hóa đơn \\ \hline
+		IssueDate & DATETIME & Yes & No & Ngày giờ xuất hóa đơn \\ \hline
+		Status & VARCHAR(50) & Yes & No & Issued, Cancelled, Refunded \\ \hline
+		Note & TEXT & No & No & Ghi chú thêm \\ \hline
+		CreatedDate & DATETIME & Yes & No & Ngày tạo bản ghi \\ \hline
+		IsDeleted & BIT & Yes & No & Cờ xóa mềm \\ \hline
+	\end{tabularx}
+	
+	\newpage
+	
+	% --------------------------------------------------
+	% 5. BẢNG PAYMENT
+	% --------------------------------------------------
+	\section{5. Bảng Payment (Thanh toán)}
+	Ghi nhận chi tiết thanh toán thực tế thông qua các cổng/ngân hàng cho hóa đơn/giao dịch.
+	
+	\begin{tabularx}{\textwidth}{|>{\bfseries}p{3.5cm}|p{2.5cm}|p{1.5cm}|p{1.8cm}|X|}
+		\hline
+		\rowcolor{tablehead} Tên trường & Kiểu dữ liệu & Bắt buộc & Khóa & Mô tả \\ \hline
+		Id & VARCHAR(255) & Yes & PK & Khóa chính bản ghi thanh toán \\ \hline
+		PaymentCode & VARCHAR(100) & Yes & Unique & Mã tham chiếu thanh toán \\ \hline
+		InvoiceId & VARCHAR(255) & Yes & FK & Khóa ngoại tới Bảng Invoice \\ \hline
+		Amount & DECIMAL(18,2) & Yes & No & Số tiền thanh toán \\ \hline
+		PaymentMethod & VARCHAR(50) & Yes & No & CASH, VNPAY, MOMO, POS\_CARD \\ \hline
+		GatewayTransactionId & VARCHAR(255) & No & No & Mã giao dịch từ Ngân hàng/Cổng \\ \hline
+		PaidDate & DATETIME & Yes & No & Thời gian thanh toán thành công \\ \hline
+		Status & VARCHAR(50) & Yes & No & Success, Failed, Processing \\ \hline
+		CreatedDate & DATETIME & Yes & No & Ngày tạo \\ \hline
+		IsDeleted & BIT & Yes & No & Cờ xóa mềm \\ \hline
+	\end{tabularx}
+	
+	\vspace{1.5em}
+	
+	% --------------------------------------------------
+	% 6. BẢNG REFUND
+	% --------------------------------------------------
+	\section{6. Bảng Refund (Hoàn tiền / Hoàn trả)}
+	Lưu trữ thông tin xử lý hoàn tiền/trả hàng cho khách hàng.
+	
+	\begin{tabularx}{\textwidth}{|>{\bfseries}p{3.5cm}|p{2.5cm}|p{1.5cm}|p{1.8cm}|X|}
+		\hline
+		\rowcolor{tablehead} Tên trường & Kiểu dữ liệu & Bắt buộc & Khóa & Mô tả \\ \hline
+		Id & VARCHAR(255) & Yes & PK & Khóa chính yêu cầu hoàn tiền \\ \hline
+		RefundCode & VARCHAR(100) & Yes & Unique & Mã tham chiếu hoàn tiền \\ \hline
+		PaymentId & VARCHAR(255) & Yes & FK & Khóa ngoại tới Bảng Payment \\ \hline
+		InvoiceId & VARCHAR(255) & Yes & FK & Khóa ngoại tới Bảng Invoice \\ \hline
+		RefundAmount & DECIMAL(18,2) & Yes & No & Số tiền hoàn trả \\ \hline
+		Reason & TEXT & Yes & No & Lý do hoàn tiền \\ \hline
+		ApprovedBy & VARCHAR(255) & No & FK & Người phê duyệt hoàn tiền (Manager/Accountant) \\ \hline
+		GatewayRefundId & VARCHAR(255) & No & No & Mã hoàn tiền từ Cổng thanh toán \\ \hline
+		RefundDate & DATETIME & Yes & No & Ngày thực hiện hoàn tiền \\ \hline
+		Status & VARCHAR(50) & Yes & No & Pending, Approved, Rejected, Completed \\ \hline
+		CreatedDate & DATETIME & Yes & No & Ngày tạo \\ \hline
+		IsDeleted & BIT & Yes & No & Cờ xóa mềm \\ \hline
+	\end{tabularx}
+	
+\end{document}
