@@ -1,0 +1,15 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{vietnam}
+\usepackage[margin=2cm]{geometry}
+\begin{document}
+	\section*{task : User Requirements for Module POSS and Payment}
+	\section*{UR-POS-01 (Service Catalog \& Pricing Differentiation)} The system shall allow onboard sales staff to browse and search the onboard service/product catalog, displaying clear indicators to distinguish between complimentary services (included in the cruise package) and paid services requiring additional charges.
+	\section*{UR-POS-02 (POS Transaction Processing):} The system shall enable staff to initiate sales transactions at POS terminals by scanning or reading the passenger's dynamic QR code, Cruise Card, or RFID/NFC wristband, selecting items, specifying quantities, and applying authorized discounts.
+	\section*{UR-POS-03 (Onboard Account Management):} The system shall automatically associate each POS transaction with the corresponding passenger's or cabin's centralized spending account (OnboardAccount), updating temporary charge balances in real time when online.
+	\section*{UR-POS-04 (Offline Synchronization \& Resiliency):} In the event of network connectivity failure, the POS device shall continue processing and recording transactions locally in encrypted persistent storage (Local Cache), automatically synchronizing pending transactions to the central server once connectivity is restored.
+	\section*{UR-POS-05 (Invoice \& Statement Generation):} The system shall allow passengers and front desk staff to view itemized temporary bills throughout the journey and generate a final consolidated invoice (Final Invoice) prior to passenger disembarkation.
+	\section*{UR-POS-06 (Payment Settlement):} The system shall support multi-channel final payment settlement at the front desk, including cash, credit cards, and pre-authorized deposit deductions.
+	\section*{UR-POS-07 (Void, Refund \& Adjustment Handling):} The system shall allow authorized personnel (supervisors/finance staff) to void misrecorded transactions or process full/partial refunds with audit logging for dispute resolution.
+\end{document}
