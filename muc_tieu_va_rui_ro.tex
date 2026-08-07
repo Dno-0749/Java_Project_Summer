@@ -1,0 +1,49 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{vietnam} % Hỗ trợ tiếng Việt không bị lỗi font Unicode
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{xcolor}
+
+\begin{document}
+	
+	\section*{Task 2: Project Objectives \& Risk Management}
+	
+	\subsection*{1. Project Objectives (Mục tiêu Dự án)}
+	
+	\begin{itemize}
+		\item \textbf{Timeline Objective (Tiến độ):} Hoàn thành toàn bộ quy trình phát triển, kiểm thử và nghiệm thu hệ thống Cruise Management System trong vòng \textbf{8 tuần}.
+		\item \textbf{Effort Objective (Công sức):} Kiểm soát và tối ưu tổng công sức thực hiện dự án trong mức giới hạn \textbf{40 Man-days}.
+		\item \textbf{Defect Distribution Target (Phân bố chỉ tiêu phát hiện lỗi):}
+		\begin{itemize}
+			\item \textbf{Giai đoạn Internal / Unit Testing:} Phát hiện và xử lý tối thiểu \textbf{70\%} tổng số lỗi hệ thống.
+			\item \textbf{Giai đoạn System Integration Testing:} Phát hiện và xử lý khoảng \textbf{20\%} số lỗi.
+			\item \textbf{Giai đoạn User Acceptance Testing (UAT):} Kiểm soát số lỗi phát hiện còn lại dưới \textbf{10\%}.
+			\item \textbf{Môi trường Production (Sau khi ra mắt):} \textbf{0\%} lỗi nghiêm trọng (Critical / Blocker).
+		\end{itemize}
+	\end{itemize}
+	
+	\subsection*{2. Project Risks \& Mitigation Plans (Quản lý Rủi ro)}
+	
+	Bảng dưới đây phân tích các rủi ro chính của dự án, đặc biệt chú trọng tới các rủi ro kỹ thuật đặc thù của module \textbf{POS/Payment} và \textbf{Activity/Excursion}:
+	
+	\begin{table}[h!]
+		\centering
+		\caption{Bảng phân tích rủi ro và kế hoạch ứng phó}
+		\vspace{0.3cm}
+		\small
+		\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.5cm} c c >{\raggedright\arraybackslash}X}
+			\toprule
+			\textbf{Mô tả Rủi ro (Risk Description)} & \textbf{Tác động (Impact)} & \textbf{Khả năng (Possibility)} & \textbf{Kế hoạch Ứng phó (Response Plan)} \\
+			\midrule
+			\textbf{POS/Payment (Offline Sync):} Gián đoạn kết nối Internet trên biển gây lỗi đồng bộ dữ liệu giao dịch thanh toán khi thiết bị mất mạng. & High & High & Thiết kế cơ chế lưu trữ dữ liệu tại máy cục bộ (SQLite/IndexedDB), xây dựng hàng chờ giao dịch (Sync Queue) và thuật toán giải quyết xung đột dữ liệu (Conflict Resolution) tự động kích hoạt khi có mạng lại. \\
+			\midrule
+			\textbf{Activity/Excursion:} Lịch trình tour/hoạt động tham quan bị hủy hoặc thay đổi đột ngột do thời tiết xấu hoặc đối tác liên kết. & Medium & Medium & Xây dựng tính năng cập nhật trạng thái tour linh hoạt theo thời gian thực và tự động phát thông báo khẩn (Push Notification) tới thiết bị di động của hành khách. \\
+			\midrule
+			\textbf{Rủi ro Nhân sự Dự án:} Thành viên chủ chốt nghỉ việc hoặc thiếu hụt kiến thức nghiệp vụ ngành du thuyền. & High & Medium & Thực hiện tài liệu hóa chuẩn hóa ($100\%$ SRS, API Spec) và tổ chức đào tạo chéo (cross-training) giữa các thành viên trong nhóm. \\
+			\bottomrule
+		\end{tabularx}
+	\end{table}
+	
+\end{document}
