@@ -1,0 +1,162 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2cm]{geometry}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage[table]{xcolor} % Thêm tùy chọn [table] để hỗ trợ \rowcolor không bị lỗi
+\usepackage{colortbl}       % Thêm gói colortbl hỗ trợ màu bảng
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+
+% Định nghĩa màu sắc
+\definecolor{primary}{HTML}{1A365D}
+\definecolor{secondary}{HTML}{2B6CB0}
+\definecolor{lightbg}{HTML}{F7FAFC}
+\definecolor{tablehead}{HTML}{EBF8FF}
+
+% Tối ưu cấu trúc tiêu đề
+\titleformat{\section}{\large\bfseries\color{primary}}{}{0pt}{}[\titlerule]
+\titleformat{\subsection}{\normalfont\bfseries\color{secondary}}{}{0pt}{}
+
+% Tối ưu danh sách
+\setlist[itemize]{noitemsep, topsep=2pt, leftmargin=1.5em}
+\setlist[enumerate]{noitemsep, topsep=2pt, leftmargin=1.5em}
+
+\begin{document}
+	
+	\begin{center}
+		{\LARGE \bfseries \color{primary} TÀI LIỆU USE CASE SPECIFICATION}\\[0.5em]
+		{\Large \color{secondary} Module POS \& Payment --- Hệ Thống POS \& Tài Chính}\\[1em]
+		\hrulefill % Sửa lệnh \hr bị lỗi thành \hrulefill chuẩn LaTeX
+	\end{center}
+	
+	\vspace{1em}
+	
+	% ==========================================
+	% USE CASE 1
+	% ==========================================
+	\section{1. UC-POS-01: Thanh toán \& Tạo hóa đơn tại điểm bán (Process POS Transaction)}
+	
+	\renewcommand{\arraystretch}{1.3}
+	\begin{tabularx}{\textwidth}{|>{\bfseries\color{secondary}}p{3.5cm}|X|}
+		\hline
+		\rowcolor{tablehead} Use Case ID & UC-POS-01 \\ \hline
+		Use Case Name & Thanh toán đơn hàng tại quầy (Process POS Transaction) \\ \hline
+		Actor chính & Thu ngân (Cashier) \\ \hline
+		Actor phụ & Khách hàng (Customer), Cổng thanh toán (Payment Gateway - VNPay/Momo/Banking) \\ \hline
+		Mô tả ngắn & Cho phép Thu ngân quét mã sản phẩm, áp dụng khuyến mãi, xử lý thanh toán (Tiền mặt/Chuyển khoản/QR Code) và xuất hóa đơn. \\ \hline
+		Tiền điều kiện & Thu ngân đã đăng nhập hệ thống POS thành công. Ca làm việc (Shift) đã mở và kết nối với các thiết bị ngoại vi. \\ \hline
+	\end{tabularx}
+	
+	\subsection*{Luồng sự kiện chính (Basic Flow)}
+	\begin{enumerate}
+		\item Thu ngân quét mã vạch sản phẩm hoặc tìm kiếm sản phẩm trên màn hình POS.
+		\item Hệ thống hiển thị danh sách mặt hàng, số lượng, đơn giá và tính tổng tiền tự động.
+		\item Thu ngân nhập thông tin khách hàng (SĐT/Mã KH) để tích điểm hoặc áp dụng mã giảm giá (nếu có).
+		\item Thu ngân chọn Phương thức thanh toán:
+		\begin{itemize}
+			\item \textbf{Phương án A - Tiền mặt:} Thu ngân nhập số tiền khách đưa $\rightarrow$ Hệ thống tính tiền thừa.
+			\item \textbf{Phương án B - QR / Chuyển khoản:} Hệ thống gọi API Cổng thanh toán tạo mã QR động.
+		\end{itemize}
+		\item Khách hàng hoàn tất thanh toán. Cổng thanh toán trả về kết quả thành công.
+		\item Hệ thống ghi nhận hóa đơn \texttt{Completed}, trừ tồn kho tức thì và gửi lệnh in hóa đơn.
+		\item Máy in xuất hóa đơn cho khách hàng. Use case kết thúc.
+	\end{enumerate}
+	
+	\subsection*{Luồng rẽ nhánh \& Ngoại lệ (Alternative \& Exception Flows)}
+	\begin{itemize}
+		\item \textbf{A1: Chuyển sang chế độ Mất mạng (Offline Mode Trigger):} Tại bước 4, nếu hệ thống mất kết nối Internet, cảnh báo "Đang ở chế độ Offline" hiển thị. Hệ thống chuyển sang luồng \textbf{UC-POS-02}, chỉ chấp nhận tiền mặt và lưu đơn hàng ở trạng thái \texttt{Pending\_Sync}.
+		\item \textbf{E1: Thanh toán trực tuyến thất bại / Timeout:} Tại bước 5, nếu Cổng thanh toán trả về thất bại hoặc hết thời hạn, hệ thống hiển thị thông báo lỗi, cho phép Thu ngân chọn phương thức khác hoặc Hủy đơn hàng.
+	\end{itemize}
+	
+	\subsection*{Hậu điều kiện (Postconditions)}
+	\begin{itemize}
+		\item Hóa đơn được lưu vào cơ sở dữ liệu ở trạng thái \texttt{Completed} hoặc \texttt{Pending\_Sync}.
+		\item Doanh thu ca làm việc của Thu ngân được cập nhật.
+	\end{itemize}
+	
+	\vspace{1.5em}
+	
+	% ==========================================
+	% USE CASE 2
+	% ==========================================
+	\section{2. UC-POS-02: Đồng bộ dữ liệu ngoại tuyến (Offline Synchronization Flow)}
+	
+	\begin{tabularx}{\textwidth}{|>{\bfseries\color{secondary}}p{3.5cm}|X|}
+		\hline
+		\rowcolor{tablehead} Use Case ID & UC-POS-02 \\ \hline
+		Use Case Name & Đồng bộ dữ liệu bán hàng Offline (Offline Data Synchronization) \\ \hline
+		Actor chính & Hệ thống POS Client (Background Service Process) \\ \hline
+		Actor phụ & Thu ngân (Cashier), Server Trung tâm (Central Database) \\ \hline
+		Mô tả ngắn & Tự động hoặc thủ công đồng bộ toàn bộ giao dịch phát sinh trong thời gian mất mạng lên Server trung tâm ngay khi có kết nối Internet trở lại. \\ \hline
+		Tiền điều kiện & Có ít nhất 01 giao dịch chưa đồng bộ (\texttt{Pending\_Sync}) lưu dưới Local DB và kết nối Internet được khôi phục. \\ \hline
+	\end{tabularx}
+	
+	\subsection*{Luồng sự kiện chính (Basic Flow)}
+	\begin{enumerate}
+		\item Tiến trình ngầm (Background Job) phát hiện kết nối Internet được khôi phục.
+		\item POS Client truy vấn danh sách đơn hàng \texttt{Pending\_Sync} từ Local Storage theo thứ tự thời gian (FIFO).
+		\item POS Client đóng gói và gửi danh sách đơn hàng lên Server Trung tâm.
+		\item Server kiểm tra tính hợp lệ, kiểm tra Idempotency Key (chống trùng lặp), cập nhật tồn kho và ghi nhận hóa đơn thành \texttt{Synced}.
+		\item Server gửi phản hồi thành công kèm danh sách ID đơn hàng đã đồng bộ.
+		\item POS Client cập nhật trạng thái đơn hàng dưới Local DB thành \texttt{Synced}.
+		\item Hệ thống hiển thị thông báo: "Đồng bộ thành công [X] đơn hàng ngoại tuyến".
+	\end{enumerate}
+	
+	\subsection*{Luồng rẽ nhánh \& Ngoại lệ (Alternative \& Exception Flows)}
+	\begin{itemize}
+		\item \textbf{E1: Xung đột Tồn kho trên Server (Inventory Conflict):} Mặt hàng bán Offline đã hết hàng trên Server do kênh khác bán trước. Server vẫn ghi nhận đơn hàng để đảm bảo doanh thu và gắn cờ cảnh báo \texttt{Negative\_Stock\_Warning} để Quản lý kiểm tra sau.
+		\item \textbf{E2: Mất mạng giữa chừng khi đang đồng bộ:} Tín hiệu mạng bị ngắt đoạn. Hệ thống dừng tiến trình, giữ nguyên trạng thái \texttt{Pending\_Sync} cho các đơn chưa xác nhận và sẽ tự động thử lại (Retry) khi có mạng.
+	\end{itemize}
+	
+	\subsection*{Hậu điều kiện (Postconditions)}
+	\begin{itemize}
+		\item Dữ liệu hóa đơn, tồn kho và doanh thu giữa POS Client và Server Trung tâm đồng nhất.
+	\end{itemize}
+	
+	\vspace{1.5em}
+	
+	% ==========================================
+	% USE CASE 3
+	% ==========================================
+	\section{3. UC-POS-03: Đối soát tài chính (Financial Reconciliation)}
+	
+	\begin{tabularx}{\textwidth}{|>{\bfseries\color{secondary}}p{3.5cm}|X|}
+		\hline
+		\rowcolor{tablehead} Use Case ID & UC-POS-03 \\ \hline
+		Use Case Name & Đối soát tài chính doanh thu \& Giao dịch (Financial Reconciliation) \\ \hline
+		Actor chính & Kế toán (Accountant), Quản lý cửa hàng (Store Manager) \\ \hline
+		Actor phụ & Ngân hàng / Cổng thanh toán (Bank / Payment Gateway API) \\ \hline
+		Mô tả ngắn & So sánh và đối soát dữ liệu doanh thu giữa Hệ thống POS, Báo cáo chốt ca của Thu ngân và Sao kê thực tế từ Cổng thanh toán / Ngân hàng. \\ \hline
+		Tiền điều kiện & Ca làm việc đã chốt hoặc kết thúc ngày giao dịch. Có dữ liệu sao kê từ Ngân hàng / Cổng thanh toán. \\ \hline
+	\end{tabularx}
+	
+	\subsection*{Luồng sự kiện chính (Basic Flow)}
+	\begin{enumerate}
+		\item Kế toán truy cập chức năng "Đối soát tài chính" trên hệ thống Admin/Manager.
+		\item Kế toán chọn khoảng thời gian và chi nhánh cần đối soát.
+		\item Hệ thống tổng hợp dữ liệu từ 3 nguồn:
+		\begin{itemize}
+			\item \textbf{POS DB:} Doanh thu và danh sách đơn hàng trên POS.
+			\item \textbf{Báo cáo chốt ca:} Tiền thu ngân khai báo khi chốt ca.
+			\item \textbf{Sao kê Ngân hàng:} Lịch sử dòng tiền thực tế qua API/File sao kê.
+		\end{itemize}
+		\item Hệ thống chạy thuật toán đối soát tự động theo \texttt{Transaction\_ID}, \texttt{Amount}, và \texttt{Timestamp}.
+		\item Hệ thống phân loại kết quả thành: \textbf{Khớp 100\% (Matched)} và \textbf{Chênh lệch (Mismatched)}.
+		\item Kế toán kiểm tra, nhập ghi chú giải trình và bấm "Xác nhận chốt đối soát".
+	\end{enumerate}
+	
+	\subsection*{Luồng rẽ nhánh \& Ngoại lệ (Alternative \& Exception Flows)}
+	\begin{itemize}
+		\item \textbf{A1: Xử lý giao dịch chênh lệch thủ công (Manual Adjustment):} Tại bước 5, phát hiện giao dịch ngân hàng đã trừ tiền khách nhưng POS chưa ghi nhận thành công. Kế toán chọn "Cập nhật bù đơn hàng" hoặc "Tạo yêu cầu hoàn tiền", nhập lý do và đính kèm chứng từ. Trạng thái chuyển thành \texttt{Resolved\_Manually}.
+	\end{itemize}
+	
+	\subsection*{Hậu điều kiện (Postconditions)}
+	\begin{itemize}
+		\item Báo cáo đối soát tài chính được khóa ở trạng thái \texttt{Approved}.
+		\item Lịch sử thao tác điều chỉnh được lưu vết đầy đủ trong Audit Log.
+	\end{itemize}
+	
+\end{document}
