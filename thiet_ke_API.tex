@@ -1,0 +1,166 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{vietnam}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{amsmath,amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% --- KHAI BÁO CẤU HÌNH CHO NGÔN NGỮ JSON TRONG LISTINGS ---
+\lstdefinelanguage{json}{
+	basicstyle=\normalfont\ttfamily\small,
+	numbers=left,
+	numberstyle=\scriptsize\color{gray},
+	stepnumber=1,
+	numbersep=8pt,
+	showstringspaces=false,
+	breaklines=true,
+	frame=lines,
+	backgroundcolor=\color{gray!10},
+	string=[s]{"}{"},
+	stringstyle=\color{blue},
+	comment=[l]{:\ "},
+	morecomment=[l]{:"}
+}
+
+\title{\textbf{TÀI LIỆU THIẾT KẾ KIẾN TRÚC API SPEC}\\
+	\large Module POS \& Payment (Offline Sync Flow)}
+\author{Dự án Hệ thống POS Bán hàng}
+\date{\today}
+
+\begin{document}
+	
+	\maketitle
+	
+	\section{Tổng quan \& Nguyên tắc Thiết kế System Architecture}
+	
+	\subsection{Nguyên tắc cốt lõi (Core Principles)}
+	\begin{itemize}
+		\item \textbf{Chuẩn RESTful API:} Toàn bộ các API giao tiếp giữa POS Client và Backend Server sử dụng chuẩn REST, định dạng dữ liệu truyền nhận dạng JSON.
+		\item \textbf{Cơ chế Idempotency Key (Chống ghi trùng dữ liệu):} Sử dụng chuỗi định danh duy nhất (UUID v4) do POS Client khởi tạo cho mỗi giao dịch/đơn hàng. Máy chủ dựa vào UUID này để đảm bảo một đơn hàng chỉ được ghi nhận đúng một lần dù có bị retry nhiều lần do mạng chập chờn.
+		\item \textbf{Mô hình Offline-First Architecture:} Thiết bị POS duy trì cơ sở dữ liệu nội bộ (Local Database như SQLite hoặc IndexedDB) để ghi nhận giao dịch tức thì mà không phụ thuộc vào kết nối mạng Internet.
+	\end{itemize}
+	
+	\subsection{Quy trình Xử lý Đồng bộ Offline (Offline Sync Flow)}
+	Luồng xử lý khi thiết bị POS mất kết nối mạng được mô tả như sau:
+	\begin{enumerate}
+		\item Khi mất kết nối mạng, POS lưu đơn hàng mới vào cơ sở dữ liệu Local với trạng thái \texttt{PENDING\_SYNC} và gán mã \texttt{offline\_id} (UUID).
+		\item Khi kết nối mạng phục hồi, POS kích hoạt tiến trình đồng bộ ngầm (Background Worker).
+		\item POS gửi danh sách các đơn hàng chờ đồng bộ lên Server thông qua API \texttt{POST /api/v1/pos/sync/orders/batch}.
+		\item Server kiểm tra \texttt{offline\_id}:
+		\begin{itemize}
+			\item Nếu \texttt{offline\_id} đã tồn tại trong Database: Server bỏ qua và trả về thông báo đã đồng bộ.
+			\item Nếu \texttt{offline\_id} chưa tồn tại: Server lưu thông tin đơn hàng, cập nhật lại tồn kho và trả về trạng thái thành công (\texttt{SYNCED}).
+		\end{itemize}
+	\end{enumerate}
+	
+	---
+	
+	\section{Danh mục APIs trong Module POS \& Payment}
+	
+	\subsection{Nhóm Xác thực \& Ca làm việc (Auth \& Shift)}
+	\begin{itemize}
+		\item \texttt{POST /api/v1/pos/auth/login}: Đăng nhập thiết bị và xác thực tài khoản thu ngân.
+		\item \texttt{POST /api/v1/pos/shifts/open}: Mở ca làm việc mới (khai báo số tiền mặt đầu ca).
+		\item \texttt{POST /api/v1/pos/shifts/close}: Chốt ca làm việc và gửi báo cáo kết ca.
+	\end{itemize}
+	
+	\subsection{Nhóm Bán hàng \& Thanh toán Online (Direct API)}
+	\begin{itemize}
+		\item \texttt{GET /api/v1/pos/products}: Lấy danh sách sản phẩm, giá bán và thông tin tồn kho thời gian thực.
+		\item \texttt{POST /api/v1/pos/orders}: Tạo đơn hàng trực tiếp khi có mạng.
+		\item \texttt{POST /api/v1/pos/payments/qr/generate}: Khởi tạo mã thanh toán QR động (VietQR, MoMo, ZaloPay).
+		\item \texttt{GET /api/v1/pos/payments/\{payment\_id\}/status}: Truy vấn trạng thái thanh toán chuyển khoản.
+	\end{itemize}
+	
+	\subsection{Nhóm Đồng bộ Offline (Offline Sync Engine)}
+	\begin{itemize}
+		\item \texttt{GET /api/v1/pos/sync/catalog}: Tải toàn bộ danh mục sản phẩm, bảng giá và chính sách khuyến mãi về lưu trữ Offline trên máy POS.
+		\item \texttt{POST /api/v1/pos/sync/orders/batch}: Đẩy tập hợp các đơn hàng phát sinh trong lúc Offline lên Server.
+	\end{itemize}
+	
+	---
+	
+	\section{Chi tiết API Trọng tâm: Batch Sync Orders}
+	
+	\subsection{Thông tin Endpoint}
+	\begin{itemize}
+		\item \textbf{HTTP Method:} \texttt{POST}
+		\item \textbf{Path:} \texttt{/api/v1/pos/sync/orders/batch}
+		\item \textbf{Headers Required:} 
+		\begin{itemize}
+			\item \texttt{Content-Type: application/json}
+			\item \texttt{Authorization: Bearer <access\_token>}
+			\item \texttt{X-Device-ID: <pos\_device\_id>}
+		\end{itemize}
+	\end{itemize}
+	
+	\subsection{Cấu trúc Cấu hình Dữ liệu (Payload Schema)}
+	
+	\textbf{Sample Request Payload:}
+	\begin{lstlisting}[language=json]
+		{
+			"device_id": "POS_STORE_01_DEV_02",
+			"sync_timestamp": 1776000000,
+			"orders": [
+			{
+				"offline_id": "c9bf9e57-1685-4c89-bafb-ff5af830be8a",
+				"shift_id": "SHIFT_20260811_01",
+				"created_at": "2026-08-11T14:30:00Z",
+				"cashier_id": "EMP_102",
+				"items": [
+				{
+					"product_id": "PROD_001",
+					"quantity": 2,
+					"price": 45000,
+					"discount": 0
+				}
+				],
+				"total_amount": 90000,
+				"payment": {
+					"method": "CASH",
+					"amount_paid": 100000,
+					"change_given": 10000,
+					"paid_at": "2026-08-11T14:30:05Z"
+				}
+			}
+			]
+		}
+	\end{lstlisting}
+	
+	\textbf{Sample Response Payload (HTTP Status 200 OK):}
+	\begin{lstlisting}[language=json]
+		{
+			"code": 200,
+			"message": "Batch sync completed successfully",
+			"data": {
+				"success_count": 1,
+				"failed_count": 0,
+				"results": [
+				{
+					"offline_id": "c9bf9e57-1685-4c89-bafb-ff5af830be8a",
+					"server_order_id": "ORD_20260811_99812",
+					"status": "SYNCED",
+					"error_message": null
+				}
+				]
+			}
+		}
+	\end{lstlisting}
+	
+	---
+	
+	\section{Chính sách Giải quyết Xung đột Dữ liệu (Conflict Resolution)}
+	
+	\begin{enumerate}
+		\item \textbf{Xung đột tồn kho (Stock Discrepancy):}
+		Cho phép số lượng tồn kho trên Server bị ghi nhận âm tạm thời nếu xảy ra tình trạng bán cùng một mặt hàng tại nhiều điểm khi offline. Hệ thống sẽ ghi log cảnh báo để nhân viên quản lý kho tiến hành kiểm kê và cân bằng kho sau.
+		
+		\item \textbf{Xung đột Giá bán \& Chương trình Khuyến mãi (Price Conflict):}
+		Hệ thống công nhận tính đúng đắn của giá trị giao dịch tại thời điểm bán hàng (dựa trên \texttt{created\_at} của POS Client). Server sẽ không tự động tính toán lại đơn hàng theo bảng giá mới nếu giá sản phẩm vừa được cập nhật trên hệ thống trong thời gian POS bị ngắt kết nối.
+		
+		\item \textbf{Ràng buộc Dữ liệu Đơn hàng Offline (Order Integrity):}
+		Các đơn hàng khởi tạo trong chế độ Offline sẽ không được phép sửa đổi hoặc hủy bỏ trên máy POS cho đến khi đã được đồng bộ hoàn tất lên Server. Các thao tác trả hàng/hoàn tiền bắt buộc phải thông qua quy trình Hoàn tiền (\texttt{Refund Processing}) sau khi đồng bộ.
+	\end{enumerate}
+	
+\end{document}
