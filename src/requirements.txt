@@ -11,3 +11,7 @@ fastapi
 apispec
 apispec_webframeworks
 flask-swagger-ui
+
+# Supabase client (Python)
+supabase
+psycopg[binary]
