@@ -1,8 +1,110 @@
-\chapter{Chapter 3 — Tiêu đề}
+\setcounter{chapter}{2}
+\chapter{Software Requirement Specification}
 \label{ch:3}
+\addcontentsline{toc}{chapter}{\protect\numberline{3}Software Requirement Specification}
 
-% Chapter 3 collects subfiles from report/chapters/ch3/
-\input{chapters/ch3/01-HUNG.tex}
-\input{chapters/ch3/02-THIEN.tex}
-\input{chapters/ch3/03-LINH.tex}
+\noindent\textbf{Mục tiêu của Chương 3:} Chương này trình bày đặc tả yêu cầu phần mềm của hệ thống Cruise Activity and Service Management System dưới góc nhìn người dùng, chức năng, dữ liệu, giao diện và yêu cầu phi chức năng. Mục tiêu của phần này là phản ánh đúng nhu cầu vận hành, trải nghiệm trên tàu và yêu cầu hoạt động thực tế của các bên liên quan.
+
+\section{Phạm vi của hệ thống}
+
+Hệ thống được xây dựng để hỗ trợ vận hành du thuyền theo mô hình liên tục, nhiều điểm chạm và nhiều vai trò. Từ khi hành khách lên tàu cho đến khi xuống tàu, hệ thống cần theo dõi lịch trình, hoạt động, dịch vụ, tài khoản chi tiêu và các giao dịch liên quan. Mỗi vai trò trong hệ thống phải có quyền xem, thao tác và kiểm soát phù hợp với trách nhiệm của mình.
+
+Trong phiên bản phát hành đầu tiên, hệ thống tập trung vào các chức năng cốt lõi: quản lý lịch trình nhiều ngày, đăng ký hoạt động, check-in, thanh toán onboard account, báo cáo hoạt động và đối soát. Các tính năng nâng cao như định vị BLE, tích hợp cổng thanh toán trực tiếp, và tự động khuyến nghị cá nhân hóa sẽ được xem xét cho các phiên bản sau.
+
+\section{Product Overview}
+
+\input{chapters/ch3/01-product-overview.tex}
+
+\section{User Requirements}
+
+\input{chapters/ch3/02-user-requirements.tex}
+
+\section{Functional Requirements}
+
+\input{chapters/ch3/03-functional-requirements.tex}
+
+\section{Non-Functional Requirements}
+
+\input{chapters/ch3/04-non-functional-requirements.tex}
+
+\section{Requirement Appendix}
+
+\input{chapters/ch3/05-requirement-appendix.tex}
+
+\subsection{Bảng tóm tắt yêu cầu theo nhóm chức năng}
+
+\begin{longtable}{|p{3cm}|p{2.6cm}|p{2.8cm}|p{5cm}|}
+\hline
+\textbf{Nhóm chức năng} & \textbf{Vai trò chính} & \textbf{Tần suất sử dụng} & \textbf{Mô tả giá trị} \\
+\hline
+Lịch trình & Điều phối lịch trình & Mỗi chuyến đi & Thiết lập, cập nhật và đồng bộ thời khóa biểu trên tàu \\
+\hline
+Đăng ký hoạt động & Hành khách & Hằng ngày & Giúp hành khách chọn và theo dõi các hoạt động phù hợp \\
+\hline
+Check-in & Nhân viên phục vụ & Theo từng hoạt động & Xác nhận hành khách đã tham gia và tránh trùng lặp \\
+\hline
+Tài khoản chi tiêu & Hành khách / Tài chính & Theo giao dịch & Theo dõi chi tiêu, nợ và thanh toán cuối chuyến \\
+\hline
+Báo cáo vận hành & Quản lý vận hành & Hằng ngày & Theo dõi doanh thu, hiệu suất, và mức độ sử dụng \\
+\hline
+\caption{Bảng tóm tắt yêu cầu theo chức năng chính}
+\end{longtable}
+
+\subsection{Kết luận đặc tả yêu cầu}
+
+Các yêu cầu trong Chương 3 tập trung vào việc mô tả đầy đủ bối cảnh sử dụng, người dùng, chức năng, dữ liệu, giao diện và các ràng buộc kỹ thuật. Điều này cho phép các bên liên quan thống nhất quan điểm về sản phẩm, đồng thời tạo nền tảng để triển khai phần mềm theo hướng có kiểm soát, có thể đo lường và dễ mở rộng trong tương lai. Hệ thống được thiết kế theo hướng offline-first, an toàn, thân thiện với nhiều vai trò và phù hợp với điều kiện mạng không ổn định trên tàu.
+
+\paragraph{Quy tắc xác thực}\
+Mỗi vai trò đều phải tương ứng với một nhóm quyền truy cập riêng. Hành khách chỉ được xem dữ liệu liên quan đến chuyến đi của mình, trong khi quản trị viên và vận hành có quyền giám sát toàn hệ thống. Điều này giúp giảm rủi ro vi phạm dữ liệu cá nhân, tránh truy cập trái phép và đảm bảo kiểm soát hoạt động rõ ràng.
+
+\paragraph{Quy tắc dữ liệu}\
+Tất cả dữ liệu quan trọng như lịch trình, đăng ký, thanh toán, thông báo, và trạng thái check-in phải được lưu với định danh riêng biệt, hỗ trợ trùng lặp và đồng bộ an toàn. Dữ liệu cần tuân thủ các nguyên tắc có thể truy vết, không mất mát và không lưu trữ sai version khi thiết bị mất kết nối.
+
+\paragraph{Quy tắc tích hợp}\
+Hệ thống cần có khả năng tích hợp với hệ thống POS, thiết bị QR/RFID/NFC, cổng thanh toán và cơ sở dữ liệu trung tâm. Các API cần có xác thực, định tuyến rõ ràng, và khả năng xử lý lỗi phù hợp để phục vụ cho vận hành liên tục.
+
+\paragraph{Quy tắc hoạt động}\
+Việc vận hành cần phải ổn định ngay cả khi khách hàng đăng ký đồng thời, chạy nhiều giao dịch và thay đổi lịch trình theo thời tiết hay sự cố ngoài ý muốn. Chính vì vậy, mọi logic nghiệp vụ cần có kiểm tra ràng buộc chặt chẽ, cảnh báo tự động và cơ chế phục hồi rõ ràng.
+
+\paragraph{Đánh giá mức độ hoàn thiện}\
+Khi yêu cầu ở Chương 3 được xác nhận, nhóm phát triển có thể chuyển sang triển khai架构 và thiết kế dữ liệu chi tiết. Tại thời điểm này, các thành phần về nghiệp vụ, giao diện, quyền truy cập và ràng buộc dữ liệu đều đã được nêu rõ để hỗ trợ giải pháp kỹ thuật và kiểm thử có hướng dẫn.
+
+\section{Tổng hợp yêu cầu chức năng và phi chức năng}
+
+Bảng dưới đây tổng hợp các nhóm yêu cầu chính để phục vụ quản lý dự án và phát triển hệ thống theo từng giai đoạn. Nhiệm vụ của từng nhóm được mô tả ở mức bản thân có thể triển khai, kiểm thử và đối soát rõ ràng.
+
+\begin{longtable}{|p{2.7cm}|p{3.8cm}|p{3.5cm}|p{4.2cm}|}
+\hline
+\textbf{Nhóm yêu cầu} & \textbf{Mức ưu tiên} & \textbf{Đơn vị phụ trách} & \textbf{Kết quả mong đợi} \\
+\hline
+Hệ thống quản lý lịch trình & Cao & Điều phối lịch trình & Lập đúng kế hoạch cho nhiều ngày, cập nhật kịp thời \\
+\hline
+Hệ thống đăng ký & Cao & Hành khách / quản lý hoạt động & Hỗ trợ đăng ký đúng quy trình và kiểm soát sức chứa \\
+\hline
+Hệ thống check-in & Cao & Nhân viên / hành khách & Xác nhận tham gia nhanh, chính xác và không trùng \\
+\hline
+Hệ thống tài chính & Cao & Tài chính / lễ tân & Chốt giao dịch, đối soát và xuất hóa đơn đúng tiêu chuẩn \\
+\hline
+Hệ thống báo cáo & Trung bình & Quản lý vận hành & Theo dõi hiệu suất, doanh thu và rủi ro vận hành \\
+\hline
+Hệ thống bảo mật & Cao & Quản trị hệ thống & Đảm bảo quyền truy cập, lưu trữ và đồng bộ dữ liệu an toàn \\
+\hline
+\caption{Bảng tổng hợp yêu cầu chức năng và phi chức năng theo ưu tiên}
+\end{longtable}
+
+\section{Mức độ sẵn sàng cho giai đoạn thiết kế chi tiết}
+
+Một đặc tả yêu cầu tốt phải cho phép chuyển tiếp sang thiết kế kỹ thuật mà không cần giải thích thêm nhiều. Đối với hệ thống này, các yêu cầu cốt lõi đã được phân tách theo đối tượng, quy trình, phân quyền và hoạt động dữ liệu. Điều này cho phép triển khai theo mô hình microservice hoặc theo module quản lý với sự tách biệt rõ ràng giữa frontend, business layer và data layer.
+
+\begin{itemize}
+    \item Đảm bảo giao diện người dùng phù hợp với từng vai trò.
+    \item Có khả năng chạy offline và tự đồng bộ khi có kết nối.
+    \item Hỗ trợ tải cao trong giờ cao điểm và nhiều hoạt động đồng thời.
+    \item Đảm bảo độ tin cậy và bảo mật dữ liệu cá nhân trên tàu.
+    \item Tối ưu cho nhân viên sử dụng trên thiết bị tablet và POS.
+\end{itemize}
+
+\section{Nhận định cuối cùng}
+
+Chương 3 đã xác định rõ: hệ thống cần phục vụ nhiều vai trò, nhiều luồng nghiệp vụ và nhiều điều kiện kết nối do môi trường vận hành đặc thù. Dựa trên các yêu cầu này, hệ thống có thể được thiết kế theo hướng modular, dễ kiểm thử, dễ mở rộng và phù hợp với yêu cầu vận hành thực tế. Đây là phần nền tảng để triển khai và kiểm thử ở các chương tiếp theo.
 

@@ -1,7 +1,10 @@
 \documentclass[a4paper,12pt]{book}
 \usepackage{fontspec}
 \usepackage{graphicx}
+\usepackage{float}
+\usepackage[section]{placeins}
 \usepackage{microtype}
+\usepackage{longtable}
 \usepackage[unicode]{hyperref}
 \usepackage{bookmark}
 \usepackage[main=vietnamese,english]{babel}
@@ -10,6 +13,9 @@
 \defaultfontfeatures{Ligatures=TeX}
 \setmainfont{Times New Roman}
 \setsansfont{Arial}
+
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{3}
 
 \begin{document}
 \frontmatter
@@ -24,11 +30,11 @@
 \mainmatter
 
 % Include five chapter files (one per team member)
-\include{chapters/chapter1}
-\include{chapters/chapter2}
-\include{chapters/chapter3}
-\include{chapters/chapter4}
-\include{chapters/chapter5}
+\input{chapters/chapter1}
+\input{chapters/chapter2}
+\input{chapters/chapter3}
+\input{chapters/chapter4}
+\input{chapters/chapter5}
 
 \clearpage
 \bibliographystyle{plain}
