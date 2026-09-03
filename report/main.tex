@@ -11,8 +11,9 @@
 
 % Use XeLaTeX for Unicode fonts
 \defaultfontfeatures{Ligatures=TeX}
-\setmainfont{Times New Roman}
-\setsansfont{Arial}
+% Times New Roman with fallback to Liberation Serif for Linux/CI compatibility
+\setmainfont[Fallback=true]{Times New Roman}
+\setsansfont[Fallback=true]{Arial}
 
 \setcounter{tocdepth}{3}
 \setcounter{secnumdepth}{3}
