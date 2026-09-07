@@ -26,3 +26,12 @@ full-compile.txt
 # OS files
 Thumbs.db
 .DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+.env
