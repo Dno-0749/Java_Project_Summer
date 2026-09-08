@@ -1,0 +1,191 @@
+\section{User Requirements}
+
+\subsection{Actors}
+
+\begin{longtable}{|p{0.6cm}|p{4.2cm}|p{9.5cm}|}
+    \hline
+    \textbf{\#} & \textbf{Actor} & \textbf{Mô tả} \\
+    \hline
+    \endfirsthead
+    \hline
+    \textbf{\#} & \textbf{Actor} & \textbf{Mô tả} \\
+    \hline
+    \endhead
+    1 & Hành khách (Passenger) & Người dùng chính, xem lịch trình, đăng ký
+    hoạt động/tham quan bờ, check-in, theo dõi chi phí phát sinh, nhận thông
+    báo và gửi phản hồi. \\
+    \hline
+    2 & Điều phối lịch trình (Itinerary Coordinator) & Tạo và quản lý lịch
+    trình nhiều ngày, cảng ghé thăm, cập nhật thay đổi do thời tiết/vận
+    hành. \\
+    \hline
+    3 & Quản lý hoạt động trên tàu (Onboard Activity Manager) & Tạo và cấu
+    hình các hoạt động giải trí trên tàu, quản lý đăng ký và check-in tham
+    gia. \\
+    \hline
+    4 & Quản lý tham quan bờ (Shore Excursion Manager) & Tạo các chuyến
+    tham quan bờ, quản lý đơn vị cung cấp, danh sách hành khách, trạng thái
+    chuyến đi. \\
+    \hline
+    5 & Nhân viên bán hàng \& dịch vụ trên tàu (Onboard Sales Staff) & Ghi
+    nhận dịch vụ/sản phẩm sử dụng, xác thực hành khách, ghi nợ vào tài khoản
+    trên tàu. \\
+    \hline
+    6 & Tài chính \& Lễ tân (Finance \& Front Desk) & Quản lý tài khoản chi
+    tiêu trên tàu, đối soát giao dịch POS, xử lý tranh chấp, xuất hóa đơn
+    cuối chuyến. \\
+    \hline
+    7 & Quản lý vận hành (Operations Manager) & Theo dõi dashboard hoạt
+    động/doanh thu/sức chứa, giám sát check-in, xem báo cáo vận hành. \\
+    \hline
+    8 & Quản trị viên hệ thống (System Admin) & Quản lý tài khoản người
+    dùng, phân quyền, cấu hình chính sách hệ thống, quản lý thiết bị
+    QR/RFID/NFC. \\
+    \hline
+    \caption{Danh sách Actor của hệ thống}
+    \label{tab:actors}
+\end{longtable}
+
+\subsection{Use Cases}
+
+\subsubsection{Diagram(s)}
+
+Toàn bộ các actor và use case liên quan được tổng hợp trong một sơ đồ Use
+Case duy nhất, thể hiện quan hệ giữa 8 actor và các nhóm chức năng chính của
+hệ thống.
+
+\begin{figure}[htbp]
+    \centering
+    \fbox{\parbox[c][3.8cm][c]{0.88\textwidth}{\centering \textbf{Sơ đồ Use Case tổng hợp}\\ \small{(placeholder: usecase-diagram-full.png)}}}
+    \caption{Sơ đồ Use Case tổng hợp toàn hệ thống}
+    \label{fig:usecase-full}
+\end{figure}
+
+\subsubsection{Descriptions}
+
+\begin{longtable}{|p{1.5cm}|p{4cm}|p{3.2cm}|p{6.5cm}|}
+    \hline
+    \textbf{ID} & \textbf{Use Case} & \textbf{Actor} & \textbf{Mô tả} \\
+    \hline
+    \endfirsthead
+    \hline
+    \textbf{ID} & \textbf{Use Case} & \textbf{Actor} & \textbf{Mô tả} \\
+    \hline
+    \endhead
+    UC01 & Đăng nhập & Tất cả actor đã xác thực & Người dùng đăng nhập vào
+    hệ thống theo vai trò \\
+    \hline
+    UC02 & Đăng xuất & Tất cả actor đã xác thực & Người dùng đăng xuất khỏi
+    hệ thống \\
+    \hline
+    UC03 & Quản lý hồ sơ cá nhân & Tất cả actor & Xem, cập nhật thông tin
+    cá nhân \\
+    \hline
+    UC04 & Nhận thông báo & Tất cả actor & Nhận thông báo về lịch trình,
+    hoạt động, tài khoản \\
+    \hline
+    UC05 & Xem lịch trình chuyến đi & Hành khách & Xem lịch trình nhiều
+    ngày, cảng ghé thăm \\
+    \hline
+    UC06 & Xem hoạt động trên tàu / tham quan bờ & Hành khách & Xem danh
+    sách hoạt động, phân biệt miễn phí/trả phí \\
+    \hline
+    UC07 & Đăng ký hoạt động trước chuyến đi & Hành khách & Đăng ký trước
+    các hoạt động hoặc dịch vụ đặc biệt \\
+    \hline
+    UC08 & Đăng ký hoạt động trong chuyến đi & Hành khách & Đăng ký trực
+    tiếp nếu còn chỗ trống \\
+    \hline
+    UC09 & Check-in hoạt động & Hành khách & Xác thực tham gia bằng QR/thẻ
+    du thuyền/vòng tay RFID-NFC \\
+    \hline
+    UC10 & Xem chi phí phát sinh & Hành khách & Xem hóa đơn tạm tính trong
+    chuyến đi \\
+    \hline
+    UC11 & Gửi phản hồi & Hành khách & Gửi đánh giá sau hoạt động hoặc cuối
+    chuyến đi \\
+    \hline
+    UC12 & Tạo chuyến du lịch nhiều ngày & Điều phối lịch trình & Tạo tour
+    và lịch trình chi tiết theo ngày \\
+    \hline
+    UC13 & Quản lý cảng ghé thăm & Điều phối lịch trình & Thiết lập thời
+    gian tàu cập bến/rời bến \\
+    \hline
+    UC14 & Cập nhật thay đổi lịch trình & Điều phối lịch trình & Cập nhật
+    do thời tiết/vận hành, gửi thông báo liên quan \\
+    \hline
+    UC15 & Tạo hoạt động trên tàu & Quản lý hoạt động trên tàu & Tạo hoạt
+    động, cấu hình thời gian/địa điểm/sức chứa/phí \\
+    \hline
+    UC16 & Quản lý danh sách đăng ký hoạt động & Quản lý hoạt động trên tàu
+    & Giám sát tỷ lệ tham gia và phản hồi \\
+    \hline
+    UC17 & Check-in hành khách (hoạt động) & Quản lý hoạt động trên tàu &
+    Xác thực hành khách bằng QR/thẻ/RFID-NFC \\
+    \hline
+    UC18 & Tạo chuyến tham quan bờ & Quản lý tham quan bờ & Tạo tour, quản
+    lý đơn vị cung cấp, thiết lập sức chứa/giá/thời gian \\
+    \hline
+    UC19 & Quản lý danh sách hành khách tham quan & Quản lý tham quan bờ &
+    Theo nhóm, phương tiện, hướng dẫn viên \\
+    \hline
+    UC20 & Theo dõi trạng thái chuyến tham quan & Quản lý tham quan bờ &
+    Hoàn thành / hủy / trì hoãn \\
+    \hline
+    UC21 & Ghi nhận giao dịch dịch vụ & Nhân viên bán hàng \& dịch vụ & Ghi
+    nhận sản phẩm/dịch vụ hành khách sử dụng \\
+    \hline
+    UC22 & Xác thực hành khách tại POS & Nhân viên bán hàng \& dịch vụ &
+    Xác thực bằng QR/thẻ du thuyền/RFID-NFC \\
+    \hline
+    UC23 & Ghi nợ tài khoản trên tàu & Nhân viên bán hàng \& dịch vụ & Ghi
+    nợ trực tiếp vào tài khoản chi tiêu của hành khách \\
+    \hline
+    UC24 & Hủy/hoàn tiền giao dịch & Nhân viên bán hàng \& dịch vụ & Thực
+    hiện nếu được cấp quyền \\
+    \hline
+    UC25 & Lưu trữ giao dịch ngoại tuyến & Nhân viên bán hàng \& dịch vụ &
+    Lưu tạm khi mất mạng, đồng bộ khi có kết nối \\
+    \hline
+    UC26 & Quản lý tài khoản trên tàu & Tài chính \& Lễ tân & Theo hành
+    khách/phòng/mã đặt chỗ \\
+    \hline
+    UC27 & Đối soát giao dịch POS & Tài chính \& Lễ tân & Giải quyết tranh
+    chấp chi phí \\
+    \hline
+    UC28 & Xác nhận thanh toán cuối chuyến & Tài chính \& Lễ tân & Thực
+    hiện thanh toán cuối cùng \\
+    \hline
+    UC29 & Xuất hóa đơn cuối chuyến & Tài chính \& Lễ tân & Xuất hóa đơn
+    tổng hợp cho hành khách \\
+    \hline
+    UC30 & Xem dashboard vận hành & Quản lý vận hành & Theo dõi hoạt động,
+    doanh thu, sức chứa \\
+    \hline
+    UC31 & Giám sát check-in / rủi ro quay lại tàu muộn & Quản lý vận hành
+    & Theo dõi trạng thái check-in \\
+    \hline
+    UC32 & Xem báo cáo vận hành sau chuyến đi & Quản lý vận hành & Xem báo
+    cáo tổng kết \\
+    \hline
+    UC33 & Quản lý người dùng & Quản trị viên hệ thống & CRUD tài khoản,
+    phân quyền \\
+    \hline
+    UC34 & Quản lý tàu / khu vực / điểm dừng & Quản trị viên hệ thống &
+    Cấu hình dữ liệu nền tảng \\
+    \hline
+    UC35 & Cấu hình chính sách hệ thống & Quản trị viên hệ thống & Đăng
+    ký, hủy, hoàn tiền \\
+    \hline
+    UC36 & Quản lý thiết bị QR/RFID/NFC & Quản trị viên hệ thống & Quản lý
+    và xử lý log thiết bị \\
+    \hline
+    UC37 & Gán thiết bị BLE (tùy chọn) & Quản trị viên hệ thống & Gán thiết
+    bị định vị cho hành khách \\
+    \hline
+    UC38 & Ghi nhận vị trí hành khách (tùy chọn) & Hệ thống (tự động) &
+    Ước tính vị trí theo khu vực qua BLE \\
+    \hline
+    \caption{Danh sách và mô tả Use Case}
+    \label{tab:usecases}
+\end{longtable}

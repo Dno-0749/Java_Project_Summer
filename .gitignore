@@ -1,0 +1,41 @@
+# LaTeX intermediate files
+*.aux
+*.bbl
+*.blg
+*.brf
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# build output
+report/build/
+*.pdf
+compile1.txt
+compile2.txt
+compile-output.txt
+full-compile.txt
+
+# OS files
+Thumbs.db
+.DS_Store
+# Environment variables
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+.venv/
+
+# Database
+*.db
