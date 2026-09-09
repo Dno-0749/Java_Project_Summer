@@ -1,0 +1,23 @@
+name: Build LaTeX PDF
+
+on:
+  push:
+    branches: [ report ]
+  pull_request:
+    branches: [ report ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup TeX Live and build
+        uses: xu-cheng/latex-action@v2
+        with:
+          root_file: report/main.tex
+          engine: xelatex
+      - name: Upload PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: report-pdf
+          path: report/main.pdf

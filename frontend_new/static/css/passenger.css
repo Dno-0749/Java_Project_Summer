@@ -1,0 +1,119 @@
+.passenger-outer {
+    background: #e9ecef;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.phone-frame {
+    width: 390px;
+    max-width: 94vw;
+    height: 780px;
+    max-height: 92vh;
+    background: #fff;
+    border-radius: 36px;
+    border: 10px solid #14161a;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    position: relative;
+}
+
+.phone-statusbar {
+    background: #fff;
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 20px 2px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.phone-topbar {
+    background: #0d2137;
+    color: #fff;
+    padding: 10px 16px;
+}
+
+.phone-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    background: #f4f6f9;
+}
+
+.phone-bottom-nav {
+    background: #fff;
+    border-top: 1px solid #e9ecef;
+    height: 62px;
+}
+.phone-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #868e96;
+    text-decoration: none;
+    font-size: 0.65rem;
+    gap: 2px;
+}
+.phone-nav-item i {
+    font-size: 1.25rem;
+}
+.phone-nav-item.active {
+    color: #0d6efd;
+}
+
+/* Card & UI chung trong app */
+.p-card {
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #e9ecef;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+
+.p-qr-box {
+    background: #fff;
+    border: 2px dashed #0d6efd;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    font-family: "Courier New", monospace;
+    letter-spacing: 3px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #0d2137;
+}
+
+.p-day-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+.p-day-tab {
+    flex: none;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #495057;
+    text-decoration: none;
+}
+.p-day-tab.active {
+    background: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
+}
+
+.p-badge-free { background: #d1fae5; color: #065f46; }
+.p-badge-paid { background: #fef3c7; color: #92400e; }
+.p-badge-full { background: #fee2e2; color: #991b1b; }

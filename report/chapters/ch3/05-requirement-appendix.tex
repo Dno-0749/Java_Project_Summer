@@ -1,0 +1,105 @@
+\subsection{Business Rules}
+
+\begin{longtable}{|p{1.6cm}|p{12cm}|}
+    \hline
+    \textbf{ID} & \textbf{Rule Definition} \\
+    \hline
+    \endfirsthead
+    \hline
+    \textbf{ID} & \textbf{Rule Definition} \\
+    \hline
+    \endhead
+    BR-01 & Một hành khách chỉ có một tài khoản chi tiêu trên tàu
+    (OnboardAccount) cho mỗi chuyến đi. \\
+    \hline
+    BR-02 & Một hoạt động/tham quan bờ có sức chứa tối đa, không cho phép
+    đăng ký vượt quá sức chứa. \\
+    \hline
+    BR-03 & Giờ quay lại tàu của chuyến tham quan bờ phải trước giờ tàu
+    rời bến tối thiểu 30 phút. \\
+    \hline
+    BR-04 & Mọi giao dịch ngoại tuyến phải có mã định danh duy nhất (UUID)
+    để tránh trùng lặp khi đồng bộ. \\
+    \hline
+    BR-05 & Hóa đơn cuối chuyến chỉ được xuất khi tài khoản không còn
+    giao dịch tranh chấp chưa xử lý. \\
+    \hline
+    BR-06 & Thiết bị QR/RFID/NFC bị báo mất phải được vô hiệu hóa ngay
+    lập tức. \\
+    \hline
+    BR-07 & Mọi thay đổi lịch trình phải kích hoạt thông báo tự động tới
+    hành khách liên quan. \\
+    \hline
+    BR-08 & Chỉ nhân viên có quyền "Refund" mới được thực hiện hủy/hoàn
+    tiền giao dịch. \\
+    \hline
+    BR-09 & Dữ liệu định vị BLE chỉ được ghi nhận khi hành khách đã đồng
+    ý sử dụng (opt-in). \\
+    \hline
+    BR-10 & Chính sách hệ thống (đăng ký/hủy/hoàn tiền) khi thay đổi chỉ
+    áp dụng cho giao dịch phát sinh sau đó, không hồi tố. \\
+    \hline
+    \caption{Danh sách quy tắc nghiệp vụ (Business Rules)}
+    \label{tab:business-rules}
+\end{longtable}
+
+\subsection{Common Requirements}
+\begin{itemize}
+    \item \textbf{Authentication and Authorization:} Áp dụng RBAC
+    (Role-Based Access Control) để đảm bảo mỗi vai trò chỉ truy cập chức
+    năng phù hợp.
+    \item \textbf{Data Privacy:} Dữ liệu hành khách (thông tin cá nhân,
+    vị trí, giao dịch tài chính) phải được bảo vệ, mã hóa khi lưu trữ và
+    truyền tải.
+    \item \textbf{Scalability:} Hệ thống phải mở rộng được để phục vụ
+    nhiều tàu, nhiều chuyến đi đồng thời mà không suy giảm hiệu năng.
+    \item \textbf{Offline-first:} Các module liên quan tới POS và
+    check-in phải hoạt động được khi mất kết nối mạng và tự đồng bộ khi
+    có mạng trở lại.
+\end{itemize}
+
+\subsection{Application Messages List}
+
+\begin{longtable}{|p{0.6cm}|p{1.6cm}|p{1.5cm}|p{3cm}|p{6.5cm}|}
+    \hline
+    \textbf{\#} & \textbf{Mã} & \textbf{Loại} & \textbf{Ngữ cảnh} &
+    \textbf{Nội dung} \\
+    \hline
+    \endfirsthead
+    \hline
+    \textbf{\#} & \textbf{Mã} & \textbf{Loại} & \textbf{Ngữ cảnh} &
+    \textbf{Nội dung} \\
+    \hline
+    \endhead
+    1 & MSG01 & Error & Đăng ký hoạt động & "Đăng ký thất bại. Hoạt động
+    đã đạt sức chứa tối đa." \\
+    \hline
+    2 & MSG02 & Success & Đăng ký hoạt động & "Đăng ký hoạt động thành
+    công." \\
+    \hline
+    3 & MSG03 & Error & Check-in & "Mã xác thực không hợp lệ hoặc chưa
+    đăng ký hoạt động này." \\
+    \hline
+    4 & MSG04 & Success & Check-in & "Check-in thành công." \\
+    \hline
+    5 & MSG05 & Info & Giao dịch ngoại tuyến & "Giao dịch đang được lưu
+    tạm do mất kết nối, sẽ tự động đồng bộ khi có mạng." \\
+    \hline
+    6 & MSG06 & Success & Đồng bộ giao dịch & "Đồng bộ giao dịch thành
+    công." \\
+    \hline
+    7 & MSG07 & Error & Đồng bộ giao dịch & "Đồng bộ thất bại. Vui lòng
+    liên hệ bộ phận Tài chính để xử lý." \\
+    \hline
+    8 & MSG08 & Error & Xuất hóa đơn & "Không thể xuất hóa đơn. Tài khoản
+    còn giao dịch tranh chấp chưa xử lý." \\
+    \hline
+    9 & MSG09 & Success & Xuất hóa đơn & "Hóa đơn cuối chuyến đã được xuất
+    thành công." \\
+    \hline
+    10 & MSG10 & Warning & Vận hành & "Hành khách chưa quay lại tàu, đã
+    trễ giờ hẹn." \\
+    \hline
+    \caption{Danh sách thông báo ứng dụng}
+    \label{tab:app-messages}
+\end{longtable}
