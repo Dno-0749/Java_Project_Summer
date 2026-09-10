@@ -1,0 +1,44 @@
+\section{Môi trường và công nghệ sử dụng}
+
+\subsection{Công nghệ triển khai}
+Dựa trên các lựa chọn công nghệ đã đề ra ở Chương 2, nhóm quyết định chốt
+stack công nghệ cụ thể như sau để đảm bảo tốc độ phát triển phù hợp với
+thời hạn 6 tuần:
+
+\begin{itemize}
+    \item \textbf{Frontend (Web Admin):} ReactJS + TypeScript, TailwindCSS
+    cho giao diện, Redux Toolkit/Zustand cho quản lý state.
+    \item \textbf{Mobile App (Hành khách):} React Native, dùng chung phần
+    lớn logic và component với Web Admin để tiết kiệm thời gian phát
+    triển.
+    \item \textbf{Tablet/POS App:} React Native (build riêng target cho
+    tablet), tích hợp SDK đọc QR/RFID/NFC.
+    \item \textbf{Backend:} NodeJS với NestJS framework — chọn NodeJS vì
+    toàn bộ frontend/mobile đã dùng JavaScript/TypeScript, giúp nhóm dùng
+    chung ngôn ngữ, giảm thời gian onboard trong 6 tuần.
+    \item \textbf{Cơ sở dữ liệu:} PostgreSQL (dữ liệu quan hệ chính:
+    User, Cruise, Itinerary, Activity, Transaction...), Redis (hàng đợi
+    đồng bộ giao dịch ngoại tuyến, cache dashboard vận hành).
+    \item \textbf{Giao tiếp thời gian thực:} WebSocket (Socket.IO) cho
+    thông báo tức thời và cập nhật dashboard vận hành.
+    \item \textbf{Containerization \& Triển khai:} Docker, Docker
+    Compose cho môi trường phát triển; CI/CD bằng GitHub Actions; hosting
+    Render (backend) và Vercel (frontend).
+    \item \textbf{Công cụ kiểm thử:} Jest (unit test), Supertest (API
+    integration test), Postman/Newman (test API thủ công và tự động
+    hóa), Selenium (system test giao diện).
+\end{itemize}
+
+\subsection{Môi trường phát triển}
+\begin{itemize}
+    \item \textbf{IDE:} Visual Studio Code (toàn bộ thành viên dùng
+    chung để đồng bộ extension và cấu hình).
+    \item \textbf{Quản lý mã nguồn:} Git/GitHub, quy ước nhánh
+    \texttt{main}, \texttt{develop}, \texttt{feature/*}.
+    \item \textbf{Quản lý API:} Swagger/OpenAPI để tự sinh tài liệu API,
+    giúp các thành viên frontend/backend làm việc song song mà không
+    phải chờ nhau — yếu tố quan trọng khi thời hạn chỉ 6 tuần.
+    \item \textbf{Môi trường:} 3 môi trường \texttt{development},
+    \texttt{staging}, \texttt{production}, quản lý biến môi trường bằng
+    file \texttt{.env} theo từng môi trường.
+\end{itemize}

@@ -1,0 +1,50 @@
+\section{Phương pháp Quản lý}
+\subsection{Quy trình dự án}
+Sau khi đánh giá các mô hình phát triển phần mềm, nhóm quyết định áp dụng mô hình \textbf{Phát triển lặp và tăng trưởng (Iterative and Incremental Development)}. Hệ thống được xây dựng theo từng phần chức năng nhỏ, hoàn thiện dần qua các sprint, đảm bảo luôn có phiên bản chạy được ở mỗi giai đoạn.
+
+Lý do lựa chọn mô hình này:
+\begin{itemize}
+    \item Ưu tiên phát triển trước các module cốt lõi: quản lý lịch trình, đăng ký hoạt động, tài khoản chi tiêu trên tàu.
+    \item Dễ dàng thích ứng khi giảng viên hướng dẫn hoặc yêu cầu nghiệp vụ có thay đổi.
+    \item Kiểm thử và sửa lỗi liên tục trong từng chu kỳ phát triển.
+    \item Dễ quản lý rủi ro vì rủi ro được nhận diện và xử lý sớm ở từng sprint.
+    \item Nhóm nhận được phản hồi từ giảng viên sau mỗi phần tăng trưởng sản phẩm, tránh bất ngờ vào cuối dự án.
+    \item Các chức năng quan trọng (đăng ký hoạt động, thanh toán) được ưu tiên hoàn thành sớm để có giá trị sử dụng ngay.
+\end{itemize}
+
+\subsection{Quản lý chất lượng}
+\textbf{Phòng ngừa lỗi:} Khi phát hiện lỗi, người phụ trách phải được thông báo ngay. Mỗi lỗi cần được đánh giá mức độ nghiêm trọng (ví dụ: lỗi đồng bộ giao dịch ngoại tuyến bị sai lệch số tiền được coi là lỗi nghiêm trọng) và có thời hạn xử lý rõ ràng.
+
+\textbf{Review:} Quá trình review mã nguồn và tài liệu được thực hiện khách quan, không thiên vị. Lỗi phát hiện được ghi nhận trên công cụ theo dõi lỗi kèm mức độ ưu tiên.
+
+\textbf{Unit Testing:} Test case được chuẩn bị kỹ, bám sát chức năng hệ thống (ví dụ: kiểm thử tính đúng của việc tính tiền tài khoản trên tàu, kiểm thử logic check-in).
+
+\textbf{Integration Testing:} Kiểm thử tương tác giữa các module, đặc biệt giữa module POS ngoại tuyến và module đồng bộ dữ liệu trung tâm.
+
+\textbf{System Testing:} Kiểm thử toàn diện hệ thống bao gồm tương tác giữa Web Admin, Mobile App và ứng dụng POS/Tablet.
+
+\subsection{Kế hoạch đào tạo}
+Do thời hạn dự án chỉ 6 tuần, toàn bộ nội dung đào tạo được dồn nén và triển
+khai song song ngay trong 3 ngày đầu của Sprint 1, thay vì trải dài nhiều
+tuần như kế hoạch thông thường.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Kế hoạch đào tạo nhóm}
+    \begin{tabular}{|p{3.5cm}|p{3cm}|p{2.5cm}|p{2.5cm}|}
+        \hline
+        \textbf{Nội dung đào tạo} & \textbf{Thành viên tham gia} & \textbf{Thời gian} & \textbf{Yêu cầu} \\
+        \hline
+        Công nghệ Backend (Java/.NET/NodeJS) & Toàn bộ thành viên & Ngày 1--2 & Bắt buộc \\
+        \hline
+        Công nghệ Frontend (ReactJS/VueJS) & Toàn bộ thành viên & Ngày 1--2 & Bắt buộc \\
+        \hline
+        Git, GitHub, quy trình review PR & Toàn bộ thành viên & Ngày 1 & Bắt buộc \\
+        \hline
+        Thiết kế cơ sở dữ liệu (PostgreSQL/MySQL) & Toàn bộ thành viên & Ngày 2--3 & Bắt buộc \\
+        \hline
+        Đồng bộ dữ liệu ngoại tuyến (offline-first) & Thành viên phụ trách POS & Ngày 3 & Bắt buộc \\
+        \hline
+    \end{tabular}
+\end{table}

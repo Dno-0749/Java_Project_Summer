@@ -1,0 +1,38 @@
+[
+  {
+    "id": "1",
+    "username": "nguyenchihai",
+    "password": "123456",
+    "full_name": "Nguyễn Chí Hải",
+    "role": "admin",
+    "role_name": "Quản trị viên hệ thống",
+    "status": "Active"
+  },
+  {
+    "id": "2",
+    "username": "nguyenhoangphat",
+    "password": "123456",
+    "full_name": "Nguyễn Hoàng Phát",
+    "role": "operations",
+    "role_name": "Quản lý vận hành",
+    "status": "Active"
+  },
+  {
+    "id": "3",
+    "username": "nguyenthithi",
+    "password": "123456",
+    "full_name": "Nguyễn Thị Thi",
+    "role": "finance",
+    "role_name": "Tài chính & Lễ tân",
+    "status": "Active"
+  },
+  {
+    "id": "6",
+    "username": "tranvanan",
+    "password": "123456",
+    "full_name": "Trần Văn An",
+    "role": "coordinator",
+    "role_name": "Điều phối lịch trình",
+    "status": "Active"
+  }
+]

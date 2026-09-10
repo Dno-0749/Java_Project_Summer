@@ -1,0 +1,35 @@
+\section{Triển khai hệ thống}
+
+\subsection{Kiến trúc triển khai}
+Hệ thống được triển khai theo mô hình client-server tách biệt frontend và
+backend, đóng gói bằng Docker để đảm bảo tính nhất quán giữa môi trường
+phát triển và production:
+
+\begin{itemize}
+    \item \textbf{Backend API:} Đóng gói Docker image, triển khai trên
+    Render (free/hobby tier phù hợp với ngân sách đồ án sinh viên).
+    \item \textbf{Frontend Web Admin:} Triển khai trên Vercel, tận dụng
+    CDN toàn cầu giúp cải thiện thời gian tải trang.
+    \item \textbf{Cơ sở dữ liệu:} PostgreSQL managed service (Render
+    Postgres hoặc Neon), Redis managed instance cho hàng đợi đồng bộ.
+    \item \textbf{Mobile App:} Build APK/IPA thử nghiệm qua Expo, phân
+    phối nội bộ cho hội đồng chấm và giảng viên hướng dẫn kiểm thử (chưa
+    phát hành chính thức lên App Store/Google Play trong phạm vi đồ án).
+\end{itemize}
+
+\subsection{Quy trình CI/CD}
+Áp dụng GitHub Actions với 2 pipeline:
+\begin{itemize}
+    \item \textbf{Pipeline Build \& Test:} Kích hoạt khi có Pull Request
+    vào nhánh \texttt{develop} — tự động chạy Unit Test và Lint trước
+    khi cho phép merge.
+    \item \textbf{Pipeline Deploy:} Kích hoạt khi merge vào nhánh
+    \texttt{main} — tự động build Docker image, deploy backend lên
+    Render và trigger deploy frontend trên Vercel.
+\end{itemize}
+
+\subsection{Hướng dẫn cài đặt}
+Xem chi tiết đầy đủ tại mục "Installation Guides" — hướng dẫn cài đặt môi
+trường phát triển local cho cả Backend (NodeJS/NestJS, Docker) và
+Frontend (ReactJS, Node.js 20) được trình bày kèm theo Release Package
+bàn giao cuối kỳ.

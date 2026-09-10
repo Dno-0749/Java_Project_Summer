@@ -1,0 +1,57 @@
+\section{Đánh giá kết quả đạt được}
+
+\subsection{Kết quả đạt được so với kế hoạch}
+Trong thời hạn 6 tuần, nhóm đã hoàn thành các module theo đúng 6 sprint
+đã lập ở Chương 2:
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Đối chiếu kế hoạch và kết quả thực hiện}
+    \begin{tabularx}{\textwidth}{|Y|p{2.2cm}|Y|}
+        \hline
+        \textbf{Module} & \textbf{Trạng thái} & \textbf{Ghi chú} \\
+        \hline
+        Xác thực \& phân quyền (RBAC) & Hoàn thành & \\
+        \hline
+        Quản lý lịch trình nhiều ngày \& cảng ghé thăm & Hoàn thành & \\
+        \hline
+        Quản lý hoạt động trên tàu \& tham quan bờ & Hoàn thành & \\
+        \hline
+        Check-in QR/RFID/NFC & Hoàn thành & \\
+        \hline
+        Giao dịch POS \& đồng bộ ngoại tuyến & Hoàn thành & Module trọng
+        tâm, được ưu tiên nguồn lực nhiều nhất \\
+        \hline
+        Tài khoản trên tàu, đối soát, hóa đơn cuối chuyến & Hoàn thành & \\
+        \hline
+        Dashboard vận hành & Hoàn thành & \\
+        \hline
+        Module BLE định vị hành khách & Chưa thực hiện & Đã xác định là
+        tính năng tùy chọn ngay từ đầu, dời sang giai đoạn phát triển
+        tiếp theo do giới hạn thời gian 6 tuần \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\subsection{Đánh giá theo yêu cầu phi chức năng}
+Đối chiếu với các chỉ tiêu phi chức năng đã đặt ra ở Chương 3 (thời gian
+phản hồi dưới 2 giây, hỗ trợ 1.000 giao dịch/phút...), nhóm đã kiểm thử ở
+quy mô nhỏ (mô phỏng tối đa vài trăm giao dịch đồng thời do giới hạn hạ
+tầng thử nghiệm miễn phí) và đạt kết quả phù hợp với mục tiêu đề ra ở quy
+mô thử nghiệm này; cần kiểm thử tải ở quy mô lớn hơn trước khi đưa vào
+vận hành thực tế.
+
+\subsection{Bài học kinh nghiệm}
+\begin{itemize}
+    \item Việc chốt sớm tech stack cụ thể (thay vì để tùy chọn
+    Java/.NET/NodeJS) ngay từ Sprint 1 giúp nhóm tiết kiệm đáng kể thời
+    gian trong điều kiện 6 tuần.
+    \item Kiến trúc offline-first cho module POS là phần tốn nhiều công
+    sức nhất nhưng cũng là điểm khác biệt cốt lõi của hệ thống so với
+    các giải pháp quản lý du thuyền truyền thống đã phân tích ở Chương
+    1.
+    \item Thời gian dành cho kiểm thử (chỉ 1 sprint/6 sprint) là hạn chế
+    lớn nhất của lịch trình rút gọn — nhóm khuyến nghị các đợt phát
+    triển tiếp theo cần phân bổ tối thiểu 20\% thời gian cho kiểm thử.
+\end{itemize}

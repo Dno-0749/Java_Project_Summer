@@ -1,0 +1,65 @@
+\section{Kiểm thử và kết quả}
+
+\subsection{Phạm vi kiểm thử}
+Do thời hạn 6 tuần chỉ dành trọn một tuần cho kiểm thử tích hợp
+và hệ thống, nhóm tập trung kiểm thử vào các luồng nghiệp vụ có rủi ro
+cao nhất, thay vì phủ toàn bộ 38 use case:
+\begin{itemize}
+    \item Xác thực \& phân quyền (RBAC).
+    \item Đăng ký hoạt động có kiểm soát sức chứa (race-condition).
+    \item Check-in bằng QR/RFID/NFC.
+    \item Ghi nhận giao dịch ngoại tuyến và đồng bộ khi có mạng trở lại.
+    \item Đối soát giao dịch và xuất hóa đơn cuối chuyến.
+\end{itemize}
+
+\textbf{Không nằm trong phạm vi kiểm thử của phiên bản 1.0:} Module BLE
+định vị hành khách (chưa hiện thực), kiểm thử tải với quy mô trên 1.000
+hành khách đồng thời (do giới hạn hạ tầng thử nghiệm).
+
+\subsection{Chiến lược kiểm thử}
+\begin{itemize}
+    \item \textbf{Unit Test:} Jest, mục tiêu tỷ lệ pass tối thiểu 90\%
+    cho các service xử lý business rule quan trọng (kiểm tra sức chứa,
+    tính số dư tài khoản).
+    \item \textbf{Integration Test:} Supertest kiểm thử API kết hợp
+    PostgreSQL/Redis thật trên môi trường staging.
+    \item \textbf{System Test:} Kiểm thử thủ công theo kịch bản
+    (test case) trên Web Admin, Mobile App và giả lập thiết bị POS mất
+    mạng.
+\end{itemize}
+
+\subsection{Kết quả kiểm thử}
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Tổng hợp kết quả kiểm thử}
+    \begin{tabularx}{\textwidth}{|Y|p{2cm}|p{2cm}|p{2cm}|Y|}
+        \hline
+        \textbf{Module} & \textbf{Số test case} & \textbf{Pass} & \textbf{Fail} & \textbf{Ghi chú} \\
+        \hline
+        Xác thực \& RBAC & -- & -- & -- & Điền số liệu thực tế sau khi
+        chạy test \\
+        \hline
+        Đăng ký hoạt động & -- & -- & -- & \\
+        \hline
+        Check-in QR/RFID/NFC & -- & -- & -- & \\
+        \hline
+        Giao dịch ngoại tuyến \& đồng bộ & -- & -- & -- & Module rủi ro
+        cao nhất, cần kiểm thử kỹ nhất \\
+        \hline
+        Đối soát \& hóa đơn & -- & -- & -- & \\
+        \hline
+    \end{tabularx}
+\end{table}
+
+\textit{Ghi chú: Bảng trên để trống cột số liệu — nhóm điền kết quả thật
+sau khi chạy xong bộ kiểm thử, đính kèm chi tiết đầy đủ tại file
+Report5\_Test Report.xls theo quy ước bàn giao ở Chương 2.}
+
+\subsection{Lỗi phát hiện và hướng xử lý}
+Các lỗi phát hiện trong quá trình test được ghi nhận theo mức độ ưu tiên
+(Critical/High/Medium/Low) trên công cụ theo dõi lỗi (GitHub Issues),
+tuân theo quy trình Quản lý chất lượng đã mô tả ở Chương 2 — lỗi Critical
+liên quan tới đồng bộ giao dịch (sai lệch số dư tài khoản) được ưu tiên
+xử lý trong vòng 24 giờ.

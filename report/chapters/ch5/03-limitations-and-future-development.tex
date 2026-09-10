@@ -1,0 +1,35 @@
+\section{Hạn chế và hướng phát triển}
+
+\subsection{Hạn chế hiện tại}
+Kế thừa các giới hạn đã nêu ở Chương 1 (LI-1, LI-2, LI-3), sau quá trình
+hiện thực trong 6 tuần, nhóm ghi nhận thêm các hạn chế cụ thể:
+\begin{itemize}
+    \item \textbf{Phụ thuộc phần cứng:} Hệ thống phụ thuộc vào thiết bị
+    POS vật lý và đầu đọc QR/RFID/NFC thật để kiểm thử đầy đủ; môi
+    trường thử nghiệm hiện tại chủ yếu mô phỏng bằng phần mềm.
+    \item \textbf{Độ trễ đồng bộ mạng:} Đúng như giới hạn LI-2 đã nêu,
+    dashboard vận hành có thể không phản ánh dữ liệu 100\% real-time cho
+    tới khi giao dịch ngoại tuyến được đồng bộ hết.
+    \item \textbf{Quy mô kiểm thử:} Do giới hạn hạ tầng miễn phí (Render
+    free tier, Vercel hobby tier), nhóm chưa kiểm thử được ở quy mô
+    5.000 hành khách đồng thời như mục tiêu phi chức năng đã đặt ra.
+    \item \textbf{Module BLE:} Chưa được hiện thực trong phiên bản này.
+\end{itemize}
+
+\subsection{Hướng phát triển}
+\begin{itemize}
+    \item Hiện thực module định vị hành khách qua thiết bị đeo BLE (đã
+    thiết kế sẵn ở đặc tả yêu cầu Chương 3, mục 3.11) cho phiên bản kế
+    tiếp.
+    \item Tích hợp cổng thanh toán trực tuyến (VNPAY/payOS/Stripe) để hỗ
+    trợ hành khách nạp tiền trước vào tài khoản trên tàu qua ứng dụng
+    mobile.
+    \item Bổ sung phân tích dữ liệu lớn (dashboard nâng cao) để dự đoán
+    nhu cầu hoạt động/tham quan bờ dựa trên lịch sử các chuyến đi trước.
+    \item Kiểm thử tải (load testing) ở quy mô lớn hơn bằng công cụ
+    JMeter/Locust trên hạ tầng cloud trả phí để xác nhận đầy đủ các chỉ
+    tiêu phi chức năng đã đặt ra.
+    \item Phát hành chính thức ứng dụng Mobile lên App Store và Google
+    Play sau khi hoàn tất kiểm thử bảo mật và tuân thủ chính sách của
+    hai nền tảng.
+\end{itemize}

@@ -1,0 +1,48 @@
+\section{Hiện thực các chức năng chính}
+
+Do giới hạn thời gian 6 tuần, nhóm ưu tiên hiện thực đầy đủ các chức năng
+cốt lõi (core features) theo đúng thứ tự kế hoạch đã lập ở Chương 2, tạm
+hoãn module BLE định vị hành khách (được xếp là tính năng tùy chọn/nâng cao
+ngay từ Chương 1) sang giai đoạn phát triển tiếp theo.
+
+\subsection{Xác thực và quản lý người dùng}
+Hiện thực đăng nhập/đăng xuất bằng JWT (access token + refresh token),
+RBAC phân quyền theo 8 vai trò đã định nghĩa ở Chương 3. Middleware xác
+thực được áp dụng tại tầng API Gateway của backend NestJS, đảm bảo mọi
+endpoint đều được kiểm tra quyền trước khi xử lý logic nghiệp vụ.
+
+\subsection{Quản lý Lịch trình}
+Hiện thực CRUD cho Cruise, Itinerary, Port theo đúng đặc tả 3.3 ở Chương
+3. Áp dụng validate ngày tháng và ràng buộc "không trùng lịch trên cùng
+một tàu" (BR liên quan) ngay tại tầng Service trước khi ghi xuống
+PostgreSQL.
+
+\subsection{Quản lý Hoạt động trên tàu \& Tham quan bờ}
+Hiện thực tạo hoạt động/chuyến tham quan, đăng ký tham gia có kiểm tra
+sức chứa real-time (dùng transaction/lock ở tầng database để tránh
+race-condition khi nhiều hành khách đăng ký cùng lúc chỗ cuối cùng).
+
+\subsection{Check-in \& Ghi nhận Giao dịch Ngoại tuyến}
+Đây là module phức tạp nhất, được ưu tiên nguồn lực nhiều nhất trong
+6 tuần:
+\begin{itemize}
+    \item Module check-in hỗ trợ quét QR/RFID/NFC qua Web Bluetooth
+    API/SDK thiết bị, có cơ chế nhập mã dự phòng khi thiết bị lỗi.
+    \item Module POS xây dựng theo kiến trúc \textit{offline-first}:
+    mọi giao dịch được ghi vào SQLite cục bộ trên thiết bị POS trước,
+    kèm UUID sinh tại client; một background service định kỳ kiểm tra
+    kết nối mạng và đẩy giao dịch "Chờ đồng bộ" lên backend theo hàng
+    đợi Redis.
+\end{itemize}
+
+\subsection{Tài khoản trên tàu, Đối soát \& Thông báo}
+Hiện thực OnboardAccount với cơ chế cộng dồn/trừ số dư theo transaction,
+job đối soát tự động (cron job) so khớp giao dịch theo POSDeviceId, và
+hệ thống Notification đẩy qua WebSocket kết hợp lưu trữ để hành khách xem
+lại trong app.
+
+\subsection{Dashboard Vận hành}
+Hiện thực dashboard tổng hợp dữ liệu real-time (doanh thu, tỷ lệ tham gia
+hoạt động, số giao dịch đang chờ đồng bộ) bằng cách kết hợp truy vấn
+PostgreSQL định kỳ và cache Redis để đảm bảo thời gian phản hồi dưới 2
+giây như yêu cầu phi chức năng ở Chương 3.
