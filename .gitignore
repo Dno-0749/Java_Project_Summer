@@ -26,12 +26,16 @@ full-compile.txt
 # OS files
 Thumbs.db
 .DS_Store
+# Environment variables
+.env
 
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
-.venv/
+
+# Virtual environment
 venv/
-ENV/
-.env
+.venv/
+
+# Database
+*.db

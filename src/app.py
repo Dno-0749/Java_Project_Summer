@@ -10,7 +10,13 @@ from config import Config
 from flasgger import Swagger
 from config import SwaggerConfig
 from flask_swagger_ui import get_swaggerui_blueprint
+<<<<<<< HEAD
+from api.controllers.tour_provider_controller import bp as tour_provider_bp
+from api.controllers.shore_excursion_controller import bp as shore_excursion_bp
+from api.controllers.activity_schedule_controller import bp as activity_schedule_bp
+=======
 
+>>>>>>> 8d19f021d9acf8d589c321c72b215501a5581ec4
 
 def create_app():
     app = Flask(__name__)
@@ -18,6 +24,12 @@ def create_app():
     # Đăng ký blueprint trước
     app.register_blueprint(todo_bp)
     app.register_blueprint(auth_bp)
+<<<<<<< HEAD
+    app.register_blueprint(tour_provider_bp)
+    app.register_blueprint(shore_excursion_bp)
+    app.register_blueprint(activity_schedule_bp)
+=======
+>>>>>>> 8d19f021d9acf8d589c321c72b215501a5581ec4
     # register_routes(app)
      # Thêm Swagger UI blueprint
     SWAGGER_URL = '/docs'
@@ -41,7 +53,7 @@ def create_app():
     with app.test_request_context():
         for rule in app.url_map.iter_rules():
             # Thêm các endpoint khác nếu cần
-            if rule.endpoint.startswith(('todo.', 'course.', 'user.', 'auth.')):
+            if rule.endpoint.startswith(('todo.', 'course.', 'user.', 'auth.', 'tour_provider.', 'shore_excursion.', 'activity_schedule.')):
                 view_func = app.view_functions[rule.endpoint]
                 print(f"Adding path: {rule.rule} -> {view_func}")
                 spec.path(view=view_func)
