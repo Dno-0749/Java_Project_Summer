@@ -1,547 +1,63 @@
 {% extends "layouts/base.html" %}
 
 {% block content %}
-
-<div class="container-fluid py-4">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-1">
-                <i class="bi bi-ship"></i>
-                Quản lý hoạt động trên tàu
-            </h2>
-            <p class="text-muted mb-0">
-                Quản lý các hoạt động, lịch tổ chức và đăng ký của hành khách
-            </p>
-        </div>
-
-        <a href="{{ url_for('activities.create_activity') }}" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i>
-            Thêm hoạt động
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="bi bi-music-note-list text-primary me-2"></i>Quản lý Hoạt động trên tàu</h4>
+        <small class="text-muted">Cấu hình thời gian, sức chứa và danh sách khách tham gia (UC15, UC16)</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary shadow-sm" href="{{ url_for('activities.register_activity') }}">
+            <i class="bi bi-plus-lg me-1"></i> Thêm hoạt động mới
         </a>
     </div>
-
-    <div class="row g-3 mb-4">
-
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-1">Tổng hoạt động</p>
-                            <h3 class="fw-bold mb-0">
-                                {{ activities|length }}
-                            </h3>
-                        </div>
-
-                        <div class="stat-icon bg-primary-subtle text-primary">
-                            <i class="bi bi-calendar-event"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-1">Đang mở đăng ký</p>
-                            <h3 class="fw-bold mb-0">
-                                {% set open_count = namespace(value=0) %}
-
-                                {% for activity in activities %}
-                                    {% if activity.status not in ["Đã hoàn thành", "Đã hủy"] %}
-                                        {% set open_count.value = open_count.value + 1 %}
-                                    {% endif %}
-                                {% endfor %}
-
-                                {{ open_count.value }}
-                            </h3>
-                        </div>
-
-                        <div class="stat-icon bg-success-subtle text-success">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-1">Hoạt động trả phí</p>
-
-                            <h3 class="fw-bold mb-0">
-                                {% set paid_count = namespace(value=0) %}
-
-                                {% for activity in activities %}
-                                    {% if activity.price > 0 %}
-                                        {% set paid_count.value = paid_count.value + 1 %}
-                                    {% endif %}
-                                {% endfor %}
-
-                                {{ paid_count.value }}
-                            </h3>
-                        </div>
-
-                        <div class="stat-icon bg-warning-subtle text-warning">
-                            <i class="bi bi-cash-stack"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-1">Tổng lượt đăng ký</p>
-
-                            <h3 class="fw-bold mb-0">
-                                {% set total = namespace(value=0) %}
-
-                                {% for activity in activities %}
-                                    {% set total.value = total.value + activity.registered %}
-                                {% endfor %}
-
-                                {{ total.value }}
-                            </h3>
-                        </div>
-
-                        <div class="stat-icon bg-info-subtle text-info">
-                            <i class="bi bi-people"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-
-            <div class="row g-3">
-
-                <div class="col-md-5">
-                    <label class="form-label fw-semibold">
-                        Tìm kiếm
-                    </label>
-
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-search"></i>
-                        </span>
-
-                        <input
-                            type="text"
-                            id="activitySearch"
-                            class="form-control"
-                            placeholder="Tìm theo tên hoặc địa điểm..."
-                        >
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label fw-semibold">
-                        Loại hoạt động
-                    </label>
-
-                    <select id="priceFilter" class="form-select">
-                        <option value="">Tất cả</option>
-                        <option value="free">Miễn phí</option>
-                        <option value="paid">Trả phí</option>
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label fw-semibold">
-                        Tình trạng chỗ
-                    </label>
-
-                    <select id="capacityFilter" class="form-select">
-                        <option value="">Tất cả</option>
-                        <option value="available">Còn chỗ</option>
-                        <option value="full">Đã đầy</option>
-                    </select>
-                </div>
-
-                <div class="col-md-1 d-flex align-items-end">
-                    <button
-                        type="button"
-                        class="btn btn-outline-secondary w-100"
-                        onclick="resetActivityFilter()"
-                    >
-                        <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                </div>
-
-            </div>
-
-        </div>
-    </div>
-
-    <div class="card border-0 shadow-sm">
-
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold">
-                <i class="bi bi-list-ul"></i>
-                Danh sách hoạt động
-            </h5>
-        </div>
-
-        <div class="table-responsive">
-
-            <table class="table table-hover align-middle mb-0">
-
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Hoạt động</th>
-                        <th>Địa điểm</th>
-                        <th>Thời gian</th>
-                        <th>Sức chứa</th>
-                        <th>Phí tham gia</th>
-                        <th>Trạng thái</th>
-                        <th class="text-center">Thao tác</th>
-                    </tr>
-                </thead>
-
-                <tbody id="activityTable">
-
-                    {% for activity in activities %}
-
-                    {% set is_full = activity.registered >= activity.capacity %}
-
-                    {% set participation =
-                        ((activity.registered / activity.capacity) * 100)
-                        if activity.capacity > 0
-                        else 0
-                    %}
-
-                    <tr
-                        class="activity-row"
-                        data-name="{{ activity.name|lower }}"
-                        data-location="{{ activity.location|lower }}"
-                        data-price="{% if activity.price > 0 %}paid{% else %}free{% endif %}"
-                        data-capacity="{% if is_full %}full{% else %}available{% endif %}"
-                    >
-
-                        <td>
-                            <span class="text-muted">
-                                {{ loop.index }}
-                            </span>
-                        </td>
-
-                        <td>
-                            <a
-                                href="{{ url_for('activities.activity_detail', activity_id=activity.id) }}"
-                                class="text-decoration-none text-dark"
-                            >
-                                <div class="fw-semibold">
-                                    {{ activity.name }}
-                                </div>
-
-                                <small class="text-muted">
-                                    Hoạt động trên tàu
-                                </small>
-                            </a>
-                        </td>
-
-                        <td>
-                            <i class="bi bi-geo-alt text-primary"></i>
-                            {{ activity.location }}
-                        </td>
-
-                        <td>
-                            <div>
-                                <i class="bi bi-clock text-muted"></i>
-                                {{ activity.time }}
-                            </div>
-
-                            {% if activity.date %}
-                            <small class="text-muted">
-                                {{ activity.date }}
-                            </small>
-                            {% endif %}
-                        </td>
-
-                        <td style="min-width: 160px;">
-
-                            <div class="d-flex justify-content-between mb-1">
-                                <small>
-                                    {{ activity.registered }}/{{ activity.capacity }}
-                                </small>
-
-                                <small class="text-muted">
-                                    {{ participation|round|int }}%
-                                </small>
-                            </div>
-
-                            <div class="progress" style="height: 6px;">
-
-                                <div
-                                    class="progress-bar
-                                    {% if is_full %}
-                                        bg-danger
-                                    {% elif participation >= 80 %}
-                                        bg-warning
-                                    {% else %}
-                                        bg-success
-                                    {% endif %}"
-                                    data-progress="{{ participation }}"
-                                ></div>
-
-                            </div>
-
-                        </td>
-
-                        <td>
-
-                            {% if activity.price > 0 %}
-
-                            <span class="fw-semibold">
-                                {{ "{:,.0f}".format(activity.price) }} VNĐ
-                            </span>
-
-                            {% else %}
-
-                            <span class="badge bg-success-subtle text-success">
-                                <i class="bi bi-check-circle"></i>
-                                Miễn phí
-                            </span>
-
-                            {% endif %}
-
-                        </td>
-
-                        <td>
-
-                            {% if activity.status == "Đang diễn ra" %}
-
-                            <span class="badge bg-primary-subtle text-primary">
-                                <i class="bi bi-play-circle"></i>
-                                Đang diễn ra
-                            </span>
-
-                            {% elif activity.status == "Đã hoàn thành" %}
-
-                            <span class="badge bg-secondary-subtle text-secondary">
-                                <i class="bi bi-check-circle"></i>
-                                Đã hoàn thành
-                            </span>
-
-                            {% elif activity.status == "Đã hủy" %}
-
-                            <span class="badge bg-danger-subtle text-danger">
-                                <i class="bi bi-x-circle"></i>
-                                Đã hủy
-                            </span>
-
-                            {% elif is_full %}
-
-                            <span class="badge bg-danger-subtle text-danger">
-                                <i class="bi bi-x-circle"></i>
-                                Đã đầy
-                            </span>
-
-                            {% else %}
-
-                            <span class="badge bg-success-subtle text-success">
-                                <i class="bi bi-check-circle"></i>
-                                Còn chỗ
-                            </span>
-
-                            {% endif %}
-
-                        </td>
-
-                        <td>
-
-                            <div class="d-flex justify-content-center gap-1">
-
-                                <a
-                                    href="{{ url_for('activities.registrations', activity_id=activity.id) }}"
-                                    class="btn btn-sm btn-outline-primary"
-                                    title="Danh sách khách"
-                                >
-                                    <i class="bi bi-people"></i>
-                                </a>
-
-                                <a
-                                    href="{{ url_for('activities.edit_activity', activity_id=activity.id) }}"
-                                    class="btn btn-sm btn-outline-secondary"
-                                    title="Chỉnh sửa"
-                                >
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-        <div
-            id="noActivity"
-            class="text-center py-5 d-none"
-        >
-            <i class="bi bi-search fs-1 text-muted"></i>
-
-            <p class="text-muted mt-3 mb-0">
-                Không tìm thấy hoạt động phù hợp.
-            </p>
-        </div>
-
-    </div>
-
 </div>
 
-<script>
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    document.querySelectorAll(".progress-bar").forEach(function (bar) {
-
-        const progress = parseFloat(
-            bar.dataset.progress || 0
-        );
-
-        bar.style.width = Math.min(progress, 100) + "%";
-
-    });
-
-    const searchInput =
-        document.getElementById("activitySearch");
-
-    const priceFilter =
-        document.getElementById("priceFilter");
-
-    const capacityFilter =
-        document.getElementById("capacityFilter");
-
-    function filterActivities() {
-
-        const keyword =
-            searchInput.value.toLowerCase().trim();
-
-        const price =
-            priceFilter.value;
-
-        const capacity =
-            capacityFilter.value;
-
-        const rows =
-            document.querySelectorAll(".activity-row");
-
-        let visible = 0;
-
-        rows.forEach(function (row) {
-
-            const name =
-                row.dataset.name || "";
-
-            const location =
-                row.dataset.location || "";
-
-            const matchKeyword =
-                name.includes(keyword) ||
-                location.includes(keyword);
-
-            const matchPrice =
-                price === "" ||
-                row.dataset.price === price;
-
-            const matchCapacity =
-                capacity === "" ||
-                row.dataset.capacity === capacity;
-
-            if (
-                matchKeyword &&
-                matchPrice &&
-                matchCapacity
-            ) {
-
-                row.style.display = "";
-                visible++;
-
-            } else {
-
-                row.style.display = "none";
-
-            }
-
-        });
-
-        document
-            .getElementById("noActivity")
-            .classList.toggle(
-                "d-none",
-                visible !== 0
-            );
-
-    }
-
-    searchInput.addEventListener(
-        "input",
-        filterActivities
-    );
-
-    priceFilter.addEventListener(
-        "change",
-        filterActivities
-    );
-
-    capacityFilter.addEventListener(
-        "change",
-        filterActivities
-    );
-
-});
-
-function resetActivityFilter() {
-
-    document.getElementById(
-        "activitySearch"
-    ).value = "";
-
-    document.getElementById(
-        "priceFilter"
-    ).value = "";
-
-    document.getElementById(
-        "capacityFilter"
-    ).value = "";
-
-    document
-        .querySelectorAll(".activity-row")
-        .forEach(function (row) {
-
-            row.style.display = "";
-
-        });
-
-    document
-        .getElementById("noActivity")
-        .classList.add("d-none");
-
-}
-
-</script>
-
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Tên hoạt động</th>
+                        <th>Địa điểm</th>
+                        <th>Khung giờ</th>
+                        <th>Sức chứa</th>
+                        <th>Loại phí</th>
+                        <th class="text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for act in activities %}
+                    <tr>
+                        <td class="ps-4 fw-semibold text-primary">{{ act.name }}</td>
+                        <td><i class="bi bi-geo-alt me-1 text-muted"></i>{{ act.location }}</td>
+                        <td><i class="bi bi-clock me-1 text-muted"></i>{{ act.time }}</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height: 6px; width: 80px;">
+                                    <div class="progress-bar {% if act.registered >= act.capacity %}bg-danger{% else %}bg-primary{% endif %}" 
+                                         style="width: {{ (act.registered / act.capacity * 100) }}%;"></div>
+                                </div>
+                                <span class="small text-muted">{{ act.registered }}/{{ act.capacity }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if act.price == 0 %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">Miễn phí</span>
+                            {% else %}
+                                <span class="badge bg-warning-subtle text-dark border border-warning-subtle">{{ "{:,.0f}".format(act.price) }} đ</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <a class="btn btn-sm btn-outline-primary me-1" href="{{ url_for('activities.customers', activity_id=act.id) }}">Danh sách khách</a>
+                            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('activities.edit_activity', activity_id=act.id) }}">Sửa</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

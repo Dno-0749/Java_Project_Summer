@@ -14,7 +14,7 @@
         <!-- Điều phối lịch trình -->
         {% if current_user.role in ['admin', 'coordinator', 'operations'] %}
         <a href="{{ url_for('coordinator.itinerary') }}"
-           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint.startswith('coordinator.') %}active{% endif %}">
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'coordinator.itinerary' or request.endpoint == 'coordinator.create_tour' %}active{% endif %}">
             <i class="bi bi-calendar-week me-2"></i> Lịch trình
         </a>
         {% endif %}
@@ -44,6 +44,30 @@
         <a href="{{ url_for('finance.finance') }}"
            class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'finance.finance' %}active{% endif %}">
             <i class="bi bi-cash-stack me-2"></i> Tài chính
+        </a>
+        <a href="{{ url_for('finance.bookings') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'finance.bookings' %}active{% endif %}">
+            <i class="bi bi-journal-bookmark me-2"></i> Booking
+        </a>
+        <a href="{{ url_for('finance.cabins') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'finance.cabins' %}active{% endif %}">
+            <i class="bi bi-door-open me-2"></i> Cabin
+        </a>
+        <a href="{{ url_for('finance.services') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'finance.services' %}active{% endif %}">
+            <i class="bi bi-list-check me-2"></i> Dịch vụ
+        </a>
+        <a href="{{ url_for('finance.expenses') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'finance.expenses' %}active{% endif %}">
+            <i class="bi bi-receipt me-2"></i> Chi tiêu
+        </a>
+        <a href="{{ url_for('finance.feedback') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'finance.feedback' %}active{% endif %}">
+            <i class="bi bi-chat-heart me-2"></i> Phản hồi
+        </a>
+        <a href="{{ url_for('finance.checkin') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'finance.checkin' %}active{% endif %}">
+            <i class="bi bi-person-check me-2"></i> Check-in
         </a>
         {% endif %}
 

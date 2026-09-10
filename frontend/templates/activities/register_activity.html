@@ -1,0 +1,54 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1"><i class="bi bi-pencil-square text-primary me-2"></i>Tạo hoạt động mới</h4>
+            <small class="text-muted">Thêm một hoạt động mới trên tàu</small>
+        </div>
+        <a href="{{ url_for('activities.activities') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <form method="post" action="{{ url_for('activities.register_activity') }}">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Tên hoạt động</label>
+                        <input type="text" class="form-control" name="name" required placeholder="Nhập tên hoạt động">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Địa điểm</label>
+                        <input type="text" class="form-control" name="location" required placeholder="Nhập địa điểm">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Khung giờ</label>
+                        <input type="text" class="form-control" name="time" required placeholder="VD: 06:30 - 07:30">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Sức chứa</label>
+                        <input type="number" class="form-control" name="capacity" min="1" value="1" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Giá vé</label>
+                        <input type="number" class="form-control" name="price" min="0" value="0" required>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>Tạo hoạt động
+                    </button>
+                    <a href="{{ url_for('activities.activities') }}" class="btn btn-outline-secondary">
+                        Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
