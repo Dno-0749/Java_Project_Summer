@@ -70,6 +70,12 @@
                                     </button>
                                 {% endif %}
                             </form>
+                            <form method="POST" action="{{ url_for('system_admin.delete_user_route', user_id=u.id) }}" class="d-inline"
+                                  onsubmit="return confirm('Bạn có chắc muốn xóa tài khoản {{ u.username }}? Dữ liệu liên kết sẽ bị xóa.');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa tài khoản">
+                                    <i class="bi bi-trash me-1"></i> Xóa
+                                </button>
+                            </form>
                             {% else %}
                                 <span class="badge bg-secondary-subtle text-secondary small">Tài khoản của bạn</span>
                             {% endif %}

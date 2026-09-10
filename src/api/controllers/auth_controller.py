@@ -5,9 +5,9 @@ from infrastructure.databases.mssql import session
 from api.schemas.auth import RigisterUserRequestSchema,RigisterUserResponseSchema
 from services.auth_service import AuthService
 from infrastructure.repositories.auth_repository import AuthRepository
-from hashlib import sha256
 import jwt
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
+from services.supabase_auth_service import authenticate as authenticate_supabase_user, delete_user, list_users
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 auth_service = AuthService(AuthRepository(session))
 register_request = RigisterUserRequestSchema()
@@ -66,20 +66,63 @@ def login():
                   error:
                     type: string
     """
-    data = request.get_json()
-    username=data['username'],
-    password=data['password']
-    password = generate_password_hash(password)
-    user = auth_service.login(username, password)
+    data = request.get_json(silent=True) or {}
+    username = data.get('username', '')
+    password = data.get('password', '')
+    if not username or not password:
+      return jsonify({'error': 'Username and password are required'}), 400
+
+    user = authenticate_supabase_user(username, password)
     if not user:
         return jsonify({'error': 'Invalid credentials'}), 401
 
     payload = {
-        'user_id': user.id,
+        'user_id': user['id'],
+        'role': user['role'],
         'exp': datetime.utcnow() + timedelta(hours=2)
     }
     token = jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
-    return jsonify({'token': token})
+    return jsonify({'token': token, 'user': user})
+
+
+@auth_bp.route('/users/<user_id>', methods=['DELETE'])
+def delete_user_route(user_id):
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return jsonify({'error': 'Authentication required'}), 401
+    try:
+        claims = jwt.decode(
+            auth_header[7:],
+            current_app.config['SECRET_KEY'],
+            algorithms=['HS256'],
+        )
+    except jwt.InvalidTokenError:
+        return jsonify({'error': 'Invalid authentication token'}), 401
+    if claims.get('role') != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    if str(claims.get('user_id')) == str(user_id):
+        return jsonify({'error': 'You cannot delete your own account'}), 400
+    if not delete_user(user_id):
+        return jsonify({'error': 'User not found'}), 404
+    return jsonify({'message': 'User deleted'}), 200
+
+
+@auth_bp.route('/users', methods=['GET'])
+def list_users_route():
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return jsonify({'error': 'Authentication required'}), 401
+    try:
+        claims = jwt.decode(
+            auth_header[7:],
+            current_app.config['SECRET_KEY'],
+            algorithms=['HS256'],
+        )
+    except jwt.InvalidTokenError:
+        return jsonify({'error': 'Invalid authentication token'}), 401
+    if claims.get('role') != 'admin':
+        return jsonify({'error': 'Admin access required'}), 403
+    return jsonify({'users': list_users()}), 200
 
 
 @auth_bp.route('/signup', methods=['POST'])

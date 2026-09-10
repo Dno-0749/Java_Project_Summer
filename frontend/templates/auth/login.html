@@ -28,7 +28,7 @@
                     <label class="form-label fw-semibold">Tên đăng nhập (Họ tên viết liền không dấu)</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input type="text" id="loginUsername" name="username" class="form-control" placeholder="nguyenchihai / nguyenhoangphat..." required autofocus>
+                        <input type="text" id="loginUsername" name="username" class="form-control" placeholder="Nhập tên đăng nhập" required autofocus>
                     </div>
                 </div>
                 <div class="mb-4">
@@ -43,62 +43,7 @@
                 </button>
             </form>
 
-            <div class="mt-4 pt-3 border-top">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="small fw-bold text-muted text-uppercase">Tài khoản thành viên nhóm:</span>
-                    <span class="badge bg-secondary-subtle text-secondary small">Pass: 123456</span>
-                </div>
-                <div class="list-group list-group-flush small">
-                    <button type="button" class="list-group-item list-group-item-action px-2 py-2 d-flex justify-content-between align-items-center border-0 rounded-2 mb-1 bg-light"
-                            onclick="fillLogin('nguyenchihai', '123456')">
-                        <div>
-                            <strong>Nguyễn Chí Hải</strong> <span class="badge bg-danger ms-1">Admin</span>
-                            <div class="text-muted small"><code>nguyenchihai</code> ➔ Quản lý & Phân quyền</div>
-                        </div>
-                        <i class="bi bi-arrow-right-short fs-5 text-primary"></i>
-                    </button>
-                    <button type="button" class="list-group-item list-group-item-action px-2 py-2 d-flex justify-content-between align-items-center border-0 rounded-2 mb-1 bg-light"
-                            onclick="fillLogin('nguyenhoangphat', '123456')">
-                        <div>
-                            <strong>Nguyễn Hoàng Phát</strong> <span class="badge bg-primary ms-1">Vận hành</span>
-                            <div class="text-muted small"><code>nguyenhoangphat</code> ➔ Dashboard</div>
-                        </div>
-                        <i class="bi bi-arrow-right-short fs-5 text-primary"></i>
-                    </button>
-                    <button type="button" class="list-group-item list-group-item-action px-2 py-2 d-flex justify-content-between align-items-center border-0 rounded-2 mb-1 bg-light"
-                            onclick="fillLogin('nguyenthithi', '123456')">
-                        <div>
-                            <strong>Nguyễn Thị Thi</strong> <span class="badge bg-success ms-1">Tài chính</span>
-                            <div class="text-muted small"><code>nguyenthithi</code> ➔ Tài chính & Hóa đơn</div>
-                        </div>
-                        <i class="bi bi-arrow-right-short fs-5 text-primary"></i>
-                    </button>
-                    <button type="button" class="list-group-item list-group-item-action px-2 py-2 d-flex justify-content-between align-items-center border-0 rounded-2 mb-1 bg-light"
-                            onclick="fillLogin('nguyentronghai', '123456')">
-                        <div>
-                            <strong>Nguyễn Trọng Hải</strong> <span class="badge bg-warning text-dark ms-1">Điều phối</span>
-                            <div class="text-muted small"><code>nguyentronghai</code> ➔ Lịch trình tour</div>
-                        </div>
-                        <i class="bi bi-arrow-right-short fs-5 text-primary"></i>
-                    </button>
-                    <button type="button" class="list-group-item list-group-item-action px-2 py-2 d-flex justify-content-between align-items-center border-0 rounded-2 mb-1 bg-light"
-                            onclick="fillLogin('ledinhquy', '123456')">
-                        <div>
-                            <strong>Lê Đình Quý</strong> <span class="badge bg-info text-dark ms-1">Hoạt động</span>
-                            <div class="text-muted small"><code>ledinhquy</code> ➔ Hoạt động trên tàu</div>
-                        </div>
-                        <i class="bi bi-arrow-right-short fs-5 text-primary"></i>
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 </div>
-
-<script>
-function fillLogin(u, p) {
-    document.getElementById('loginUsername').value = u;
-    document.getElementById('loginPassword').value = p;
-}
-</script>
 {% endblock %}

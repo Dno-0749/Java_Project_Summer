@@ -27,24 +27,6 @@
     "status": "Active"
   },
   {
-    "id": "4",
-    "username": "nguyentronghai",
-    "password": "123456",
-    "full_name": "Nguyễn Trọng Hải",
-    "role": "coordinator",
-    "role_name": "Điều phối lịch trình",
-    "status": "Active"
-  },
-  {
-    "id": "5",
-    "username": "ledinhquy",
-    "password": "123456",
-    "full_name": "Lê Đình Quý",
-    "role": "activity_manager",
-    "role_name": "Quản lý hoạt động",
-    "status": "Active"
-  },
-  {
     "id": "6",
     "username": "tranvanan",
     "password": "123456",

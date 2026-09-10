@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, session
 from flask_login import LoginManager
 from config import Config
 from blueprints.auth import auth_bp
@@ -8,7 +8,7 @@ from blueprints.coordinator import coordinator_bp
 from blueprints.activities import activities_bp
 from blueprints.excursions import excursions_bp
 from blueprints.finance import finance_bp
-from models import get_user_by_id
+from models import User
 
 def create_app():
     app = Flask(__name__)
@@ -23,7 +23,10 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        return get_user_by_id(user_id)
+        user_data = session.get("authenticated_user")
+        if user_data and str(user_data.get("id")) == str(user_id):
+            return User.from_dict(user_data)
+        return None
 
     # Đăng ký các Blueprint mở rộng theo từng Actor
     app.register_blueprint(auth_bp)
