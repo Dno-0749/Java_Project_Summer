@@ -1,0 +1,26 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1"><i class="bi bi-geo-alt text-primary me-2"></i>Sửa cảng tour</h4>
+            <small class="text-muted">Cập nhật danh sách cảng của {{ tour.name }}</small>
+        </div>
+        <a href="{{ url_for('coordinator.tour_detail', tour_id=tour.id) }}" class="btn btn-outline-secondary">Quay lại</a>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <form method="post">
+                <label class="form-label">Danh sách cảng (mỗi dòng 1 cảng)</label>
+                <textarea name="ports" rows="8" class="form-control" required>{{ '\n'.join(tour.ports) }}</textarea>
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{{ url_for('coordinator.tour_detail', tour_id=tour.id) }}" class="btn btn-outline-secondary">Hủy</a>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

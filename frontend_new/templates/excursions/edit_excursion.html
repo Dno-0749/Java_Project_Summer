@@ -1,0 +1,51 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1"><i class="bi bi-pencil-square text-primary me-2"></i>Sửa tour bờ</h4>
+            <small class="text-muted">Cập nhật thông tin tour</small>
+        </div>
+        <a href="{{ url_for('excursions.excursions') }}" class="btn btn-outline-secondary">Quay lại</a>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <form method="post">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Tên tour</label>
+                        <input type="text" name="name" class="form-control" value="{{ excursion.name }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Ngày khởi hành</label>
+                        <input type="date" name="date" class="form-control" value="{{ excursion.date }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select name="status" class="form-select">
+                            <option value="Còn chỗ" {% if excursion.status == 'Còn chỗ' %}selected{% endif %}>Còn chỗ</option>
+                            <option value="Hết chỗ" {% if excursion.status == 'Hết chỗ' %}selected{% endif %}>Hết chỗ</option>
+                            <option value="Đã kết thúc" {% if excursion.status == 'Đã kết thúc' %}selected{% endif %}>Đã kết thúc</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Sức chứa</label>
+                        <input type="number" name="capacity" class="form-control" min="0" value="{{ excursion.capacity }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Giá vé</label>
+                        <input type="number" name="price" class="form-control" min="0" value="{{ excursion.price }}">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{{ url_for('excursions.excursion_detail', excursion_id=excursion.id) }}" class="btn btn-outline-secondary">Hủy</a>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

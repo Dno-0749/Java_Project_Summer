@@ -1,0 +1,73 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="bi bi-bar-chart-line text-primary me-2"></i>Báo cáo thống kê</h4>
+        <small class="text-muted">Tổng hợp doanh thu, người tham gia và công suất hoạt động.</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('reports.export_csv', start_date=report.start_date, end_date=report.end_date) }}" class="btn btn-success">
+            <i class="bi bi-filetype-csv me-1"></i> CSV
+        </a>
+        <a href="{{ url_for('reports.export_xlsx', start_date=report.start_date, end_date=report.end_date) }}" class="btn btn-outline-success">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Excel
+        </a>
+        <a href="{{ url_for('reports.export_pdf', start_date=report.start_date, end_date=report.end_date) }}" class="btn btn-outline-danger">
+            <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Từ ngày</label>
+                <input type="date" name="start_date" class="form-control" value="{{ report.start_date }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Đến ngày</label>
+                <input type="date" name="end_date" class="form-control" value="{{ report.end_date }}">
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1"></i>Lọc báo cáo</button>
+                <a href="{{ url_for('reports.index') }}" class="btn btn-outline-secondary">Xóa lọc</a>
+            </div>
+        </form>
+        <div class="small text-muted mt-3"><i class="bi bi-database me-1"></i>Nguồn dữ liệu: <strong>{{ report.data_source }}</strong></div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">Tổng doanh thu</div><div class="fs-4 fw-bold">{{ "{:,.0f}".format(report.revenue) }} đ</div></div></div></div>
+    <div class="col-md-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">Lượt tham gia</div><div class="fs-4 fw-bold">{{ report.participants }}</div></div></div></div>
+    <div class="col-md-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">Tổng sức chứa</div><div class="fs-4 fw-bold">{{ report.capacity }}</div></div></div></div>
+    <div class="col-md-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">Công suất trung bình</div><div class="fs-4 fw-bold">{{ report.occupancy_rate }}%</div></div></div></div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white fw-semibold"><i class="bi bi-activity text-primary me-2"></i>Công suất từng hoạt động</div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light"><tr><th>Hoạt động</th><th>Loại</th><th>Đăng ký</th><th>Sức chứa</th><th>Công suất</th></tr></thead>
+            <tbody>
+                {% for activity in report.activities %}
+                <tr>
+                    <td class="fw-semibold">{{ activity.name }}</td>
+                    <td>{{ activity.type }}</td>
+                    <td>{{ activity.registered }}</td>
+                    <td>{{ activity.capacity }}</td>
+                    <td style="min-width: 180px">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress flex-grow-1" style="height: 8px"><div class="progress-bar {% if activity.occupancy_rate >= 90 %}bg-danger{% elif activity.occupancy_rate >= 70 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ [activity.occupancy_rate, 100]|min }}%"></div></div>
+                            <span class="small">{{ activity.occupancy_rate }}%</span>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="bi bi-people text-primary me-2"></i>Danh sách Hành khách & Phòng Cabin</h4>
+        <small class="text-muted">Theo dõi danh sách khách lưu trú, mã thẻ định danh và số dư chi tiêu</small>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Họ và tên</th>
+                        <th>Phòng (Cabin)</th>
+                        <th>Mã thẻ / QR RFID</th>
+                        <th>Trạng thái check-in</th>
+                        <th class="pe-4 text-end">Chi tiêu tạm tính</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in passengers %}
+                    <tr>
+                        <td class="ps-4 fw-semibold text-dark">{{ p.name }}</td>
+                        <td><span class="badge bg-secondary">Cabin {{ p.cabin }}</span></td>
+                        <td><code>{{ p.card_id }}</code></td>
+                        <td>
+                            {% if p.checkin == 'Đã lên tàu' %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">{{ p.checkin }}</span>
+                            {% else %}
+                                <span class="badge bg-warning-subtle text-dark border border-warning-subtle">{{ p.checkin }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="pe-4 text-end fw-bold text-danger">{{ "{:,.0f}".format(p.balance) }} đ</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

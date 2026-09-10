@@ -1,0 +1,153 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-4 col-xl-2">
+        <div class="card border-0 shadow-sm stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small">Hành khách</span>
+                    <div class="stat-icon bg-primary-subtle text-primary">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+                <div class="fs-4 fw-bold">{{ "{:,}".format(stats.passengers) }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-4 col-xl-2">
+        <div class="card border-0 shadow-sm stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small">Hoạt động hôm nay</span>
+                    <div class="stat-icon bg-success-subtle text-success">
+                        <i class="bi bi-music-note-list"></i>
+                    </div>
+                </div>
+                <div class="fs-4 fw-bold">{{ stats.activities_today }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-4 col-xl-2">
+        <div class="card border-0 shadow-sm stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small">Tham quan bờ</span>
+                    <div class="stat-icon bg-info-subtle text-info">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                </div>
+                <div class="fs-4 fw-bold">{{ stats.excursions_today }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-4 col-xl-2">
+        <div class="card border-0 shadow-sm stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small">Check-in hôm nay</span>
+                    <div class="stat-icon bg-warning-subtle text-warning">
+                        <i class="bi bi-qr-code-scan"></i>
+                    </div>
+                </div>
+                <div class="fs-4 fw-bold">{{ stats.checkins_today }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-4 col-xl-2">
+        <div class="card border-0 shadow-sm stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small">Doanh thu hôm nay</span>
+                    <div class="stat-icon bg-danger-subtle text-danger">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                </div>
+                <div class="fs-5 fw-bold text-truncate">{{ "{:,.0f}".format(stats.revenue_today) }} đ</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-4 col-xl-2">
+        <div class="card border-0 shadow-sm stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small">Đăng ký chờ</span>
+                    <div class="stat-icon bg-secondary-subtle text-secondary">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                </div>
+                <div class="fs-4 fw-bold">{{ stats.pending_registrations }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-12 d-flex justify-content-end">
+        <a href="{{ url_for('operations.checkin_monitor') }}" class="btn btn-outline-warning">
+            <i class="bi bi-shield-exclamation me-1"></i> Giám sát check-in và khách trễ giờ
+        </a>
+    </div>
+    <!-- Hoạt động gần đây -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold d-flex align-items-center gap-2">
+                <i class="bi bi-activity text-primary"></i>
+                <span>Hoạt động gần đây</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Thời gian</th>
+                                <th>Sự kiện</th>
+                                <th class="pe-4 text-end">Người thực hiện</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for act in recent_activities %}
+                            <tr>
+                                <td class="ps-4 text-muted small">{{ act.time }}</td>
+                                <td>{{ act.event }}</td>
+                                <td class="pe-4 text-end"><span class="badge bg-light text-dark border">{{ act.user }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông tin nhanh -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white fw-semibold d-flex align-items-center gap-2">
+                <i class="bi bi-info-circle text-info"></i>
+                <span>Thông tin nhanh</span>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="text-muted small">Chuyến đang diễn ra</div>
+                    <div class="fw-semibold">Hạ Long - Cát Bà 5 ngày</div>
+                    <div class="small text-muted">Ngày 2/5 — Đang tại Vịnh Lan Hạ</div>
+                </div>
+                <hr>
+                <div class="mb-3">
+                    <div class="text-muted small">Tình trạng kết nối vệ tinh</div>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                        <i class="bi bi-wifi me-1"></i> Trực tuyến (Online)
+                    </span>
+                </div>
+                <hr>
+                <div>
+                    <div class="text-muted small">Thời tiết trên biển</div>
+                    <div class="fw-semibold"><i class="bi bi-sun text-warning me-1"></i> Nắng nhẹ, sóng êm 0.5m</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+\subsection{External Interfaces}
+\begin{itemize}
+    \item \textbf{Giao diện người dùng:} Thân thiện, trực quan, tuân theo
+    chuẩn thiết kế GUI phổ biến (Material Design/Human Interface
+    Guidelines); hỗ trợ đa nền tảng (desktop, tablet, smartphone).
+    \item \textbf{Cổng thanh toán:} Tích hợp cổng thanh toán (VD: Stripe,
+    VNPAY, payOS...) với mã hóa dữ liệu và xác thực an toàn.
+    \item \textbf{Thiết bị phần cứng:} Giao tiếp với đầu đọc QR/RFID/NFC
+    và thiết bị POS thông qua SDK/driver tương ứng.
+\end{itemize}
+
+\subsection{Quality Attributes}
+
+\subsubsection{Usability}
+\begin{itemize}
+    \item Thời gian đào tạo cho nhân viên cơ bản (POS, check-in): không
+    quá 1 giờ.
+    \item Thời gian đào tạo cho quản lý/admin: khoảng 2--3 giờ kèm tài
+    liệu chi tiết.
+    \item Thời gian hoàn tất một giao dịch POS: không quá 2 phút.
+\end{itemize}
+
+\subsubsection{Reliability}
+\begin{itemize}
+    \item Uptime tối thiểu 99.9\% mỗi năm.
+    \item MTBF (Mean Time Between Failures) mục tiêu trên 10.000 giờ hoạt
+    động liên tục cho các thành phần quan trọng.
+    \item MTTR (Mean Time To Repair) không vượt quá 30 phút cho sự cố
+    nghiêm trọng.
+    \item Giao dịch ngoại tuyến phải được lưu trữ an toàn, không mất dữ
+    liệu ngay cả khi thiết bị mất điện đột ngột.
+\end{itemize}
+
+\subsubsection{Performance}
+\begin{itemize}
+    \item Thời gian phản hồi trung bình dưới 2 giây, tối đa 5 giây khi
+    tải cao.
+    \item Hệ thống hỗ trợ tối thiểu 1.000 giao dịch/phút vào giờ cao
+    điểm.
+    \item Hỗ trợ tối thiểu 5.000 hành khách đồng thời sử dụng hệ thống
+    trên một chuyến tàu lớn.
+    \item Đồng bộ dữ liệu ngoại tuyến phải hoàn tất trong vòng 5 phút kể
+    từ khi có kết nối mạng trở lại (với tối đa 500 giao dịch chờ đồng
+    bộ).
+\end{itemize}
