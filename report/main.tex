@@ -1,13 +1,27 @@
 \documentclass[a4paper,12pt]{book}
+\usepackage[a4paper,left=1.2cm,right=1.2cm,top=2cm,bottom=2cm]{geometry}
 \usepackage{fontspec}
 \usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
 \usepackage{float}
 \usepackage[section]{placeins}
 \usepackage{microtype}
 \usepackage{longtable}
+\usepackage{array}
+\usepackage{ragged2e}
 \usepackage[unicode]{hyperref}
 \usepackage{bookmark}
+\usepackage[titles]{tocloft}
 \usepackage[main=vietnamese,english]{babel}
+
+\renewcommand{\contentsname}{Mục lục}
+\renewcommand{\cftchapfont}{\bfseries}
+\renewcommand{\cftchappagefont}{\bfseries}
+\setlength{\cftbeforechapskip}{5pt}
+\setlength{\cftbeforesecskip}{2pt}
+\setlength{\cftbeforefigskip}{2pt}
+\setlength{\cftbeforetabskip}{2pt}
 
 % Use XeLaTeX for Unicode fonts
 \defaultfontfeatures{Ligatures=TeX}
@@ -18,7 +32,17 @@
 \setcounter{tocdepth}{3}
 \setcounter{secnumdepth}{3}
 
+\setlength{\emergencystretch}{2em}
+\setlength{\tabcolsep}{2pt}
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\setlength{\arrayrulewidth}{0.4pt}
+\renewcommand{\arraystretch}{1.15}
+\AtBeginEnvironment{longtable}{\footnotesize\RaggedRight\arraybackslash}
+\AtBeginEnvironment{tabular}{\footnotesize\RaggedRight\arraybackslash}
+
 \begin{document}
+\sloppy
 \frontmatter
 \title{Báo cáo dự án}
 \author{Nhóm: Cruise Activity and Service Management System}
@@ -26,6 +50,8 @@
 \maketitle
 
 \tableofcontents
+\clearpage
+\listoffigures
 \clearpage
 
 \mainmatter
