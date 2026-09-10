@@ -1,0 +1,165 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="bi bi-person-gear text-primary me-2"></i>Quản lý Người dùng & Phân quyền</h4>
+        <small class="text-muted">Cấp quyền và quản lý tài khoản nhân viên theo 5 bộ phận vận hành</small>
+    </div>
+    <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+        <i class="bi bi-person-plus-fill me-1"></i> + Thêm người dùng mới
+    </button>
+</div>
+
+<!-- Bảng danh sách người dùng -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>Họ và tên</th>
+                        <th>Tên đăng nhập (Username)</th>
+                        <th>Chức vụ / Vai trò</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-muted">{{ u.id }}</td>
+                        <td class="fw-semibold">
+                            <i class="bi bi-person-circle me-2 text-primary"></i>{{ u.full_name }}
+                        </td>
+                        <td>
+                            <code class="px-2 py-1 bg-light border rounded text-dark fw-bold">{{ u.username }}</code>
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {% if u.role == 'admin' %}bg-danger
+                                {% elif u.role == 'operations' %}bg-primary
+                                {% elif u.role == 'finance' %}bg-success
+                                {% elif u.role == 'coordinator' %}bg-warning text-dark
+                                {% else %}bg-info text-dark{% endif %}">
+                                {{ u.role_name }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if u.status == 'Active' %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                    <i class="bi bi-check-circle me-1"></i>Đang hoạt động
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                    <i class="bi bi-dash-circle me-1"></i>Bị vô hiệu
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            {% if u.id != current_user.id %}
+                            <form method="POST" action="{{ url_for('system_admin.toggle_status', user_id=u.id) }}" class="d-inline">
+                                {% if u.status == 'Active' %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Vô hiệu hóa tài khoản">
+                                        <i class="bi bi-lock me-1"></i> Khóa
+                                    </button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Kích hoạt lại">
+                                        <i class="bi bi-unlock me-1"></i> Kích hoạt
+                                    </button>
+                                {% endif %}
+                            </form>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary small">Tài khoản của bạn</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL THÊM NGƯỜI DÙNG & CẤP VAI TRÒ -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="addUserModalLabel">
+                    <i class="bi bi-person-plus-fill me-2"></i>Thêm Người Dùng & Cấp Vai Trò
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('system_admin.add_user_route') }}">
+                <div class="modal-body p-4">
+                    <!-- Họ và tên -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Họ và tên nhân viên <span class="text-danger">*</span></label>
+                        <input type="text" id="inputFullName" name="full_name" class="form-control form-control-lg" 
+                               placeholder="Ví dụ: Trần Văn An" required autocomplete="off">
+                    </div>
+
+                    <!-- Cấp vai trò -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Cấp vai trò làm việc trên tàu <span class="text-danger">*</span></label>
+                        <select name="role" class="form-select form-select-lg" required>
+                            <option value="" disabled selected>-- Chọn vai trò nghiệp vụ --</option>
+                            {% for role_code, role_name in role_options.items() %}
+                                <option value="{{ role_code }}">
+                                    {{ role_name }} ({{ role_code }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Hộp hiển thị tự động username & mật khẩu -->
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="small fw-semibold text-muted mb-1">
+                            <i class="bi bi-magic text-primary me-1"></i> THÔNG TIN KHỞI TẠO TỰ ĐỘNG:
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small text-muted">Tên đăng nhập (Username):</span>
+                            <span class="badge bg-dark fs-6" id="previewUsername">user</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small text-muted">Mật khẩu mặc định:</span>
+                            <span class="badge bg-secondary fs-6">123456</span>
+                        </div>
+                        <small class="text-muted d-block mt-2 fst-italic">
+                            * Username được tự động chuyển thành chữ thường, viết liền không dấu. Nhân viên có thể đổi mật khẩu sau khi đăng nhập.
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0 px-4 py-3">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                        <i class="bi bi-check2-circle me-1"></i> Cấp tài khoản
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Hàm Javascript tự động sinh username tiếng Việt không dấu thời gian thực (Live preview)
+function slugifyVietnamese(str) {
+    if (!str) return 'user';
+    str = str.replace(/đ/g, 'd').replace(/Đ/g, 'd');
+    str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    str = str.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return str || 'user';
+}
+
+const inputName = document.getElementById('inputFullName');
+const preview = document.getElementById('previewUsername');
+
+inputName.addEventListener('input', function() {
+    preview.innerText = slugifyVietnamese(this.value);
+});
+</script>
+{% endblock %}

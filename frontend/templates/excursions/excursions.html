@@ -1,0 +1,1580 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-map"></i>
+                Quản lý tham quan bờ
+            </h2>
+
+            <p class="text-muted mb-0">
+                Quản lý tour, nhà cung cấp, lịch trình và hành khách
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <button
+                class="btn btn-outline-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#providerModal"
+            >
+                <i class="bi bi-building"></i>
+                Nhà cung cấp
+            </button>
+
+            <button
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#excursionModal"
+            >
+                <i class="bi bi-plus-lg"></i>
+                Thêm tour
+            </button>
+
+        </div>
+    </div>
+
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+                            <p class="text-muted mb-1">
+                                Tổng số tour
+                            </p>
+
+                            <h3 class="fw-bold mb-0">
+                                {{ excursions|length }}
+                            </h3>
+                        </div>
+
+                        <div class="stat-icon bg-primary-subtle text-primary">
+                            <i class="bi bi-map"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+                            <p class="text-muted mb-1">
+                                Tour hoàn thành
+                            </p>
+
+                            <h3 class="fw-bold mb-0">
+                                {{ excursions|selectattr("status", "equalto", "Hoàn thành")|list|length }}
+                            </h3>
+                        </div>
+
+                        <div class="stat-icon bg-success-subtle text-success">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+                            <p class="text-muted mb-1">
+                                Tour trì hoãn
+                            </p>
+
+                            <h3 class="fw-bold mb-0">
+                                {{ excursions|selectattr("status", "equalto", "Trì hoãn")|list|length }}
+                            </h3>
+                        </div>
+
+                        <div class="stat-icon bg-warning-subtle text-warning">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+                            <p class="text-muted mb-1">
+                                Tổng khách đăng ký
+                            </p>
+
+                            <h3 class="fw-bold mb-0">
+
+                                {% set total = namespace(value=0) %}
+
+                                {% for excursion in excursions %}
+                                    {% set total.value = total.value + excursion.registered %}
+                                {% endfor %}
+
+                                {{ total.value }}
+
+                            </h3>
+                        </div>
+
+                        <div class="stat-icon bg-info-subtle text-info">
+                            <i class="bi bi-people"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-5">
+
+                    <label class="form-label fw-semibold">
+                        Tìm kiếm tour
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+
+                        <input
+                            type="text"
+                            id="excursionSearch"
+                            class="form-control"
+                            placeholder="Tên tour hoặc địa điểm..."
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-3">
+
+                    <label class="form-label fw-semibold">
+                        Trạng thái
+                    </label>
+
+                    <select
+                        id="statusFilter"
+                        class="form-select"
+                    >
+
+                        <option value="">
+                            Tất cả
+                        </option>
+
+                        <option value="Hoàn thành">
+                            Hoàn thành
+                        </option>
+
+                        <option value="Hủy">
+                            Hủy
+                        </option>
+
+                        <option value="Trì hoãn">
+                            Trì hoãn
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-md-3">
+
+                    <label class="form-label fw-semibold">
+                        Nhà cung cấp
+                    </label>
+
+                    <select
+                        id="providerFilter"
+                        class="form-select"
+                    >
+
+                        <option value="">
+                            Tất cả
+                        </option>
+
+                        <option value="Saigontourist">
+                            Saigontourist
+                        </option>
+
+                        <option value="Vietravel">
+                            Vietravel
+                        </option>
+
+                        <option value="Hanoitourist">
+                            Hanoitourist
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-md-1 d-flex align-items-end">
+
+                    <button
+                        class="btn btn-outline-secondary w-100"
+                        onclick="resetExcursionFilter()"
+                    >
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        {% for excursion in excursions %}
+
+        <div
+            class="col-xl-4 col-lg-6 excursion-item"
+
+            data-name="{{ excursion.name|lower }}"
+
+            data-date="{{ excursion.date|lower }}"
+
+            data-status="{{ excursion.status }}"
+
+            data-provider="{{ excursion.provider|default('') }}"
+        >
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+
+                        <div>
+
+                            <h5 class="fw-bold mb-1">
+                                {{ excursion.name }}
+                            </h5>
+
+                            <small class="text-muted">
+                                <i class="bi bi-calendar3"></i>
+                                {{ excursion.date }}
+                            </small>
+
+                        </div>
+
+
+                        {% if excursion.status == "Hoàn thành" %}
+
+                            <span class="badge bg-success-subtle text-success">
+                                Hoàn thành
+                            </span>
+
+                        {% elif excursion.status == "Hủy" %}
+
+                            <span class="badge bg-danger-subtle text-danger">
+                                Hủy
+                            </span>
+
+                        {% elif excursion.status == "Trì hoãn" %}
+
+                            <span class="badge bg-warning-subtle text-warning">
+                                Trì hoãn
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-primary-subtle text-primary">
+                                {{ excursion.status }}
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="excursion-info mb-3">
+
+                        <div class="mb-2">
+
+                            <i class="bi bi-building text-primary"></i>
+
+                            <span class="ms-2">
+                                {{ excursion.provider|default("Chưa có nhà cung cấp") }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="mb-2">
+
+                            <i class="bi bi-geo-alt text-primary"></i>
+
+                            <span class="ms-2">
+                                {{ excursion.location|default("Địa điểm tham quan") }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="mb-2">
+
+                            <i class="bi bi-clock text-primary"></i>
+
+                            <span class="ms-2">
+                                {{ excursion.time|default("08:00 - 17:00") }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="row g-2 mb-3">
+
+                        <div class="col-6">
+
+                            <div class="excursion-stat">
+
+                                <small class="text-muted">
+                                    Sức chứa
+                                </small>
+
+                                <div class="fw-bold">
+                                    {{ excursion.capacity }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-6">
+
+                            <div class="excursion-stat">
+
+                                <small class="text-muted">
+                                    Đã đăng ký
+                                </small>
+
+                                <div class="fw-bold">
+                                    {{ excursion.registered }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <div class="d-flex justify-content-between mb-1">
+
+                            <small class="text-muted">
+                                Tỷ lệ tham gia
+                            </small>
+
+                            <small class="fw-semibold">
+
+                                {% if excursion.capacity > 0 %}
+
+                                    {{ ((excursion.registered / excursion.capacity) * 100)|round|int }}%
+
+                                {% else %}
+
+                                    0%
+
+                                {% endif %}
+
+                            </small>
+
+                        </div>
+
+
+                        <div class="progress" style="height: 6px;">
+
+                            {% if excursion.capacity > 0 %}
+
+                                {% set percent =
+                                    (excursion.registered / excursion.capacity) * 100
+                                %}
+
+                            {% else %}
+
+                                {% set percent = 0 %}
+
+                            {% endif %}
+
+                            <div
+                                class="progress-bar"
+                                data-progress="{{ percent }}"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <small class="text-muted d-block">
+                                Giá vé
+                            </small>
+
+                            <span class="fw-bold text-primary">
+
+                                {{ "{:,.0f}".format(excursion.price) }}
+                                VNĐ
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="d-flex gap-1">
+
+                            <button
+                                class="btn btn-sm btn-outline-primary"
+                                onclick="viewExcursion('{{ excursion.id }}')"
+                                title="Chi tiết"
+                            >
+                                <i class="bi bi-eye"></i>
+                            </button>
+
+
+                            <button
+                                class="btn btn-sm btn-outline-success"
+                                onclick="viewExcursionRegistrations('{{ excursion.id }}')"
+                                title="Danh sách khách"
+                            >
+                                <i class="bi bi-people"></i>
+                            </button>
+
+
+                            <button
+                                class="btn btn-sm btn-outline-secondary"
+                                onclick="editExcursion('{{ excursion.id }}')"
+                                title="Chỉnh sửa"
+                            >
+                                <i class="bi bi-pencil"></i>
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <div
+        id="noExcursion"
+        class="text-center py-5 d-none"
+    >
+
+        <i class="bi bi-search fs-1 text-muted"></i>
+
+        <p class="text-muted mt-3">
+            Không tìm thấy tour phù hợp.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div
+    class="modal fade"
+    id="excursionModal"
+    tabindex="-1"
+>
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold">
+
+                    <i class="bi bi-plus-circle"></i>
+
+                    Tạo chuyến tham quan bờ
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+
+            </div>
+
+
+            <form id="excursionForm">
+
+                <div class="modal-body">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-8">
+
+                            <label class="form-label fw-semibold">
+                                Tên tour
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                name="name"
+                                placeholder="VD: Hạ Long City Tour"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="col-md-4">
+
+                            <label class="form-label fw-semibold">
+                                Nhà cung cấp
+                            </label>
+
+                            <select
+                                class="form-select"
+                                name="provider"
+                                required
+                            >
+
+                                <option value="">
+                                    Chọn nhà cung cấp
+                                </option>
+
+                                <option value="Saigontourist">
+                                    Saigontourist
+                                </option>
+
+                                <option value="Vietravel">
+                                    Vietravel
+                                </option>
+
+                                <option value="Hanoitourist">
+                                    Hanoitourist
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+                                Ngày tổ chức
+                            </label>
+
+                            <input
+                                type="date"
+                                class="form-control"
+                                name="date"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="col-md-3">
+
+                            <label class="form-label fw-semibold">
+                                Bắt đầu
+                            </label>
+
+                            <input
+                                type="time"
+                                class="form-control"
+                                name="start_time"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="col-md-3">
+
+                            <label class="form-label fw-semibold">
+                                Kết thúc
+                            </label>
+
+                            <input
+                                type="time"
+                                class="form-control"
+                                name="end_time"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+                                Địa điểm
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                name="location"
+                                placeholder="VD: Vịnh Hạ Long"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="col-md-3">
+
+                            <label class="form-label fw-semibold">
+                                Sức chứa
+                            </label>
+
+                            <input
+                                type="number"
+                                class="form-control"
+                                name="capacity"
+                                min="1"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="col-md-3">
+
+                            <label class="form-label fw-semibold">
+                                Giá vé
+                            </label>
+
+                            <input
+                                type="number"
+                                class="form-control"
+                                name="price"
+                                min="0"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+                                Trạng thái
+                            </label>
+
+                            <select
+                                class="form-select"
+                                name="status"
+                            >
+
+                                <option value="Hoàn thành">
+                                    Hoàn thành
+                                </option>
+
+                                <option value="Hủy">
+                                    Hủy
+                                </option>
+
+                                <option value="Trì hoãn">
+                                    Trì hoãn
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="col-12">
+
+                            <label class="form-label fw-semibold">
+                                Mô tả
+                            </label>
+
+                            <textarea
+                                class="form-control"
+                                rows="4"
+                                name="description"
+                                placeholder="Nhập thông tin tour..."
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                    >
+                        Hủy
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        <i class="bi bi-check-lg"></i>
+                        Lưu tour
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div
+    class="modal fade"
+    id="providerModal"
+    tabindex="-1"
+>
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold">
+
+                    <i class="bi bi-building"></i>
+
+                    Quản lý nhà cung cấp tour
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <div class="d-flex justify-content-end mb-3">
+
+                    <button
+                        class="btn btn-primary btn-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#addProviderModal"
+                    >
+
+                        <i class="bi bi-plus-lg"></i>
+
+                        Thêm nhà cung cấp
+
+                    </button>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead class="table-light">
+
+                            <tr>
+                                <th>#</th>
+                                <th>Nhà cung cấp</th>
+                                <th>Số điện thoại</th>
+                                <th>Email</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr>
+
+                                <td>1</td>
+
+                                <td class="fw-semibold">
+                                    Saigontourist
+                                </td>
+
+                                <td>
+                                    028 3822 8898
+                                </td>
+
+                                <td>
+                                    info@saigontourist.net
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-success-subtle text-success">
+                                        Hoạt động
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    <button
+                                        class="btn btn-sm btn-outline-secondary"
+                                        onclick="editProvider(1)"
+                                    >
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td>2</td>
+
+                                <td class="fw-semibold">
+                                    Vietravel
+                                </td>
+
+                                <td>
+                                    028 3822 8898
+                                </td>
+
+                                <td>
+                                    info@vietravel.com
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-success-subtle text-success">
+                                        Hoạt động
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    <button
+                                        class="btn btn-sm btn-outline-secondary"
+                                        onclick="editProvider(2)"
+                                    >
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td>3</td>
+
+                                <td class="fw-semibold">
+                                    Hanoitourist
+                                </td>
+
+                                <td>
+                                    024 3926 2288
+                                </td>
+
+                                <td>
+                                    info@hanoitourist.vn
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-success-subtle text-success">
+                                        Hoạt động
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    <button
+                                        class="btn btn-sm btn-outline-secondary"
+                                        onclick="editProvider(3)"
+                                    >
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div
+    class="modal fade"
+    id="addProviderModal"
+    tabindex="-1"
+>
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold">
+                    Thêm nhà cung cấp
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+
+            </div>
+
+
+            <form id="providerForm">
+
+                <div class="modal-body">
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Tên nhà cung cấp
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Số điện thoại
+                        </label>
+
+                        <input
+                            type="tel"
+                            class="form-control"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Email
+                        </label>
+
+                        <input
+                            type="email"
+                            class="form-control"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Địa chỉ
+                        </label>
+
+                        <textarea
+                            class="form-control"
+                            rows="3"
+                        ></textarea>
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                    >
+                        Hủy
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Lưu nhà cung cấp
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div
+    class="modal fade"
+    id="registrationModal"
+    tabindex="-1"
+>
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-people"></i>
+                    Danh sách hành khách
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <div class="row mb-3">
+
+                    <div class="col-md-4">
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Tìm hành khách..."
+                        >
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <select class="form-select">
+
+                            <option>
+                                Tất cả
+                            </option>
+
+                            <option>
+                                Đã đăng ký
+                            </option>
+
+                            <option>
+                                Đã check-in
+                            </option>
+
+                            <option>
+                                Chưa check-in
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead class="table-light">
+
+                            <tr>
+                                <th>#</th>
+                                <th>Hành khách</th>
+                                <th>Phòng</th>
+                                <th>Số điện thoại</th>
+                                <th>Đăng ký</th>
+                                <th>Check-in</th>
+                                <th>Đánh giá</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr>
+
+                                <td>1</td>
+
+                                <td class="fw-semibold">
+                                    Nguyễn Văn An
+                                </td>
+
+                                <td>
+                                    A101
+                                </td>
+
+                                <td>
+                                    0901234567
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-success-subtle text-success">
+                                        Đã đăng ký
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-success">
+                                        Đã check-in
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="text-warning">
+                                        ★★★★★
+                                    </span>
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td>2</td>
+
+                                <td class="fw-semibold">
+                                    Trần Thị Bình
+                                </td>
+
+                                <td>
+                                    A102
+                                </td>
+
+                                <td>
+                                    0912345678
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-success-subtle text-success">
+                                        Đã đăng ký
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        Chưa check-in
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="text-muted">
+                                        Chưa đánh giá
+                                    </span>
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <td>3</td>
+
+                                <td class="fw-semibold">
+                                    Lê Minh Tuấn
+                                </td>
+
+                                <td>
+                                    B205
+                                </td>
+
+                                <td>
+                                    0987654321
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-success-subtle text-success">
+                                        Đã đăng ký
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-success">
+                                        Đã check-in
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="text-warning">
+                                        ★★★★☆
+                                    </span>
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    document.querySelectorAll(".excursion-item .progress-bar").forEach(function (bar) {
+
+        const progress = parseFloat(
+            bar.dataset.progress || 0
+        );
+
+        bar.style.width = progress + "%";
+
+        if (progress >= 100) {
+            bar.classList.add("bg-danger");
+        } else if (progress >= 80) {
+            bar.classList.add("bg-warning");
+        } else {
+            bar.classList.add("bg-success");
+        }
+
+    });
+
+
+    const search =
+        document.getElementById("excursionSearch");
+
+    const status =
+        document.getElementById("statusFilter");
+
+    const provider =
+        document.getElementById("providerFilter");
+
+
+    function filterExcursions() {
+
+        const keyword =
+            search.value.toLowerCase().trim();
+
+        const statusValue =
+            status.value;
+
+        const providerValue =
+            provider.value;
+
+
+        const items =
+            document.querySelectorAll(".excursion-item");
+
+        let visible = 0;
+
+
+        items.forEach(function (item) {
+
+            const name =
+                item.dataset.name || "";
+
+            const date =
+                item.dataset.date || "";
+
+            const itemStatus =
+                item.dataset.status || "";
+
+            const itemProvider =
+                item.dataset.provider || "";
+
+
+            const matchKeyword =
+                name.includes(keyword) ||
+                date.includes(keyword);
+
+
+            const matchStatus =
+                statusValue === "" ||
+                itemStatus === statusValue;
+
+
+            const matchProvider =
+                providerValue === "" ||
+                itemProvider === providerValue;
+
+
+            if (
+                matchKeyword &&
+                matchStatus &&
+                matchProvider
+            ) {
+
+                item.style.display = "";
+
+                visible++;
+
+            } else {
+
+                item.style.display = "none";
+
+            }
+
+        });
+
+
+        document
+            .getElementById("noExcursion")
+            .classList.toggle(
+                "d-none",
+                visible !== 0
+            );
+
+    }
+
+
+    search.addEventListener(
+        "input",
+        filterExcursions
+    );
+
+    status.addEventListener(
+        "change",
+        filterExcursions
+    );
+
+    provider.addEventListener(
+        "change",
+        filterExcursions
+    );
+
+
+    document
+        .getElementById("excursionForm")
+        .addEventListener(
+            "submit",
+            function (event) {
+
+                event.preventDefault();
+
+                alert(
+                    "Đã lưu tour thành công!"
+                );
+
+                const modal =
+                    bootstrap.Modal.getInstance(
+                        document.getElementById(
+                            "excursionModal"
+                        )
+                    );
+
+                if (modal) {
+                    modal.hide();
+                }
+
+                this.reset();
+
+            }
+        );
+
+
+    document
+        .getElementById("providerForm")
+        .addEventListener(
+            "submit",
+            function (event) {
+
+                event.preventDefault();
+
+                alert(
+                    "Đã lưu nhà cung cấp thành công!"
+                );
+
+                const modal =
+                    bootstrap.Modal.getInstance(
+                        document.getElementById(
+                            "addProviderModal"
+                        )
+                    );
+
+                if (modal) {
+                    modal.hide();
+                }
+
+                this.reset();
+
+            }
+        );
+
+});
+
+
+function resetExcursionFilter() {
+
+    document.getElementById(
+        "excursionSearch"
+    ).value = "";
+
+    document.getElementById(
+        "statusFilter"
+    ).value = "";
+
+    document.getElementById(
+        "providerFilter"
+    ).value = "";
+
+
+    document
+        .querySelectorAll(".excursion-item")
+        .forEach(function (item) {
+
+            item.style.display = "";
+
+        });
+
+
+    document
+        .getElementById("noExcursion")
+        .classList.add("d-none");
+
+}
+
+
+function viewExcursion(id) {
+
+    alert(
+        "Xem chi tiết tour #" + id
+    );
+
+}
+
+
+function viewExcursionRegistrations(id) {
+
+    const modal =
+        new bootstrap.Modal(
+            document.getElementById(
+                "registrationModal"
+            )
+        );
+
+    modal.show();
+
+}
+
+
+function editExcursion(id) {
+
+    alert(
+        "Chỉnh sửa tour #" + id
+    );
+
+}
+
+
+function editProvider(id) {
+
+    alert(
+        "Chỉnh sửa nhà cung cấp #" + id
+    );
+
+}
+
+</script>
+
+{% endblock %}

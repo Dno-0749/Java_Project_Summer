@@ -1,0 +1,309 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Chi tiết tour{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+
+    <div class="mb-4">
+        <a href="/excursions" class="text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i>
+            Quay lại danh sách
+        </a>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-start mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                {{ excursion.name }}
+            </h2>
+
+            <p class="text-muted mb-0">
+                {{ excursion.location }}
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a
+                href="/excursions/{{ excursion.id }}/registrations"
+                class="btn btn-success"
+            >
+                <i class="bi bi-people me-1"></i>
+                Danh sách khách
+            </a>
+
+            {% if current_user.role in ["shore_excursion_manager", "admin"] %}
+            <a
+                href="/excursions/{{ excursion.id }}/edit"
+                class="btn btn-outline-primary"
+            >
+                <i class="bi bi-pencil me-1"></i>
+                Chỉnh sửa
+            </a>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm mb-4">
+
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-semibold mb-0">
+                        Thông tin tour
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row g-4">
+
+                        <div class="col-md-6">
+                            <div class="detail-item">
+
+                                <span class="detail-label">
+                                    <i class="bi bi-calendar3 text-primary me-2"></i>
+                                    Ngày khởi hành
+                                </span>
+
+                                <span class="detail-value">
+                                    {{ excursion.date }}
+                                </span>
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="detail-item">
+
+                                <span class="detail-label">
+                                    <i class="bi bi-clock text-primary me-2"></i>
+                                    Thời gian
+                                </span>
+
+                                <span class="detail-value">
+                                    {{ excursion.time|default("-") }}
+                                </span>
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="detail-item">
+
+                                <span class="detail-label">
+                                    <i class="bi bi-geo-alt text-primary me-2"></i>
+                                    Địa điểm
+                                </span>
+
+                                <span class="detail-value">
+                                    {{ excursion.location }}
+                                </span>
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="detail-item">
+
+                                <span class="detail-label">
+                                    <i class="bi bi-building text-primary me-2"></i>
+                                    Nhà cung cấp
+                                </span>
+
+                                <span class="detail-value">
+                                    {{ excursion.provider|default("-") }}
+                                </span>
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="detail-item">
+
+                                <span class="detail-label">
+                                    <i class="bi bi-people text-primary me-2"></i>
+                                    Sức chứa
+                                </span>
+
+                                <span class="detail-value">
+                                    {{ excursion.capacity }} người
+                                </span>
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="detail-item">
+
+                                <span class="detail-label">
+                                    <i class="bi bi-ticket-perforated text-primary me-2"></i>
+                                    Giá vé
+                                </span>
+
+                                <span class="detail-value">
+                                    {{ "{:,.0f}".format(excursion.price) }} VNĐ
+                                </span>
+
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+
+                            <div class="detail-item">
+
+                                <span class="detail-label">
+                                    <i class="bi bi-info-circle text-primary me-2"></i>
+                                    Trạng thái
+                                </span>
+
+                                <span class="detail-value">
+
+                                    {% if excursion.status == "Hoàn thành" %}
+                                    <span class="badge bg-success">
+                                        Hoàn thành
+                                    </span>
+
+                                    {% elif excursion.status == "Hủy" %}
+                                    <span class="badge bg-danger">
+                                        Hủy
+                                    </span>
+
+                                    {% elif excursion.status == "Trì hoãn" %}
+                                    <span class="badge bg-warning text-dark">
+                                        Trì hoãn
+                                    </span>
+
+                                    {% else %}
+                                    <span class="badge bg-primary">
+                                        {{ excursion.status }}
+                                    </span>
+                                    {% endif %}
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-semibold mb-0">
+                        Mô tả tour
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <p class="text-muted mb-0">
+                        {{ excursion.description|default("Chưa có mô tả cho tour này.") }}
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="card border-0 shadow-sm mb-4">
+
+                <div class="card-body text-center p-4">
+
+                    <div class="detail-stat-icon mx-auto mb-3">
+                        <i class="bi bi-people"></i>
+                    </div>
+
+                    <h6 class="text-muted mb-2">
+                        Số lượng đăng ký
+                    </h6>
+
+                    <h2 class="fw-bold mb-1">
+                        {{ excursion.registered }}/{{ excursion.capacity }}
+                    </h2>
+
+                    <p class="text-muted mb-3">
+                        người đăng ký
+                    </p>
+
+                    <div class="progress mb-2">
+
+                        <div
+                            class="progress-bar activity-progress"
+                            data-progress="{{ ((excursion.registered / excursion.capacity) * 100)|round|int }}"
+                        ></div>
+
+                    </div>
+
+                    <small class="text-muted">
+                        {{ ((excursion.registered / excursion.capacity) * 100)|round|int }}% sức chứa
+                    </small>
+
+                </div>
+
+            </div>
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-semibold mb-0">
+                        Đánh giá hành khách
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="feedback-rating">
+
+                        <div class="rating-number">
+                            {{ excursion.rating|default("4.7") }}
+                        </div>
+
+                        <div>
+
+                            <div class="text-warning">
+
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-half"></i>
+
+                            </div>
+
+                            <small class="text-muted">
+                                {{ excursion.feedback_count|default(18) }} phản hồi
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/activities.js') }}"></script>
+{% endblock %}
