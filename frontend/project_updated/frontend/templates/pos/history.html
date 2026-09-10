@@ -1,0 +1,86 @@
+{% extends "layouts/pos_base.html" %}
+
+{% block content %}
+<h5 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Lịch sử giao dịch ca làm việc</h5>
+
+<form method="GET" action="{{ url_for('pos.history') }}" class="mb-3" style="max-width: 400px;">
+    <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Tìm theo mã GD, cabin, dịch vụ...">
+        {% if search_query %}
+        <a href="{{ url_for('pos.history') }}" class="btn btn-outline-secondary">Xoá</a>
+        {% else %}
+        <button class="btn btn-outline-secondary" type="submit">Tìm</button>
+        {% endif %}
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-hover bg-white align-middle" style="border-radius: 12px; overflow: hidden;">
+        <thead>
+            <tr>
+                <th>Mã GD</th>
+                <th>Cabin</th>
+                <th>Dịch vụ</th>
+                <th>Số tiền</th>
+                <th>Giờ</th>
+                <th>Trạng thái</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tx in transactions %}
+            <tr>
+                <td class="fw-semibold">{{ tx.id }}</td>
+                <td>{{ tx.cabin }}</td>
+                <td>{{ tx.item }}</td>
+                <td>{{ "{:,.0f}".format(tx.amount) }}đ</td>
+                <td>{{ tx.time }}</td>
+                <td>
+                    {% if tx.sync_status == "pending_sync" %}
+                        <span class="sync-badge sync-pending"><i class="bi bi-cloud-arrow-up"></i> Chờ đồng bộ</span>
+                    {% elif tx.sync_status == "disputed" %}
+                        <span class="sync-badge" style="background:#fee2e2;color:#991b1b;"><i class="bi bi-exclamation-triangle"></i> Tranh chấp</span>
+                    {% elif tx.sync_status == "reconciled" %}
+                        <span class="sync-badge" style="background:#dbeafe;color:#1e40af;"><i class="bi bi-check2-all"></i> Đã đối soát</span>
+                    {% else %}
+                        <span class="sync-badge sync-synced"><i class="bi bi-check-circle"></i> Đã đồng bộ</span>
+                    {% endif %}
+                </td>
+                <td class="d-flex gap-1">
+                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#detailModal{{ tx.id }}">
+                        Chi tiết
+                    </button>
+                    {% if tx.sync_status in ("synced", "reconciled") %}
+                    <form method="POST" action="{{ url_for('pos.refund', transaction_id=tx.id) }}" onsubmit="return confirm('Xác nhận hoàn tiền giao dịch #{{ tx.id }}?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Hoàn tiền</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+
+            <div class="modal fade" id="detailModal{{ tx.id }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title">Chi tiết giao dịch #{{ tx.id }}</h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body small">
+                            <div class="d-flex justify-content-between py-1 border-bottom"><span class="text-muted">Cabin/Account</span><span>{{ tx.cabin }}</span></div>
+                            <div class="d-flex justify-content-between py-1 border-bottom"><span class="text-muted">Dịch vụ</span><span>{{ tx.item }}</span></div>
+                            <div class="d-flex justify-content-between py-1 border-bottom"><span class="text-muted">Số tiền</span><span>{{ "{:,.0f}".format(tx.amount) }}đ</span></div>
+                            <div class="d-flex justify-content-between py-1 border-bottom"><span class="text-muted">Giờ</span><span>{{ tx.time }}</span></div>
+                            <div class="d-flex justify-content-between py-1 border-bottom"><span class="text-muted">local_id</span><span class="text-truncate" style="max-width:180px;">{{ tx.local_id }}</span></div>
+                            <div class="d-flex justify-content-between py-1"><span class="text-muted">Trạng thái</span><span>{{ tx.sync_status }}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <tr><td colspan="7" class="text-center text-muted py-4">Không có giao dịch nào.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Đăng ký tài khoản Hành khách{% endblock %}
+
+{% block auth_content %}
+<div class="login-page d-flex align-items-center justify-content-center min-vh-100 py-4">
+    <div class="login-card card shadow-lg border-0 my-auto" style="max-width: 480px; width: 100%;">
+        <div class="card-body p-4 p-md-5">
+            <div class="text-center mb-4">
+                <i class="bi bi-person-plus-fill text-info" style="font-size: 3rem;"></i>
+                <h3 class="mt-2 fw-bold">Đăng ký Hành khách</h3>
+                <p class="text-muted small mb-0">Tạo tài khoản để xem lịch trình, đăng ký hoạt động và theo dõi chi phí</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('passenger.register') }}">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Họ và tên</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                        <input type="text" name="full_name" class="form-control" placeholder="Nguyễn Văn A" required autofocus>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Tên đăng nhập</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" name="username" class="form-control" placeholder="nguyenvana" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Mật khẩu</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" name="password" class="form-control" placeholder="Ít nhất 6 ký tự" required>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Xác nhận mật khẩu</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                        <input type="password" name="password_confirm" class="form-control" placeholder="Nhập lại mật khẩu" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm">
+                    <i class="bi bi-person-check me-2"></i>Đăng ký
+                </button>
+            </form>
+
+            <div class="text-center mt-3">
+                <a href="{{ url_for('auth.login') }}" class="small">Đã có tài khoản? Đăng nhập</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

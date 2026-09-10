@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ page_title or 'Hành khách' }}{% endblock %} | Cruise App</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/passenger.css') }}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="passenger-outer">
+    <div class="phone-frame">
+        <div class="phone-statusbar">
+            <span>9:41</span>
+            <span><i class="bi bi-wifi"></i> <i class="bi bi-battery-full ms-1"></i></span>
+        </div>
+
+        <div class="phone-topbar d-flex align-items-center justify-content-between">
+            <span class="fw-bold">{{ page_title or 'Cruise App' }}</span>
+            <a href="{{ url_for('passenger.profile') }}" class="text-white-50 small">
+                <i class="bi bi-person-circle"></i>
+            </a>
+        </div>
+
+        <div class="phone-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show py-2 small" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+
+        <nav class="phone-bottom-nav d-flex">
+            <a href="{{ url_for('passenger.home') }}" class="phone-nav-item {% if request.endpoint == 'passenger.home' %}active{% endif %}">
+                <i class="bi bi-house"></i><span>Trang chủ</span>
+            </a>
+            <a href="{{ url_for('passenger.itinerary') }}" class="phone-nav-item {% if request.endpoint == 'passenger.itinerary' %}active{% endif %}">
+                <i class="bi bi-calendar-week"></i><span>Lịch trình</span>
+            </a>
+            <a href="{{ url_for('passenger.activities') }}" class="phone-nav-item {% if request.endpoint and request.endpoint.startswith('passenger.activ') %}active{% endif %}">
+                <i class="bi bi-ticket-perforated"></i><span>Hoạt động</span>
+            </a>
+            <a href="{{ url_for('passenger.bill') }}" class="phone-nav-item {% if request.endpoint == 'passenger.bill' %}active{% endif %}">
+                <i class="bi bi-receipt"></i><span>Chi phí</span>
+            </a>
+            <a href="{{ url_for('passenger.notifications') }}" class="phone-nav-item {% if request.endpoint == 'passenger.notifications' %}active{% endif %}">
+                <i class="bi bi-bell"></i><span>Thông báo</span>
+            </a>
+        </nav>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelectorAll(".alert-dismissible").forEach(function (alert) {
+            setTimeout(function () {
+                bootstrap.Alert.getOrCreateInstance(alert).close();
+            }, 3000);
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

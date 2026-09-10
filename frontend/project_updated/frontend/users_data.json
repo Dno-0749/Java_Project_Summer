@@ -1,0 +1,82 @@
+[
+  {
+    "id": "1",
+    "username": "nguyenchihai",
+    "password": "123456",
+    "full_name": "Nguyễn Chí Hải",
+    "role": "admin",
+    "role_name": "Quản trị viên hệ thống",
+    "status": "Active",
+    "passenger_id": null
+  },
+  {
+    "id": "2",
+    "username": "nguyenhoangphat",
+    "password": "123456",
+    "full_name": "Nguyễn Hoàng Phát",
+    "role": "operations",
+    "role_name": "Quản lý vận hành",
+    "status": "Active",
+    "passenger_id": null
+  },
+  {
+    "id": "3",
+    "username": "nguyenthithi",
+    "password": "123456",
+    "full_name": "Nguyễn Thị Thi",
+    "role": "finance",
+    "role_name": "Tài chính & Lễ tân",
+    "status": "Active",
+    "passenger_id": null
+  },
+  {
+    "id": "4",
+    "username": "nguyentronghai",
+    "password": "123456",
+    "full_name": "Nguyễn Trọng Hải",
+    "role": "coordinator",
+    "role_name": "Điều phối lịch trình",
+    "status": "Active",
+    "passenger_id": null
+  },
+  {
+    "id": "5",
+    "username": "ledinhquy",
+    "password": "123456",
+    "full_name": "Lê Đình Quý",
+    "role": "activity_manager",
+    "role_name": "Quản lý hoạt động",
+    "status": "Active",
+    "passenger_id": null
+  },
+  {
+    "id": "6",
+    "username": "posstaff",
+    "password": "123456",
+    "full_name": "Nhân viên POS Demo",
+    "role": "sales_staff",
+    "role_name": "Nhân viên bán hàng & dịch vụ",
+    "status": "Active",
+    "passenger_id": null
+  },
+  {
+    "id": "7",
+    "username": "passenger",
+    "password": "123456",
+    "full_name": "Hành khách Demo",
+    "role": "passenger",
+    "role_name": "Hành khách",
+    "status": "Active",
+    "passenger_id": null
+  },
+  {
+    "id": "8",
+    "username": "nguyenvana",
+    "password": "1234567",
+    "full_name": "Nguyễn Văn A",
+    "role": "passenger",
+    "role_name": "Hành khách",
+    "status": "Active",
+    "passenger_id": 5
+  }
+]

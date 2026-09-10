@@ -1,0 +1,24 @@
+{% extends "layouts/passenger_base.html" %}
+
+{% block content %}
+{% if not feedback_list %}
+<div class="p-card text-center text-muted">Bạn chưa gửi đánh giá nào.</div>
+{% endif %}
+
+{% for f in feedback_list %}
+<div class="p-card">
+    <div class="d-flex justify-content-between align-items-start mb-1">
+        <div class="fw-semibold small">{{ f.target_name or "(Không rõ)" }}</div>
+        <div class="text-warning small">
+            {% for i in range(f.rating) %}<i class="bi bi-star-fill"></i>{% endfor %}{% for i in range(5 - f.rating) %}<i class="bi bi-star"></i>{% endfor %}
+        </div>
+    </div>
+    <div class="text-muted small mb-1">
+        {% if f.target_type == 'activity' %}Hoạt động trên tàu{% elif f.target_type == 'excursion' %}Tham quan bờ{% else %}Dịch vụ{% endif %}
+    </div>
+    {% if f.comment %}
+    <div class="small">{{ f.comment }}</div>
+    {% endif %}
+</div>
+{% endfor %}
+{% endblock %}

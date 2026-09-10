@@ -1,0 +1,19 @@
+{% extends "layouts/passenger_base.html" %}
+
+{% block content %}
+<div class="p-card mb-2 py-2">
+    <div class="small text-muted">Chọn dịch vụ bạn muốn sử dụng - nhân viên sẽ được thông báo để phục vụ bạn. Chi phí sẽ được cộng vào tài khoản chi tiêu trên tàu.</div>
+</div>
+
+{% for s in services %}
+<a href="{{ url_for('passenger.service_detail', item_id=s.id) }}" class="p-card d-block text-decoration-none text-dark">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <div class="fw-semibold">{{ s.name }}</div>
+            <div class="text-muted small">{{ s.category }}</div>
+        </div>
+        <div class="fw-bold text-primary">{{ "{:,.0f}".format(s.price) }}đ</div>
+    </div>
+</a>
+{% endfor %}
+{% endblock %}

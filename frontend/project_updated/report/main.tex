@@ -1,0 +1,43 @@
+\documentclass[a4paper,12pt]{book}
+\usepackage{fontspec}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[section]{placeins}
+\usepackage{microtype}
+\usepackage{longtable}
+\usepackage[unicode]{hyperref}
+\usepackage{bookmark}
+\usepackage[main=vietnamese,english]{babel}
+
+% Use XeLaTeX for Unicode fonts
+\defaultfontfeatures{Ligatures=TeX}
+% Times New Roman with fallback to Liberation Serif for Linux/CI compatibility
+\setmainfont[Fallback=true]{Times New Roman}
+\setsansfont[Fallback=true]{Arial}
+
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{3}
+
+\begin{document}
+\frontmatter
+\title{Báo cáo dự án}
+\author{Nhóm: Cruise Activity and Service Management System}
+\date{\today}
+\maketitle
+
+\tableofcontents
+\clearpage
+
+\mainmatter
+
+% Include five chapter files (one per team member)
+\input{chapters/chapter1}
+\input{chapters/chapter2}
+\input{chapters/chapter3}
+\input{chapters/chapter4}
+\input{chapters/chapter5}
+
+\clearpage
+\bibliographystyle{plain}
+\bibliography{bib/references}
+\end{document}

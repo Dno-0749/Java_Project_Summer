@@ -1,0 +1,74 @@
+<div class="bg-dark border-end" id="sidebar-wrapper">
+    <div class="sidebar-heading text-white fw-bold px-3 py-4 d-flex align-items-center gap-2">
+        <i class="bi bi-tsunami fs-4 text-info"></i>
+        <span>Cruise Admin</span>
+    </div>
+
+    <div class="list-group list-group-flush">
+        <!-- Dashboard vận hành -->
+        <a href="{{ url_for('operations.dashboard') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'operations.dashboard' %}active{% endif %}">
+            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+        </a>
+
+        <!-- Điều phối lịch trình -->
+        {% if current_user.role in ['admin', 'coordinator', 'operations'] %}
+        <a href="{{ url_for('coordinator.itinerary') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint.startswith('coordinator.') %}active{% endif %}">
+            <i class="bi bi-calendar-week me-2"></i> Lịch trình
+        </a>
+        {% endif %}
+
+        <!-- Quản lý hoạt động & Tour bờ -->
+        {% if current_user.role in ['admin', 'activity_manager', 'operations'] %}
+        <a href="{{ url_for('activities.activities') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint.startswith('activities.') %}active{% endif %}">
+            <i class="bi bi-music-note-list me-2"></i> Hoạt động
+        </a>
+        <a href="{{ url_for('excursions.excursions') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint.startswith('excursions.') %}active{% endif %}">
+            <i class="bi bi-geo-alt me-2"></i> Tham quan bờ
+        </a>
+        {% endif %}
+
+        <!-- Hành khách lưu trú -->
+        {% if current_user.role in ['admin', 'finance', 'operations'] %}
+        <a href="{{ url_for('finance.passengers') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'finance.passengers' %}active{% endif %}">
+            <i class="bi bi-people me-2"></i> Hành khách
+        </a>
+        {% endif %}
+
+        <!-- Tài chính & Lễ tân -->
+        {% if current_user.role in ['admin', 'finance'] %}
+        <a href="{{ url_for('finance.finance') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'finance.finance' %}active{% endif %}">
+            <i class="bi bi-cash-stack me-2"></i> Tài chính
+        </a>
+        <a href="{{ url_for('finance.settlement') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint in ['finance.settlement', 'finance.invoice_view'] %}active{% endif %}">
+            <i class="bi bi-receipt-cutoff me-2"></i> Thanh toán cuối chuyến
+        </a>
+        {% endif %}
+
+        <!-- Quản trị hệ thống (Chỉ Admin) -->
+        {% if current_user.role == 'admin' %}
+        <div class="sidebar-section-title text-secondary px-3 mt-3 mb-1 small text-uppercase">Hệ thống</div>
+        <a href="{{ url_for('system_admin.users') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint.startswith('system_admin.users') %}active{% endif %}">
+            <i class="bi bi-person-gear me-2"></i> Người dùng
+        </a>
+        <a href="{{ url_for('system_admin.settings') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'system_admin.settings' %}active{% endif %}">
+            <i class="bi bi-gear me-2"></i> Cấu hình
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="sidebar-footer px-3 py-3 mt-auto">
+        <div class="text-secondary small">
+            <div class="fw-semibold text-white">{{ current_user.full_name }}</div>
+            <div>{{ current_user.role_name }}</div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,65 @@
+{% extends "layouts/pos_base.html" %}
+
+{% block content %}
+<h5 class="fw-bold mb-3"><i class="bi bi-clipboard-data me-2"></i>Đối soát giao dịch theo tài khoản</h5>
+
+{% if not groups %}
+<div class="text-muted text-center py-5">Chưa có giao dịch nào để đối soát.</div>
+{% endif %}
+
+{% for g in groups %}
+<div class="pos-cart-panel p-3 mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+            <span class="fw-bold">Tài khoản #{{ g.account_id }}</span>
+            <span class="text-muted small ms-2">{{ g.total_transactions }} giao dịch</span>
+        </div>
+        <div class="d-flex gap-2">
+            {% if g.disputed_count > 0 %}
+            <span class="badge bg-danger">{{ g.disputed_count }} tranh chấp</span>
+            {% endif %}
+            {% if g.unreconciled_count > 0 %}
+            <form method="POST" action="{{ url_for('pos.reconcile_account', account_id=g.account_id) }}">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-check2-all me-1"></i>Đối soát {{ g.unreconciled_count }} giao dịch
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <table class="table table-sm mb-0">
+        <thead>
+            <tr><th>Mã GD</th><th>Dịch vụ</th><th>Số tiền</th><th>Trạng thái</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for tx in g.transactions %}
+            <tr>
+                <td>{{ tx.id }}</td>
+                <td>{{ tx.item }}</td>
+                <td>{{ "{:,.0f}".format(tx.amount) }}đ</td>
+                <td>
+                    {% if tx.sync_status == "synced" %}
+                        <span class="sync-badge sync-pending">Chờ đối soát</span>
+                    {% elif tx.sync_status == "reconciled" %}
+                        <span class="sync-badge" style="background:#dbeafe;color:#1e40af;">Đã đối soát</span>
+                    {% elif tx.sync_status == "disputed" %}
+                        <span class="sync-badge" style="background:#fee2e2;color:#991b1b;">Tranh chấp</span>
+                    {% else %}
+                        <span class="sync-badge sync-synced">{{ tx.sync_status }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if tx.sync_status == "synced" %}
+                    <form method="POST" action="{{ url_for('pos.mark_disputed', transaction_id=tx.id) }}">
+                        <button type="submit" class="btn btn-sm btn-outline-warning">Đánh dấu tranh chấp</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endfor %}
+{% endblock %}

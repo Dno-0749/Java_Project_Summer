@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>{% block title %}{{ page_title or 'POS' }}{% endblock %} | Cruise POS</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/pos.css') }}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="pos-body">
+    <nav class="pos-topbar d-flex align-items-center justify-content-between px-3">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-tsunami fs-4 text-info"></i>
+            <span class="fw-bold">Cruise POS</span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span id="networkIndicator" class="pos-network-badge pos-network-online">
+                <i class="bi bi-wifi"></i> Online
+            </span>
+            <button type="button" id="syncNowBtn" class="btn btn-warning btn-sm d-none">
+                <i class="bi bi-cloud-arrow-up"></i> Đồng bộ ngay (<span id="pendingCount">0</span>)
+            </button>
+            <div class="form-check form-switch m-0 d-flex align-items-center gap-2">
+                <input class="form-check-input" type="checkbox" id="offlineToggle" style="cursor:pointer;">
+                <label class="form-check-label small text-white-50" for="offlineToggle">Giả lập mất mạng</label>
+            </div>
+            <span class="text-white-50 small d-none d-md-inline">{{ current_user.full_name }}</span>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-box-arrow-right"></i>
+            </a>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-3 py-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <nav class="pos-bottom-nav d-flex">
+        <a href="{{ url_for('pos.sales') }}" class="pos-nav-item {% if request.endpoint == 'pos.sales' %}active{% endif %}">
+            <i class="bi bi-cash-coin"></i><span>Bán hàng</span>
+        </a>
+        <a href="{{ url_for('pos.history') }}" class="pos-nav-item {% if request.endpoint == 'pos.history' %}active{% endif %}">
+            <i class="bi bi-clock-history"></i><span>Lịch sử ca</span>
+        </a>
+        <a href="{{ url_for('pos.reconciliation') }}" class="pos-nav-item {% if request.endpoint == 'pos.reconciliation' %}active{% endif %}">
+            <i class="bi bi-clipboard-data"></i><span>Đối soát</span>
+        </a>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelectorAll(".alert-dismissible").forEach(function (alert) {
+            setTimeout(function () {
+                bootstrap.Alert.getOrCreateInstance(alert).close();
+            }, 4000);
+        });
+
+        // ===== Giả lập mất mạng =====
+        const offlineToggle = document.getElementById("offlineToggle");
+        const indicator = document.getElementById("networkIndicator");
+        function syncOfflineUI() {
+            const isOffline = offlineToggle.checked;
+            indicator.innerHTML = isOffline
+                ? '<i class="bi bi-wifi-off"></i> Offline (giả lập)'
+                : '<i class="bi bi-wifi"></i> Online';
+            indicator.classList.toggle("pos-network-online", !isOffline);
+            indicator.classList.toggle("pos-network-offline", isOffline);
+            document.querySelectorAll("input[name='offline_mode']").forEach(function (input) {
+                input.value = isOffline ? "1" : "0";
+            });
+            // Đổi action của form xác nhận thanh toán tuỳ theo trạng thái mạng:
+            // online -> gọi thẳng backend; offline -> lưu vào localStorage trước
+            const confirmForm = document.getElementById("confirmForm");
+            if (confirmForm) {
+                confirmForm.action = isOffline
+                    ? confirmForm.dataset.offlineAction
+                    : confirmForm.dataset.onlineAction;
+            }
+            sessionStorage.setItem("pos_offline_mode", isOffline ? "1" : "0");
+        }
+        offlineToggle.checked = sessionStorage.getItem("pos_offline_mode") === "1";
+        offlineToggle.addEventListener("change", syncOfflineUI);
+        syncOfflineUI();
+
+        // ===== Hàng đợi offline thật - lưu tại trình duyệt (localStorage) =====
+        const QUEUE_KEY = "pos_offline_queue";
+        function getQueue() {
+            try { return JSON.parse(localStorage.getItem(QUEUE_KEY)) || []; }
+            catch (e) { return []; }
+        }
+        function setQueue(q) { localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); }
+        function refreshPendingBadge() {
+            const q = getQueue();
+            const btn = document.getElementById("syncNowBtn");
+            const countEl = document.getElementById("pendingCount");
+            countEl.textContent = q.length;
+            btn.classList.toggle("d-none", q.length === 0);
+        }
+        window.pushOfflineTransaction = function (tx) {
+            const q = getQueue();
+            q.push(tx);
+            setQueue(q);
+            refreshPendingBadge();
+        };
+        document.getElementById("syncNowBtn").addEventListener("click", function () {
+            const q = getQueue();
+            if (q.length === 0) return;
+            this.disabled = true;
+            fetch("{{ url_for('pos.sync_now') }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ transactions: q }),
+            })
+            .then(r => r.json())
+            .then(data => {
+                const synced = data.synced_local_ids || [];
+                const remaining = q.filter(t => !synced.includes(t.local_id));
+                setQueue(remaining);
+                refreshPendingBadge();
+                alert(`Đã đồng bộ ${synced.length}/${q.length} giao dịch.` + (data.failed && data.failed.length ? ` ${data.failed.length} giao dịch lỗi, sẽ thử lại sau.` : ""));
+            })
+            .catch(() => alert("Không thể kết nối backend để đồng bộ. Thử lại sau."))
+            .finally(() => { this.disabled = false; });
+        });
+        refreshPendingBadge();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,108 @@
+\section{Tổng quan}
+\subsection{Phạm vi và Ước lượng}
+Dự án được chia nhỏ theo cấu trúc phân rã công việc (WBS), ước lượng nỗ lực theo ngày công (man-day) cho từng hạng mục.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Bảng phân rã công việc và ước lượng nỗ lực}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{|p{1cm}|p{7cm}|p{2.3cm}|p{2cm}|}
+        \hline
+        \textbf{\#} & \textbf{Hạng mục (WBS)} & \textbf{Độ phức tạp} & \textbf{Ước lượng (ngày công)} \\
+        \hline
+        1 & Khởi tạo (Xác định phạm vi, thu thập yêu cầu) & Trung bình & 18 \\
+        \hline
+        2 & Lập kế hoạch (Kick-off, tài liệu kế hoạch) & Trung bình & 12 \\
+        \hline
+        3.1 & Phân tích yêu cầu và tính khả thi & Phức tạp & 16 \\
+        \hline
+        3.2 & Thiết kế ERD, kiến trúc, giao diện & Trung bình & 14 \\
+        \hline
+        3.3.1 & Xác thực (Đăng nhập, phân quyền) & Trung bình & 8 \\
+        \hline
+        3.3.2 & Quản lý tài khoản (Hành khách, Nhân viên, Quản trị) & Trung bình & 10 \\
+        \hline
+        3.3.3 & Quản lý lịch trình nhiều ngày và điểm dừng & Phức tạp & 16 \\
+        \hline
+        3.3.4 & Quản lý hoạt động trên tàu & Phức tạp & 18 \\
+        \hline
+        3.3.5 & Quản lý tham quan bờ & Phức tạp & 18 \\
+        \hline
+        3.3.6 & Đăng ký hoạt động (trước và trong chuyến đi) & Trung bình & 12 \\
+        \hline
+        3.3.7 & Check-in bằng QR/thẻ/RFID-NFC & Phức tạp & 14 \\
+        \hline
+        3.3.8 & Ghi nhận giao dịch POS và đồng bộ ngoại tuyến & Phức tạp & 20 \\
+        \hline
+        3.3.9 & Tài khoản chi tiêu trên tàu và đối soát hóa đơn & Phức tạp & 18 \\
+        \hline
+        3.3.10 & Thông báo (lịch trình, giờ tập trung, giờ quay lại tàu) & Trung bình & 8 \\
+        \hline
+        3.3.11 & Bảng điều khiển vận hành (dashboard) & Trung bình & 10 \\
+        \hline
+        3.3.12 & Module BLE định vị hành khách (tùy chọn) & Phức tạp & 10 \\
+        \hline
+        3.4 & Kiểm thử (Unit, Integration, System) & Phức tạp & 20 \\
+        \hline
+        3.5 & Giám sát và kiểm soát tiến độ & Phức tạp & 10 \\
+        \hline
+        3.6 & Đóng dự án và viết báo cáo & Đơn giản & 12 \\
+        \hline
+        \multicolumn{3}{|r|}{\textbf{Tổng nỗ lực ước tính (ngày công)}} & \textbf{234} \\
+        \hline
+    \end{tabular}
+    }
+\end{table}
+
+\subsection{Mục tiêu dự án}
+\begin{itemize}
+    \item \textbf{Thời hạn:} Dự án phải hoàn thành trước ngày kết thúc học kỳ theo lịch của nhà trường.
+    \item \textbf{Nỗ lực phân bổ (man-day):} Khoảng 236 ngày công cho toàn bộ nhóm.
+    \item \textbf{Phân bố lỗi mục tiêu:}
+\end{itemize}
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Mục tiêu phân bố lỗi theo giai đoạn kiểm thử}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{|p{0.6cm}|p{2.5cm}|p{6cm}|p{1.5cm}|p{1.5cm}|}
+        \hline
+        \textbf{\#} & \textbf{Giai đoạn} & \textbf{Phạm vi kiểm thử} & \textbf{Số lỗi} & \textbf{Tỷ lệ} \\
+        \hline
+        1 & Review & Backend (Node/.NET/Java), Frontend (React/Vue) & <30 & 5\% \\
+        \hline
+        2 & Unit Test & Business logic, validation form, xử lý trạng thái & <20 & 3\% \\
+        \hline
+        3 & Integration Test & API, đồng bộ dữ liệu POS ngoại tuyến & <10 & 2\% \\
+        \hline
+        4 & System Test & Toàn hệ thống, DB, giao tiếp giữa các module & <5 & 1\% \\
+        \hline
+        5 & Acceptance Test & Toàn bộ luồng nghiệp vụ & <5 & 1\% \\
+        \hline
+    \end{tabular}
+    }
+\end{table}
+
+\subsection{Rủi ro dự án}
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Danh sách rủi ro và phương án xử lý}
+    \begin{tabular}{|p{0.5cm}|p{3.4cm}|p{3cm}|p{1.3cm}|p{3.4cm}|}
+        \hline
+        \textbf{\#} & \textbf{Mô tả rủi ro} & \textbf{Ảnh hưởng} & \textbf{Khả năng} & \textbf{Phương án xử lý} \\
+        \hline
+        1 & Mất kết nối mạng trên tàu làm gián đoạn giao dịch POS & Giao dịch không được ghi nhận kịp thời, ảnh hưởng đối soát & Cao & Xây dựng cơ chế lưu tạm cục bộ và đồng bộ tự động khi có mạng trở lại \\
+        \hline
+        2 & Dữ liệu hành khách và giao dịch bị rò rỉ & Vi phạm bảo mật dữ liệu, mất uy tín & Trung bình & Mã hóa dữ liệu nhạy cảm, áp dụng RBAC, kiểm tra bảo mật định kỳ \\
+        \hline
+        3 & Thiết bị QR/RFID/NFC hoạt động không ổn định & Hành khách không check-in được, ảnh hưởng trải nghiệm & Trung bình & Có phương án xác thực dự phòng (nhập mã thủ công), kiểm thử thiết bị trước triển khai \\
+        \hline
+        4 & Module định vị BLE chưa hoàn thiện đúng tiến độ & Chậm bàn giao tính năng nâng cao & Trung bình & Xếp là tính năng tùy chọn, phát triển sau khi hoàn tất các module lõi \\
+        \hline
+        5 & Thay đổi yêu cầu giữa chừng từ giảng viên hướng dẫn & Ảnh hưởng tiến độ các sprint đã lên kế hoạch & Trung bình & Áp dụng mô hình lặp và tăng trưởng để dễ thích ứng thay đổi \\
+        \hline
+    \end{tabular}
+\end{table}

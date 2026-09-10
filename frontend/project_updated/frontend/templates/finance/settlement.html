@@ -1,0 +1,68 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="bi bi-receipt-cutoff text-primary me-2"></i>Thanh toán cuối chuyến & Xuất hóa đơn</h4>
+        <small class="text-muted">UC28: Xác nhận thanh toán cuối chuyến · UC29: Xuất hóa đơn cuối chuyến (dữ liệu thật từ Supabase)</small>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover bg-white align-middle shadow-sm" style="border-radius: 12px; overflow: hidden;">
+        <thead class="table-light">
+            <tr>
+                <th>Hành khách</th>
+                <th>Cabin</th>
+                <th>Số giao dịch</th>
+                <th>Số dư (cần thu)</th>
+                <th>Trạng thái tài khoản</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in accounts %}
+            <tr>
+                <td class="fw-semibold">{{ a.passenger_name }}</td>
+                <td>{{ a.cabin }}</td>
+                <td>{{ a.transaction_count }}</td>
+                <td class="{% if a.balance < 0 %}text-danger{% endif %} fw-bold">
+                    {{ "{:,.0f}".format(a.balance) }}đ
+                </td>
+                <td>
+                    {% if a.status == 'settled' %}
+                        <span class="badge bg-success">Đã thanh toán</span>
+                    {% elif a.has_pending_or_disputed %}
+                        <span class="badge bg-danger">Còn tranh chấp/chưa đồng bộ</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Chờ thanh toán</span>
+                    {% endif %}
+                </td>
+                <td class="d-flex gap-2">
+                    {% if a.status != 'settled' %}
+                    <form method="POST" action="{{ url_for('finance.settle', account_id=a.account_id) }}"
+                          onsubmit="return confirm('Xác nhận thanh toán cuối chuyến cho {{ a.passenger_name }}?');">
+                        <button type="submit" class="btn btn-sm btn-outline-primary" {% if a.has_pending_or_disputed %}disabled{% endif %}>
+                            Xác nhận thanh toán
+                        </button>
+                    </form>
+                    {% endif %}
+                    <form method="POST" action="{{ url_for('finance.issue_invoice', account_id=a.account_id) }}">
+                        <button type="submit" class="btn btn-sm btn-primary" {% if a.has_pending_or_disputed %}disabled{% endif %}>
+                            <i class="bi bi-receipt me-1"></i>Xuất hóa đơn
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="text-center text-muted py-4">Chưa có tài khoản hành khách nào.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="alert alert-info small mt-3">
+    <i class="bi bi-info-circle me-1"></i>
+    Theo Business Rule BR-05: nút "Xuất hóa đơn" và "Xác nhận thanh toán" sẽ bị vô hiệu hóa nếu tài khoản còn giao dịch đang chờ đồng bộ hoặc đang tranh chấp — cần xử lý ở trang <a href="{{ url_for('pos.reconciliation') }}">Đối soát</a> trước.
+</div>
+{% endblock %}

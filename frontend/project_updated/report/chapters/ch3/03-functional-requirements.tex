@@ -1,0 +1,259 @@
+\subsection{System Functional Overview}
+
+\subsubsection{Screens Flow}
+
+Do hệ thống phục vụ nhiều nhóm người dùng với luồng thao tác khác nhau,
+luồng màn hình được tách thành 7 sơ đồ riêng theo từng nhóm actor để đảm
+bảo dễ đọc.
+
+\begin{figure}[htbp]
+    \centering
+    \fbox{\parbox[c][3.2cm][c]{0.82\textwidth}{\centering \textbf{Luồng màn hình — Hành khách}\\ \small{(placeholder: screen-flow-passenger.png)}}}
+    \caption{Luồng màn hình — Hành khách}
+    \label{fig:screenflow-passenger}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \fbox{\parbox[c][3.2cm][c]{0.82\textwidth}{\centering \textbf{Luồng màn hình — Điều phối lịch trình}\\ \small{(placeholder: screen-flow-coordinator.png)}}}
+    \caption{Luồng màn hình — Điều phối lịch trình}
+    \label{fig:screenflow-coordinator}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \fbox{\parbox[c][3.2cm][c]{0.82\textwidth}{\centering \textbf{Luồng màn hình — Quản lý hoạt động trên tàu}\\ \small{(placeholder: screen-flow-activity.png)}}}
+    \caption{Luồng màn hình — Quản lý hoạt động trên tàu}
+    \label{fig:screenflow-activity}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \fbox{\parbox[c][3.2cm][c]{0.82\textwidth}{\centering \textbf{Luồng màn hình — Quản lý tham quan bờ}\\ \small{(placeholder: screen-flow-excursion.png)}}}
+    \caption{Luồng màn hình — Quản lý tham quan bờ}
+    \label{fig:screenflow-excursion}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \fbox{\parbox[c][3.2cm][c]{0.82\textwidth}{\centering \textbf{Luồng màn hình — Nhân viên bán hàng \& dịch vụ (POS)}\\ \small{(placeholder: screen-flow-pos.png)}}}
+    \caption{Luồng màn hình — Nhân viên bán hàng \& dịch vụ (POS)}
+    \label{fig:screenflow-pos}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \fbox{\parbox[c][3.2cm][c]{0.82\textwidth}{\centering \textbf{Luồng màn hình — Tài chính \& Lễ tân}\\ \small{(placeholder: screen-flow-finance.png)}}}
+    \caption{Luồng màn hình — Tài chính \& Lễ tân}
+    \label{fig:screenflow-finance}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \fbox{\parbox[c][3.2cm][c]{0.82\textwidth}{\centering \textbf{Luồng màn hình — Quản lý vận hành \& Quản trị viên hệ thống}\\ \small{(placeholder: screen-flow-operations-admin.png)}}}
+    \caption{Luồng màn hình — Quản lý vận hành \& Quản trị viên hệ thống}
+    \label{fig:screenflow-operations-admin}
+\end{figure}
+
+\subsubsection{Screen Descriptions}
+
+\begin{longtable}{|p{0.6cm}|p{3.2cm}|p{3.2cm}|p{6.5cm}|}
+    \hline
+    \textbf{\#} & \textbf{Feature} & \textbf{Screen} & \textbf{Mô tả} \\
+    \hline
+    \endfirsthead
+    \hline
+    \textbf{\#} & \textbf{Feature} & \textbf{Screen} & \textbf{Mô tả} \\
+    \hline
+    \endhead
+    1 & Xác thực & Login & Cho phép tất cả actor đăng nhập theo vai trò \\
+    \hline
+    2 & Lịch trình & Trang lịch trình & Hành khách xem lịch trình theo
+    ngày, cảng ghé thăm \\
+    \hline
+    3 & Hoạt động & Danh sách hoạt động & Hiển thị hoạt động trên tàu và
+    tham quan bờ, lọc miễn phí/trả phí \\
+    \hline
+    4 & Chi tiết hoạt động & Chi tiết hoạt động & Thông tin chi tiết: thời
+    gian, địa điểm, sức chứa, phí \\
+    \hline
+    5 & Đăng ký & Form đăng ký & Hành khách đăng ký tham gia hoạt
+    động/tham quan \\
+    \hline
+    6 & Check-in & Màn hình check-in & Quét QR/thẻ/RFID-NFC để xác nhận
+    tham gia \\
+    \hline
+    7 & Chi phí & Hóa đơn tạm tính & Hành khách xem các khoản chi phí đã
+    phát sinh \\
+    \hline
+    8 & Thông báo & Notification & Danh sách thông báo về lịch trình, hoạt
+    động \\
+    \hline
+    9 & Phản hồi & Form phản hồi & Gửi đánh giá sau hoạt động / cuối
+    chuyến \\
+    \hline
+    10 & Quản lý tour & Manage Tour & Điều phối tạo/sửa chuyến du lịch
+    nhiều ngày \\
+    \hline
+    11 & Quản lý lịch trình & Manage Itinerary & Thiết lập lịch trình chi
+    tiết theo từng ngày \\
+    \hline
+    12 & Quản lý cảng & Manage Port & Thiết lập giờ cập bến/rời bến từng
+    cảng \\
+    \hline
+    13 & Tạo hoạt động & Create Activity & Quản lý hoạt động tạo mới hoạt
+    động trên tàu \\
+    \hline
+    14 & Tạo tham quan bờ & Create Excursion & Quản lý tham quan bờ tạo
+    mới chuyến tham quan \\
+    \hline
+    15 & Danh sách đăng ký & Registration List & Xem/giám sát danh sách
+    hành khách đã đăng ký \\
+    \hline
+    16 & Bán hàng POS & POS Screen & Nhân viên ghi nhận giao dịch dịch
+    vụ/sản phẩm \\
+    \hline
+    17 & Xác thực POS & Authentication Scan & Quét QR/thẻ/RFID-NFC để xác
+    thực hành khách tại POS \\
+    \hline
+    18 & Quản lý tài khoản trên tàu & Onboard Account & Tài chính xem/quản
+    lý số dư theo hành khách/phòng \\
+    \hline
+    19 & Đối soát & Reconciliation & Đối soát giao dịch POS, xử lý tranh
+    chấp \\
+    \hline
+    20 & Hóa đơn cuối chuyến & Final Invoice & Xuất hóa đơn tổng hợp cuối
+    chuyến đi \\
+    \hline
+    21 & Dashboard vận hành & Operations Dashboard & Biểu đồ hoạt động,
+    doanh thu, sức chứa \\
+    \hline
+    22 & Quản lý user & Manage User & Admin CRUD tài khoản người dùng \\
+    \hline
+    23 & Cấu hình chính sách & Policy Config & Admin cấu hình chính sách
+    đăng ký/hủy/hoàn tiền \\
+    \hline
+    24 & Quản lý thiết bị & Device Management & Admin quản lý thiết bị
+    QR/RFID/NFC/BLE \\
+    \hline
+    \caption{Mô tả các màn hình chính}
+    \label{tab:screen-descriptions}
+\end{longtable}
+
+\subsubsection{Screen Authorization}
+
+\begin{longtable}{|p{3.3cm}|p{1cm}|p{1cm}|p{1.3cm}|p{1.3cm}|p{0.9cm}|p{1.1cm}|p{1.1cm}|p{0.9cm}|}
+    \hline
+    \textbf{Screen} & \textbf{HK} & \textbf{ĐP} & \textbf{QLHĐ} & \textbf{QLTQ}
+    & \textbf{NVPOS} & \textbf{TC} & \textbf{VH} & \textbf{AD} \\
+    \hline
+    \endfirsthead
+    \hline
+    \textbf{Screen} & \textbf{HK} & \textbf{ĐP} & \textbf{QLHĐ} & \textbf{QLTQ}
+    & \textbf{NVPOS} & \textbf{TC} & \textbf{VH} & \textbf{AD} \\
+    \hline
+    \endhead
+    Login & x & x & x & x & x & x & x & x \\ \hline
+    Trang lịch trình & x & x & & & & & x & \\ \hline
+    Danh sách hoạt động & x & & x & x & & & x & \\ \hline
+    Đăng ký hoạt động & x & & & & & & & \\ \hline
+    Check-in & x & & x & x & x & & & \\ \hline
+    Hóa đơn tạm tính & x & & & & & x & & \\ \hline
+    Quản lý tour & & x & & & & & x & \\ \hline
+    Quản lý cảng & & x & & & & & x & \\ \hline
+    Tạo hoạt động & & & x & & & & & \\ \hline
+    Tạo tham quan bờ & & & & x & & & & \\ \hline
+    Bán hàng POS & & & & & x & & & \\ \hline
+    Quản lý tài khoản trên tàu & & & & & & x & x & \\ \hline
+    Đối soát & & & & & & x & x & \\ \hline
+    Xuất hóa đơn & & & & & & x & & \\ \hline
+    Dashboard vận hành & & & & & & & x & x \\ \hline
+    Quản lý user & & & & & & & & x \\ \hline
+    Cấu hình chính sách & & & & & & & & x \\ \hline
+    Quản lý thiết bị & & & & & & & & x \\ \hline
+    \caption{Phân quyền truy cập màn hình (HK: Hành khách, ĐP: Điều phối,
+    QLHĐ: Quản lý hoạt động, QLTQ: Quản lý tham quan, NVPOS: Nhân viên
+    POS, TC: Tài chính, VH: Vận hành, AD: Admin)}
+    \label{tab:screen-authorization}
+\end{longtable}
+
+\subsubsection{Non-Screen Functions}
+
+\begin{longtable}{|p{0.6cm}|p{4cm}|p{2.8cm}|p{6cm}|}
+    \hline
+    \textbf{\#} & \textbf{Feature} & \textbf{System Function} & \textbf{Mô tả} \\
+    \hline
+    \endfirsthead
+    \hline
+    \textbf{\#} & \textbf{Feature} & \textbf{System Function} & \textbf{Mô tả} \\
+    \hline
+    \endhead
+    1 & Đồng bộ giao dịch ngoại tuyến & Background Job & Tự động đồng bộ
+    giao dịch POS lưu tạm khi có kết nối mạng trở lại \\
+    \hline
+    2 & Thông báo tự động thay đổi lịch trình & Event Trigger & Tự động
+    gửi thông báo khi lịch trình được điều phối cập nhật \\
+    \hline
+    3 & Kiểm tra sức chứa hoạt động & Validation Job & Kiểm tra và khóa
+    đăng ký khi hoạt động đạt sức chứa tối đa \\
+    \hline
+    4 & Ước tính vị trí BLE & Background Job (tùy chọn) & Định kỳ cập nhật
+    vị trí khu vực của hành khách qua thiết bị BLE \\
+    \hline
+    5 & Xuất báo cáo vận hành & API Endpoint & Cho phép quản lý vận hành
+    xuất báo cáo dạng Excel/PDF sau chuyến đi \\
+    \hline
+    \caption{Các chức năng không có màn hình (chạy nền/hệ thống)}
+    \label{tab:non-screen-functions}
+\end{longtable}
+
+\subsubsection{Entity Relationship Diagram}
+
+\begin{figure}[htbp]
+    \centering
+    \fbox{\parbox[c][3.5cm][c]{0.86\textwidth}{\centering \textbf{Sơ đồ ERD mức khái niệm}\\ \small{(placeholder: erd-conceptual.png)}}}
+    \caption{Sơ đồ ERD mức khái niệm}
+    \label{fig:erd-conceptual}
+\end{figure}
+
+\subsection{Xác thực (Authentication)}
+
+\subsubsection{Đăng nhập}
+\textbf{Actor:} Tất cả actor \\
+\textbf{Function trigger:} Người dùng nhập thông tin đăng nhập (hoặc quét
+thẻ/QR nếu là thiết bị POS/Tablet)
+
+\textbf{Function description:}
+\begin{itemize}
+    \item Purpose: Xác thực người dùng và điều hướng theo vai trò.
+    \item Data processing: Xác thực thông tin đăng nhập, tạo phiên làm
+    việc (JWT token).
+\end{itemize}
+
+\textbf{Function Details:}
+\begin{itemize}
+    \item Nếu đăng nhập thành công → điều hướng tới Dashboard/Home theo
+    role.
+    \item Nếu thất bại → hiển thị thông báo lỗi.
+    \item Business Rules: Áp dụng RBAC (Role-Based Access Control) — mỗi
+    role chỉ thấy chức năng thuộc quyền của mình.
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \fbox{\parbox[c][3.0cm][c]{0.52\textwidth}{\centering \textbf{Mockup màn hình Login}\\ \small{(placeholder: mockup-login.png)}}}
+    \caption{Mockup màn hình Login}
+    \label{fig:mockup-login}
+\end{figure}
+
+\subsection{Quản lý Lịch trình (Itinerary Management)}
+
+\subsubsection{Tạo chuyến du lịch nhiều ngày}
+\textbf{Actor:} Điều phối lịch trình \\
+\textbf{Function trigger:} Điều phối viên chọn "Tạo tour mới"
+
+\textbf{Function description:}
+\begin{itemize}
+    \item Purpose: Thiết lập một chuyến du lịch mới với lịch trình nhiều
+    ngày.
+\end{itemize}
