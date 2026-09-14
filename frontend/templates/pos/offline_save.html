@@ -1,0 +1,24 @@
+{% extends "layouts/pos_base.html" %}
+
+{% block content %}
+<div class="pos-cart-panel p-4 text-center mx-auto" style="max-width: 480px;">
+    <i class="bi bi-cloud-arrow-down-fill text-warning" style="font-size: 3rem;"></i>
+    <h5 class="fw-bold mt-3">Đã lưu giao dịch offline</h5>
+    <p class="text-muted small">
+        Giao dịch cho <strong>{{ transaction.passenger_name }}</strong>
+        ({{ "{:,.0f}".format(transaction.amount) }}đ) đã được lưu tại thiết bị này.
+        Bấm "Đồng bộ ngay" ở góc trên khi có mạng trở lại.
+    </p>
+    <a href="{{ url_for('pos.sales') }}" class="btn btn-primary w-100 mt-2">
+        <i class="bi bi-arrow-left me-2"></i>Quay lại bán hàng
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Đẩy giao dịch này vào hàng đợi offline lưu tại trình duyệt (localStorage)
+    // - KHÔNG gọi backend ở bước này, đúng tinh thần "tiếp tục bán hàng khi mất mạng"
+    window.pushOfflineTransaction({{ transaction|tojson }});
+</script>
+{% endblock %}

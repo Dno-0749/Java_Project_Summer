@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from functools import wraps
-from models import get_all_users, add_user, toggle_user_status, ROLE_DISPLAY_NAMES, slugify_username
+from models import get_all_users, add_user, toggle_user_status, delete_user, ROLE_DISPLAY_NAMES, slugify_username
+from supabase_client import is_supabase_configured
 
 system_admin_bp = Blueprint("system_admin", __name__, url_prefix="/system")
 
@@ -61,6 +62,26 @@ def toggle_status(user_id):
     if user:
         status_text = "kích hoạt" if user.is_active else "vô hiệu hóa"
         flash(f"Đã {status_text} tài khoản {user.full_name} ({user.username}).", "info")
+    elif is_supabase_configured():
+        flash("Supabase chưa có cột trạng thái cho tài khoản này.", "warning")
+    else:
+        flash("Không tìm thấy người dùng.", "danger")
+    return redirect(url_for("system_admin.users"))
+
+
+@system_admin_bp.route("/users/<user_id>/delete", methods=["POST"])
+@login_required
+@admin_required
+def delete_user_route(user_id):
+    if str(current_user.id) == str(user_id):
+        flash("Bạn không thể tự xóa tài khoản của chính mình!", "warning")
+        return redirect(url_for("system_admin.users"))
+
+    user = delete_user(user_id)
+    if user:
+        flash(f"Đã xóa tài khoản {user.full_name} ({user.username}).", "info")
+    elif is_supabase_configured():
+        flash("Không thể xóa tài khoản Supabase từ đây - vui lòng xóa trực tiếp trên Supabase Dashboard.", "warning")
     else:
         flash("Không tìm thấy người dùng.", "danger")
     return redirect(url_for("system_admin.users"))

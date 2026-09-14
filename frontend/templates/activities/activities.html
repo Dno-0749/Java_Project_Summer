@@ -6,11 +6,9 @@
         <h4 class="fw-bold mb-1"><i class="bi bi-music-note-list text-primary me-2"></i>Quản lý Hoạt động trên tàu</h4>
         <small class="text-muted">Cấu hình thời gian, sức chứa và danh sách khách tham gia (UC15, UC16)</small>
     </div>
-    <div class="d-flex gap-2">
-        <a class="btn btn-primary shadow-sm" href="{{ url_for('activities.register_activity') }}">
-            <i class="bi bi-plus-lg me-1"></i> Thêm hoạt động mới
-        </a>
-    </div>
+    <button class="btn btn-primary shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i> Thêm hoạt động mới
+    </button>
 </div>
 
 <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
@@ -50,8 +48,8 @@
                             {% endif %}
                         </td>
                         <td class="text-end pe-4">
-                            <a class="btn btn-sm btn-outline-primary me-1" href="{{ url_for('activities.customers', activity_id=act.id) }}">Danh sách khách</a>
-                            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('activities.edit_activity', activity_id=act.id) }}">Sửa</a>
+                            <button class="btn btn-sm btn-outline-primary me-1">Danh sách khách</button>
+                            <button class="btn btn-sm btn-outline-secondary">Sửa</button>
                         </td>
                     </tr>
                     {% endfor %}

@@ -1,0 +1,42 @@
+{% extends "layouts/pos_base.html" %}
+
+{% block content %}
+<div class="pos-cart-panel p-4 mx-auto" style="max-width: 480px;">
+    <div class="text-center mb-3">
+        <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+        <h5 class="fw-bold mt-2">Giao dịch thành công</h5>
+        <div class="text-muted small">Mã giao dịch #{{ receipt.id }}</div>
+    </div>
+
+    <div class="d-flex justify-content-between py-2 border-bottom small">
+        <span class="text-muted">Hành khách</span><span class="fw-semibold">{{ receipt.passenger_name }}</span>
+    </div>
+    <div class="d-flex justify-content-between py-2 border-bottom small">
+        <span class="text-muted">Nhân viên</span><span class="fw-semibold">{{ receipt.staff_name }}</span>
+    </div>
+
+    <div class="py-2">
+        <div class="text-muted small mb-1">Chi tiết dịch vụ</div>
+        {% for item in receipt.cart_items %}
+        <div class="d-flex justify-content-between small py-1 border-bottom">
+            <span>{{ item.name }} x{{ item.qty }}</span>
+            <span>{{ "{:,.0f}".format(item.subtotal) }}đ</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="d-flex justify-content-between mt-3 pt-2 border-top">
+        <span class="fw-bold">Tổng cộng</span>
+        <span class="fw-bold fs-4 text-primary">{{ "{:,.0f}".format(receipt.total) }}đ</span>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-outline-secondary flex-grow-1">
+            <i class="bi bi-printer me-2"></i>In hóa đơn
+        </button>
+        <a href="{{ url_for('pos.sales') }}" class="btn btn-primary flex-grow-1">
+            Giao dịch mới
+        </a>
+    </div>
+</div>
+{% endblock %}

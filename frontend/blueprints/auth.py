@@ -11,6 +11,8 @@ ROLE_REDIRECT_MAP = {
     "coordinator": "coordinator.itinerary",     # Nguyễn Trọng Hải -> Quản lý Lịch trình
     "activity_manager": "activities.activities",# Lê Đình Quý -> Quản lý Hoạt động trên tàu
     "finance": "finance.finance",               # Nguyễn Thị Thi -> Tài chính & Đối soát
+    "sales_staff": "pos.sales",                  # Nhân viên POS -> Màn bán hàng
+    "passenger": "passenger.home",               # Hành khách -> Trang chủ mobile
 }
 
 @auth_bp.route("/")
