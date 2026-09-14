@@ -1,135 +1,76 @@
 from flask import Flask, jsonify
-from flasgger import Swagger
-from flask_swagger_ui import get_swaggerui_blueprint
-from sqlalchemy import text
-
+# from api.routes import register_routes
 from api.swagger import spec
-
 from api.controllers.todo_controller import bp as todo_bp
-from api.controllers.auth_controller import auth_bp
-from api.controllers.tour_provider_controller import bp as tour_provider_bp
-from api.controllers.shore_excursion_controller import bp as shore_excursion_bp
-from api.controllers.activity_schedule_controller import bp as activity_schedule_bp
+from api.controllers.auth_controller import auth_bp as auth_bp
+from api.controllers.itinerary_controller import bp as itinerary_bp
 from api.controllers.activity_controller import bp as activity_bp
-from api.controllers.activity_registration_controller import bp as activity_registration_bp
-
+from api.controllers.checkin_controller import bp as checkin_bp
+from api.controllers.account_controller import bp as account_bp
+from api.controllers.report_controller import bp as report_bp
+from api.controllers.passenger_controller import bp as passenger_bp
+from api.controllers.feedback_controller import bp as feedback_bp
+from api.controllers.notification_controller import bp as notification_bp
 from api.middleware import middleware
+from api.responses import success_response
 from infrastructure.databases import init_db
-from infrastructure.databases.factory_database import FactoryDatabase
-from infrastructure.databases.base import Base
-
-from infrastructure.models.activity_model import ActivityModel
-from infrastructure.models.activity_registration_model import ActivityRegistrationModel
+from config import Config
+from flasgger import Swagger
+from config import SwaggerConfig
+from flask_swagger_ui import get_swaggerui_blueprint
 
 
 def create_app():
     app = Flask(__name__)
-
     Swagger(app)
-
+    # Đăng ký blueprint trước
     app.register_blueprint(todo_bp)
     app.register_blueprint(auth_bp)
-    app.register_blueprint(tour_provider_bp)
-    app.register_blueprint(shore_excursion_bp)
-    app.register_blueprint(activity_schedule_bp)
+    app.register_blueprint(itinerary_bp)
     app.register_blueprint(activity_bp)
-    app.register_blueprint(activity_registration_bp)
-
-    try:
-        init_db(app)
-
-        db = FactoryDatabase.get_database("POSTGREE")
-
-        Base.metadata.create_all(bind=db.engine)
-
-        with db.engine.connect() as connection:
-            result = connection.execute(
-                text("PRAGMA table_info(activity_registrations)")
-            )
-
-            columns = result.fetchall()
-            column_names = [column[1] for column in columns]
-
-            if columns:
-                if "rating" not in column_names:
-                    connection.execute(
-                        text(
-                            "ALTER TABLE activity_registrations "
-                            "ADD COLUMN rating INTEGER"
-                        )
-                    )
-
-                if "feedback" not in column_names:
-                    connection.execute(
-                        text(
-                            "ALTER TABLE activity_registrations "
-                            "ADD COLUMN feedback VARCHAR(1000)"
-                        )
-                    )
-
-                connection.commit()
-
-        print("DATABASE INITIALIZED SUCCESSFULLY")
-
-    except Exception as e:
-        print(f"DATABASE INITIALIZATION ERROR: {e}")
-
-    middleware(app)
-
-    SWAGGER_URL = "/docs"
-    API_URL = "/swagger.json"
-
+    app.register_blueprint(checkin_bp)
+    app.register_blueprint(account_bp)
+    app.register_blueprint(report_bp)
+    app.register_blueprint(passenger_bp)
+    app.register_blueprint(feedback_bp)
+    app.register_blueprint(notification_bp)
+    # register_routes(app)
+     # Thêm Swagger UI blueprint
+    SWAGGER_URL = '/docs'
+    API_URL = '/swagger.json'
     swaggerui_blueprint = get_swaggerui_blueprint(
         SWAGGER_URL,
         API_URL,
-        config={
-            "app_name": "Activity & Shore Excursion API"
-        }
+        config={'app_name': "Todo API"}
     )
+    app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
-    app.register_blueprint(
-        swaggerui_blueprint,
-        url_prefix=SWAGGER_URL
-    )
+    try:
+        init_db(app)
+    except Exception as e:
+        print(f"Error initializing database: {e}")
 
+    # Register middleware
+    middleware(app)
+
+    # Register routes
     with app.test_request_context():
         for rule in app.url_map.iter_rules():
-            if rule.endpoint.startswith((
-                "todo.",
-                "course.",
-                "user.",
-                "auth.",
-                "tour_provider.",
-                "shore_excursion.",
-                "activity_schedule.",
-                "activities_api.",
-                "activity_registration."
-            )):
+            # Thêm các endpoint khác nếu cần
+            if rule.endpoint.startswith(('todo.', 'course.', 'user.', 'auth.',
+                                          'itinerary.', 'activity.', 'checkin.', 'account.',
+                                          'report.', 'passenger.', 'feedback.', 'notification.')):
                 view_func = app.view_functions[rule.endpoint]
-
-                print(
-                    f"Adding path: {rule.rule} -> {view_func}"
-                )
-
-                try:
-                    spec.path(view=view_func)
-                except Exception as e:
-                    print(
-                        f"Swagger path error {rule.rule}: {e}"
-                    )
-
+                print(f"Adding path: {rule.rule} -> {view_func}")
+                spec.path(view=view_func)
+            
     @app.route("/swagger.json")
     def swagger_json():
         return jsonify(spec.to_dict())
 
     return app
+# Run the application
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app = create_app()
-
-    app.run(
-        host="0.0.0.0",
-        port=9999,
-        debug=True
-    )
+    app.run(host='0.0.0.0', port=9999, debug=True)

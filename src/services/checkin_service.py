@@ -1,29 +1,25 @@
-from domain.models.checkin import CheckIn
+from infrastructure.repositories.checkin_repository import CheckinRepository
 
-class CheckInService:
-    def __init__(self, repository):
-        self.repository = repository
 
-    def list_checkins(self):
-        return self.repository.list()
+class CheckinService:
+    def __init__(self, repository: CheckinRepository = None):
+        self.repository = repository or CheckinRepository()
 
-    def create_checkin(self, passenger_id, booking_id=None, method='QR', code=None, checked_at=None):
-        item = CheckIn(
-            id=None,
-            passenger_id=passenger_id,
-            booking_id=booking_id,
-            method=method,
-            code=code,
-            status='PENDING',
-            checked_at=checked_at,
-        )
-        return self.repository.add(item)
+    def checkin(self, registration_id: int, method: str):
+        """UC09/UC17: Check-in bằng QR/thẻ/RFID-NFC.
+        Business Rule (SRS 3.4.4.3): Một hành khách chỉ có thể check-in một lần
+        cho mỗi lượt hoạt động đã đăng ký.
+        """
+        registration = self.repository.get_registration(registration_id)
+        if not registration:
+            # Đúng MSG03 trong SRS: "Mã xác thực không hợp lệ hoặc chưa đăng ký hoạt động này."
+            raise ValueError("Mã xác thực không hợp lệ hoặc chưa đăng ký hoạt động này.")
 
-    def update_status(self, checkin_id, status):
-        allowed = {'PENDING', 'CHECKED_IN', 'FAILED'}
-        if status not in allowed:
-            return {'ok': False, 'message': 'Trạng thái không hợp lệ'}
-        row = self.repository.update_status(checkin_id, status)
-        if not row:
-            return {'ok': False, 'message': 'Không tìm thấy check-in'}
-        return {'ok': True, 'id': row.id, 'status': row.status}
+        existing = self.repository.get_existing_checkin(registration_id)
+        if existing:
+            raise ValueError("Hành khách đã check-in cho hoạt động này rồi.")
+
+        if method not in ["qr", "card", "rfid"]:
+            raise ValueError("Phương thức check-in không hợp lệ (chỉ nhận qr/card/rfid).")
+
+        return self.repository.add_checkin(registration_id, method)

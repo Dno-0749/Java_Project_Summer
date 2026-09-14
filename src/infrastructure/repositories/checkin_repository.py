@@ -1,50 +1,42 @@
-from typing import List, Optional
-from sqlalchemy.orm import Session
-from domain.models.checkin import CheckIn
-from infrastructure.models.checkin_model import CheckInModel
+from typing import Optional
 from infrastructure.databases.factory_database import FactoryDatabase as db_factory
+from infrastructure.models.cruise.checkin_model import CheckinModel
+from infrastructure.models.cruise.registration_model import RegistrationModel
 
-class CheckInRepository:
-    def __init__(self, session: Session = None):
-        self.session = session or db_factory.get_database('POSTGREE').session
 
-    def add(self, item: CheckIn) -> CheckInModel:
+class CheckinRepository:
+    def _new_session(self):
+        return db_factory.get_database('POSTGREE').new_session()
+
+    def get_registration(self, registration_id: int) -> Optional[RegistrationModel]:
+        session = self._new_session()
         try:
-            row = CheckInModel(
-                passenger_id=item.passenger_id,
-                booking_id=item.booking_id,
-                method=item.method or 'QR',
-                code=item.code,
-                status=item.status or 'PENDING',
-                checked_at=item.checked_at,
-            )
-            self.session.add(row)
-            self.session.commit()
-            self.session.refresh(row)
-            return row
+            return session.query(RegistrationModel).filter_by(id=registration_id).first()
+        finally:
+            session.close()
+
+    def get_existing_checkin(self, registration_id: int) -> Optional[CheckinModel]:
+        session = self._new_session()
+        try:
+            return session.query(CheckinModel).filter_by(registration_id=registration_id).first()
+        finally:
+            session.close()
+
+    def add_checkin(self, registration_id: int, method: str) -> CheckinModel:
+        session = self._new_session()
+        try:
+            checkin = CheckinModel(registration_id=registration_id, method=method)
+            session.add(checkin)
+
+            registration = session.query(RegistrationModel).filter_by(id=registration_id).first()
+            if registration:
+                registration.status = "checked_in"
+
+            session.commit()
+            session.refresh(checkin)
+            return checkin
         except Exception:
-            self.session.rollback()
+            session.rollback()
             raise
         finally:
-            self.session.close()
-
-    def list(self) -> List[CheckInModel]:
-        return self.session.query(CheckInModel).all()
-
-    def get_by_id(self, item_id: int) -> Optional[CheckInModel]:
-        return self.session.query(CheckInModel).filter_by(id=item_id).first()
-
-    def update_status(self, item_id: int, status: str) -> Optional[CheckInModel]:
-        row = self.get_by_id(item_id)
-        if not row:
-            return None
-        try:
-            row.status = status
-            self.session.commit()
-            self.session.refresh(row)
-            return row
-        except Exception:
-            self.session.rollback()
-            raise
-        finally:
-            self.session.close()
+            session.close()

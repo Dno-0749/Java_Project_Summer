@@ -1,52 +1,73 @@
 from flask import Blueprint, request, jsonify
-from services.checkin_service import CheckInService
-from infrastructure.repositories.checkin_repository import CheckInRepository
+from marshmallow import Schema, fields
+from services.checkin_service import CheckinService
 
-bp = Blueprint('checkin', __name__, url_prefix='/checkins')
-service = CheckInService(CheckInRepository())
+bp = Blueprint("checkin", __name__)
+service = CheckinService()
 
-@bp.route('/', methods=['GET'])
-def list_checkins():
-    rows = service.list_checkins()
-    return jsonify([
-        {
-            'id': row.id,
-            'passenger_id': row.passenger_id,
-            'booking_id': row.booking_id,
-            'method': row.method,
-            'code': row.code,
-            'status': row.status,
-            'checked_at': row.checked_at,
-        } for row in rows
-    ]), 200
 
-@bp.route('/', methods=['POST'])
-def create_checkin():
-    data = request.get_json() or {}
-    passenger_id = data.get('passenger_id')
-    if not passenger_id:
-        return jsonify({'message': 'passenger_id là bắt buộc'}), 400
-    row = service.create_checkin(
-        passenger_id=passenger_id,
-        booking_id=data.get('booking_id'),
-        method=data.get('method', 'QR'),
-        code=data.get('code'),
-        checked_at=data.get('checked_at'),
-    )
-    return jsonify({
-        'id': row.id,
-        'passenger_id': row.passenger_id,
-        'booking_id': row.booking_id,
-        'method': row.method,
-        'code': row.code,
-        'status': row.status,
-        'checked_at': row.checked_at,
-    }), 201
+class CheckinRequestSchema(Schema):
+    registration_id = fields.Int(required=True)
+    method = fields.Str(required=True)
 
-@bp.route('/<int:checkin_id>/status', methods=['PUT'])
-def update_checkin_status(checkin_id):
-    data = request.get_json() or {}
-    status = data.get('status')
-    if not status:
-        return jsonify({'message': 'status là bắt buộc'}), 400
-    return jsonify(service.update_status(checkin_id, status)), 200
+
+class CheckinResponseSchema(Schema):
+    id = fields.Int()
+    registration_id = fields.Int()
+    method = fields.Str()
+    checked_in_at = fields.Raw()
+
+
+checkin_req = CheckinRequestSchema()
+checkin_res = CheckinResponseSchema()
+
+
+@bp.route("/checkins", methods=["POST"])
+def checkin():
+    """
+    Check-in hoạt động
+    ---
+    post:
+      summary: Check-in bằng QR/thẻ/RFID-NFC (UC09/UC17)
+      tags:
+        - Checkin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [registration_id, method]
+              properties:
+                registration_id:
+                  type: integer
+                method:
+                  type: string
+                  enum: [qr, card, rfid]
+      responses:
+        201:
+          description: "Check-in thành công (MSG04)"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  registration_id:
+                    type: integer
+                  method:
+                    type: string
+                  checked_in_at: {}
+        400:
+          description: "Mã xác thực không hợp lệ hoặc chưa đăng ký hoạt động này (MSG03)"
+    """
+    data = request.get_json()
+    errors = checkin_req.validate(data)
+    if errors:
+        return jsonify(errors), 400
+    try:
+        result = service.checkin(data["registration_id"], data["method"])
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    return jsonify(checkin_res.dump(result)), 201
