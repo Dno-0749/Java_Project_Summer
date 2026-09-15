@@ -28,7 +28,7 @@
                     <label class="form-label fw-semibold">Tên đăng nhập (Họ tên viết liền không dấu)</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input type="text" id="loginUsername" name="username" class="form-control" placeholder="nguyenchihai / nguyenhoangphat..." required autofocus>
+                        <input type="text" id="loginUsername" name="username" class="form-control" placeholder="Nhập tên đăng nhập" required autofocus>
                     </div>
                 </div>
                 <div class="mb-4">
@@ -121,11 +121,4 @@
         </div>
     </div>
 </div>
-
-<script>
-function fillLogin(u, p) {
-    document.getElementById('loginUsername').value = u;
-    document.getElementById('loginPassword').value = p;
-}
-</script>
 {% endblock %}

@@ -2,7 +2,8 @@
 
 import os
 from dotenv import load_dotenv
-load_dotenv()
+
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 class FactoryConfig:
     """Factory to get configuration based on environment."""

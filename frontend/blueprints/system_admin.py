@@ -1,7 +1,12 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+import json
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import login_required, current_user
 from functools import wraps
 from models import get_all_users, add_user, toggle_user_status, delete_user, ROLE_DISPLAY_NAMES, slugify_username
+from config import Config
 from supabase_client import is_supabase_configured
 
 system_admin_bp = Blueprint("system_admin", __name__, url_prefix="/system")
@@ -19,6 +24,21 @@ def admin_required(f):
 @admin_required
 def users():
     user_list = get_all_users()
+    token = session.get("backend_token")
+    if token:
+        try:
+            backend_request = Request(
+                f"{Config.API_BASE_URL}/auth/users",
+                headers={"Authorization": f"Bearer {token}"},
+                method="GET",
+            )
+            with urlopen(backend_request, timeout=8) as response:
+                backend_users = json.loads(response.read().decode("utf-8")).get("users")
+            if backend_users is not None:
+                from models import User
+                user_list = [User.from_api(user) for user in backend_users]
+        except (HTTPError, URLError, ValueError):
+            flash("Không thể đồng bộ danh sách người dùng từ máy chủ.", "warning")
     return render_template(
         "system_admin/users.html",
         users=user_list,
@@ -76,14 +96,27 @@ def delete_user_route(user_id):
     if str(current_user.id) == str(user_id):
         flash("Bạn không thể tự xóa tài khoản của chính mình!", "warning")
         return redirect(url_for("system_admin.users"))
-
-    user = delete_user(user_id)
-    if user:
-        flash(f"Đã xóa tài khoản {user.full_name} ({user.username}).", "info")
-    elif is_supabase_configured():
-        flash("Không thể xóa tài khoản Supabase từ đây - vui lòng xóa trực tiếp trên Supabase Dashboard.", "warning")
-    else:
-        flash("Không tìm thấy người dùng.", "danger")
+    token = session.get("backend_token")
+    if token:
+        try:
+            backend_request = Request(
+                f"{Config.API_BASE_URL}/auth/users/{user_id}",
+                headers={"Authorization": f"Bearer {token}"},
+                method="DELETE",
+            )
+            with urlopen(backend_request, timeout=8):
+                pass
+        except HTTPError as error:
+            if error.code != 404:
+                flash("Không thể xóa tài khoản trên máy chủ.", "danger")
+                return redirect(url_for("system_admin.users"))
+        except URLError:
+            flash("Không thể kết nối máy chủ để xóa tài khoản.", "danger")
+            return redirect(url_for("system_admin.users"))
+    flash(
+        "Đã xóa tài khoản thành công." if token else "Đã xóa tài khoản cục bộ.",
+        "success",
+    )
     return redirect(url_for("system_admin.users"))
 
 @system_admin_bp.route("/settings")
