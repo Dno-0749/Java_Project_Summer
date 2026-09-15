@@ -1,31 +1,27 @@
-# Cruise Activity & Service Management System - Web Admin Frontend
+# OpsPulse - Operations Control Center
+
+Web application focused on cruise operations: live operational metrics and passenger check-in monitoring.
 
 ## Hướng dẫn sử dụng
 
 ### 1. Cấu trúc thư mục
 
 ```
-frontend_webadmin/
+frontend_new/
 ├── app.py                 # Entry point chính
 ├── config.py              # Cấu hình
 ├── requirements.txt       # Thư viện cần thiết
 ├── blueprints/
 │   ├── auth.py            # Login / Logout
-│   └── admin.py           # Các trang Admin
+│   └── operations.py      # Dashboard và giám sát check-in
 ├── templates/
 │   ├── layouts/
 │   │   └── base.html      # Layout chung
 │   ├── auth/
 │   │   └── login.html
-│   ├── admin/
+│   ├── operations/
 │   │   ├── dashboard.html
-│   │   ├── itinerary.html
-│   │   ├── activities.html
-│   │   ├── excursions.html
-│   │   ├── passengers.html
-│   │   ├── finance.html
-│   │   ├── users.html
-│   │   └── settings.html
+│   │   └── checkins.html
 │   └── components/
 │       ├── sidebar.html
 │       └── navbar.html
@@ -54,13 +50,10 @@ python app.py
 
 Truy cập: http://localhost:5000
 
-### 3. Tài khoản demo (tạm thời)
+### 3. Tài khoản Operations demo
 
 | Role              | Username     | Password   |
 |-------------------|--------------|------------|
-| Admin             | admin        | admin123   |
-| Operations        | operations   | ops123     |
-| Finance           | finance      | fin123     |
-| Coordinator       | coordinator  | coord123   |
+| Operations        | nguyenhoangphat | 123456 |
 
-> Hiện tại đang dùng mock data. Sau này sẽ kết nối với API backend thật.
+> Dashboard sử dụng dữ liệu Supabase nếu khả dụng và tự động dùng dữ liệu demo khi chưa cấu hình kết nối.

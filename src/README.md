@@ -37,3 +37,17 @@ To get started with the project, ensure you have the necessary dependencies inst
 ## Contributing
 
 Contributions are welcome! Please follow the contribution guidelines outlined in the project documentation.
+
+## Operations API
+
+The operations blueprint is registered by `app.py` under `/operations`:
+
+- `GET /operations/dashboard` - operational metrics for activities, services, revenue, capacity, check-ins and late-return risks.
+- `GET|POST /operations/activities` - list or create scheduled activities with capacity.
+- `POST /operations/activities/{activity_id}/participants` - register a passenger and enforce capacity.
+- `GET|POST /operations/checkins` - monitor or record passenger check-in status.
+- `GET /operations/late-return-risks` - list passengers marked `LATE`, `MISSING` or `AT_RISK`.
+- `POST /operations/transactions` - record service revenue.
+- `GET|PUT /operations/reports/{trip_id}` - read or save a post-trip operations report.
+
+The current `OperationsService` uses an in-memory store so the API can be exercised without a database. Replace it with a repository implementation before production deployment; data is cleared when the API process restarts.
