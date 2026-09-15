@@ -4,7 +4,16 @@
 <div class="row g-3">
     <div class="col-lg-7">
         <h5 class="fw-bold mb-2"><i class="bi bi-qr-code-scan me-2"></i>Quét thẻ / QR hành khách</h5>
-        <p class="text-muted small">Mô phỏng thao tác quét — chọn hành khách bên dưới để xác thực (thực tế sẽ đọc từ đầu đọc QR/RFID/NFC).</p>
+        <p class="text-muted small">Bấm "Quét bằng Camera" để xác thực thật, hoặc chọn thủ công bên dưới nếu không có camera.</p>
+
+        <button type="button" class="btn btn-dark pos-big-btn mb-3" id="openScannerBtn">
+            <i class="bi bi-camera-fill me-2"></i>Quét bằng Camera
+        </button>
+        <div id="scannerBox" class="d-none mb-3">
+            <div id="qr-reader" style="width: 100%; max-width: 360px;"></div>
+            <div id="scanResult" class="small mt-2"></div>
+            <button type="button" class="btn btn-outline-secondary btn-sm mt-2" id="closeScannerBtn">Đóng camera</button>
+        </div>
 
         <div class="input-group mb-3">
             <span class="input-group-text"><i class="bi bi-search"></i></span>
@@ -69,13 +78,69 @@
     </div>
 </div>
 
+<script src="{{ url_for('static', filename='js/vendor/html5-qrcode.min.js') }}"></script>
 <script>
+let html5QrCode = null;
+
+function selectPassenger(id, name) {
+    document.getElementById("selectedPassengerId").value = id;
+    document.getElementById("selectedPassengerName").value = name;
+    document.querySelectorAll(".pos-passenger-card").forEach(c => c.classList.remove("selected"));
+    document.querySelectorAll(".passenger-radio").forEach(r => { r.checked = (String(r.value) === String(id)); });
+    const matched = Array.from(document.querySelectorAll(".passenger-radio")).find(r => String(r.value) === String(id));
+    if (matched) matched.closest(".pos-passenger-card").classList.add("selected");
+}
+
+function stopScanner() {
+    if (html5QrCode) {
+        html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {});
+    }
+    document.getElementById("scannerBox").classList.add("d-none");
+    document.getElementById("openScannerBtn").classList.remove("d-none");
+}
+
+document.getElementById("openScannerBtn").addEventListener("click", function () {
+    this.classList.add("d-none");
+    document.getElementById("scannerBox").classList.remove("d-none");
+    document.getElementById("scanResult").innerHTML = "";
+
+    html5QrCode = new Html5Qrcode("qr-reader");
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 220 },
+        function (decodedText) {
+            // Quét được mã -> tra cứu THẬT qua backend (UC22)
+            document.getElementById("scanResult").innerHTML =
+                '<span class="text-muted">Đã đọc mã: ' + decodedText + ' — đang tra cứu...</span>';
+            fetch("{{ url_for('pos.lookup_passenger', code='__CODE__') }}".replace('__CODE__', encodeURIComponent(decodedText)))
+                .then(r => r.json())
+                .then(data => {
+                    if (data.found) {
+                        selectPassenger(data.id, data.name);
+                        document.getElementById("scanResult").innerHTML =
+                            '<span class="text-success"><i class="bi bi-check-circle"></i> Đã xác thực: <strong>' + data.name + '</strong> (Cabin ' + data.cabin + ', số dư ' + data.balance.toLocaleString('vi-VN') + 'đ)</span>';
+                        setTimeout(stopScanner, 1200);
+                    } else {
+                        document.getElementById("scanResult").innerHTML =
+                            '<span class="text-danger"><i class="bi bi-x-circle"></i> ' + (data.message || 'Không tìm thấy hành khách') + '</span>';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById("scanResult").innerHTML = '<span class="text-danger">Lỗi kết nối tới backend.</span>';
+                });
+        },
+        function (errorMessage) { /* không tìm thấy QR trong khung hình - bỏ qua, tiếp tục quét */ }
+    ).catch(function (err) {
+        document.getElementById("scanResult").innerHTML =
+            '<span class="text-danger">Không mở được camera: ' + err + '. Kiểm tra đã cấp quyền Camera cho trình duyệt chưa, và trang phải chạy qua HTTPS hoặc localhost.</span>';
+    });
+});
+
+document.getElementById("closeScannerBtn").addEventListener("click", stopScanner);
+
 document.querySelectorAll(".passenger-radio").forEach(function (radio) {
     radio.addEventListener("change", function () {
-        document.querySelectorAll(".pos-passenger-card").forEach(c => c.classList.remove("selected"));
-        this.closest(".pos-passenger-card").classList.add("selected");
-        document.getElementById("selectedPassengerId").value = this.value;
-        document.getElementById("selectedPassengerName").value = this.dataset.name;
+        selectPassenger(this.value, this.dataset.name);
     });
 });
 const firstRadio = document.querySelector(".passenger-radio");

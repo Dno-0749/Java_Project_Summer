@@ -275,6 +275,28 @@ def sync_now():
     return jsonify({"synced_local_ids": synced_local_ids, "failed": failed})
 
 
+@pos_bp.route("/lookup/<string:code>", methods=["GET"])
+@login_required
+@pos_access
+def lookup_passenger(code):
+    """Được gọi bằng JS (fetch) ngay sau khi camera quét được mã QR/RFID
+    của hành khách - tra cứu thật qua backend (UC22: Xác thực hành khách
+    tại POS), trả JSON cho trang checkout tự động chọn đúng khách."""
+    passenger, err = api_client.lookup_passenger(code)
+    if err or not passenger:
+        return jsonify({"found": False, "message": err or "Không tìm thấy hành khách với mã này"}), 404
+
+    account, _ = api_client.get_account(passenger["id"])
+    return jsonify({
+        "found": True,
+        "id": passenger["id"],
+        "name": passenger["full_name"],
+        "cabin": passenger.get("cabin_id") or "-",
+        "card_id": passenger.get("qr_code") or "-",
+        "balance": float(account["balance"]) if account else 0,
+    })
+
+
 # ==================== LỊCH SỬ, TÌM KIẾM, HOÀN TIỀN ====================
 
 @pos_bp.route("/history")

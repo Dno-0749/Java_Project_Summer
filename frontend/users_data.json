@@ -67,6 +67,26 @@
     "role": "passenger",
     "role_name": "Hành khách",
     "status": "Active",
-    "passenger_id": 7
+    "passenger_id": 11
+  },
+  {
+    "id": "8",
+    "username": "nguyenvana",
+    "password": "123456",
+    "full_name": "Nguyen Van A",
+    "role": "passenger",
+    "role_name": "Hành khách",
+    "status": "Active",
+    "passenger_id": 10
+  },
+  {
+    "id": "9",
+    "username": "nguyenvanc",
+    "password": "123456",
+    "full_name": "Nguyen Van C",
+    "role": "passenger",
+    "role_name": "Hành khách",
+    "status": "Active",
+    "passenger_id": 12
   }
 ]
