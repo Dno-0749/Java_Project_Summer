@@ -10,7 +10,6 @@ from sqlalchemy import Column, Integer, String, DateTime
 from infrastructure.databases import Base
 from sqlalchemy.orm import Session
 from infrastructure.models.todo_model import TodoModel
-from infrastructure.databases.mssql import session
 from infrastructure.databases.factory_database import FactoryDatabase as db_factory
 load_dotenv()
 
@@ -54,7 +53,7 @@ class TodoRepository(ITodoRepository):
     #     self._todos
     #     return self._todos
     def list(self) -> List[TodoModel]:
-        self._todos = session.query(TodoModel).all()
+        self._todos = self.session.query(TodoModel).all()
         # select * from todos
         return self._todos
 

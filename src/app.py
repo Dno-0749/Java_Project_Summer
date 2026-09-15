@@ -3,6 +3,14 @@ from flask import Flask, jsonify
 from api.swagger import spec
 from api.controllers.todo_controller import bp as todo_bp
 from api.controllers.auth_controller import auth_bp as auth_bp
+from api.controllers.itinerary_controller import bp as itinerary_bp
+from api.controllers.activity_controller import bp as activity_bp
+from api.controllers.checkin_controller import bp as checkin_bp
+from api.controllers.account_controller import bp as account_bp
+from api.controllers.report_controller import bp as report_bp
+from api.controllers.passenger_controller import bp as passenger_bp
+from api.controllers.feedback_controller import bp as feedback_bp
+from api.controllers.notification_controller import bp as notification_bp
 from api.middleware import middleware
 from api.responses import success_response
 from infrastructure.databases import init_db
@@ -10,9 +18,6 @@ from config import Config
 from flasgger import Swagger
 from config import SwaggerConfig
 from flask_swagger_ui import get_swaggerui_blueprint
-from api.controllers.tour_provider_controller import bp as tour_provider_bp
-from api.controllers.shore_excursion_controller import bp as shore_excursion_bp
-from api.controllers.activity_schedule_controller import bp as activity_schedule_bp
 
 def create_app():
     app = Flask(__name__)
@@ -21,9 +26,14 @@ def create_app():
     # Đăng ký blueprint trước
     app.register_blueprint(todo_bp)
     app.register_blueprint(auth_bp)
-    app.register_blueprint(tour_provider_bp)
-    app.register_blueprint(shore_excursion_bp)
-    app.register_blueprint(activity_schedule_bp)
+    app.register_blueprint(itinerary_bp)
+    app.register_blueprint(activity_bp)
+    app.register_blueprint(checkin_bp)
+    app.register_blueprint(account_bp)
+    app.register_blueprint(report_bp)
+    app.register_blueprint(passenger_bp)
+    app.register_blueprint(feedback_bp)
+    app.register_blueprint(notification_bp)
     # register_routes(app)
      # Thêm Swagger UI blueprint
     SWAGGER_URL = '/docs'
@@ -47,7 +57,9 @@ def create_app():
     with app.test_request_context():
         for rule in app.url_map.iter_rules():
             # Thêm các endpoint khác nếu cần
-            if rule.endpoint.startswith(('todo.', 'course.', 'user.', 'auth.', 'tour_provider.', 'shore_excursion.', 'activity_schedule.')):
+            if rule.endpoint.startswith(('todo.', 'course.', 'user.', 'auth.',
+                                          'itinerary.', 'activity.', 'checkin.', 'account.',
+                                          'report.', 'passenger.', 'feedback.', 'notification.')):
                 view_func = app.view_functions[rule.endpoint]
                 print(f"Adding path: {rule.rule} -> {view_func}")
                 spec.path(view=view_func)

@@ -1,0 +1,99 @@
+{% extends "layouts/pos_base.html" %}
+
+{% block content %}
+<div class="row g-3">
+    <div class="col-lg-7">
+        <h5 class="fw-bold mb-2"><i class="bi bi-qr-code-scan me-2"></i>Quét thẻ / QR hành khách</h5>
+        <p class="text-muted small">Mô phỏng thao tác quét — chọn hành khách bên dưới để xác thực (thực tế sẽ đọc từ đầu đọc QR/RFID/NFC).</p>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" id="passengerSearch" class="form-control" placeholder="Tìm hành khách theo tên...">
+        </div>
+
+        <div class="row g-3" id="passengerList">
+            {% for p in passengers %}
+            <div class="col-md-6 passenger-item" data-name="{{ p.name|lower }}">
+                <label class="pos-passenger-card d-block">
+                    <input type="radio" name="passenger_id" value="{{ p.id }}" class="d-none passenger-radio"
+                           data-name="{{ p.name }}" {% if loop.first %}checked{% endif %}>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-bold">{{ p.name }}</div>
+                            <div class="text-muted small">Cabin {{ p.cabin }} · {{ p.card_id }}</div>
+                        </div>
+                        <i class="bi bi-person-badge fs-4 text-primary"></i>
+                    </div>
+                    <div class="mt-2 small">Số dư tài khoản: <span class="fw-semibold">{{ "{:,.0f}".format(p.balance) }}đ</span></div>
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+        <div id="noPassengerFound" class="text-muted text-center py-4 d-none">Không tìm thấy hành khách phù hợp.</div>
+
+        <div class="mt-3">
+            <a href="{{ url_for('pos.sales') }}" class="btn btn-outline-secondary pos-big-btn">
+                <i class="bi bi-arrow-left me-2"></i>Quay lại chọn dịch vụ
+            </a>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="pos-cart-panel p-3">
+            <h5 class="fw-bold mb-3">Xác nhận giao dịch</h5>
+            <div style="max-height: 220px; overflow-y:auto;">
+                {% for item in cart_items %}
+                <div class="d-flex justify-content-between small py-1 border-bottom">
+                    <span>{{ item.name }} x{{ item.qty }}</span>
+                    <span>{{ "{:,.0f}".format(item.subtotal) }}đ</span>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="d-flex justify-content-between mt-3 mb-3">
+                <span class="fw-semibold">Tổng cộng</span>
+                <span class="fw-bold fs-4 text-primary">{{ "{:,.0f}".format(cart_total) }}đ</span>
+            </div>
+
+            <form method="POST" id="confirmForm"
+                  data-online-action="{{ url_for('pos.checkout_confirm') }}"
+                  data-offline-action="{{ url_for('pos.save_offline') }}"
+                  action="{{ url_for('pos.checkout_confirm') }}">
+                <input type="hidden" name="passenger_id" id="selectedPassengerId" value="{{ passengers[0].id if passengers else '' }}">
+                <input type="hidden" name="passenger_name" id="selectedPassengerName" value="{{ passengers[0].name if passengers else '' }}">
+                <input type="hidden" name="offline_mode" value="0">
+                <button type="submit" class="btn btn-primary pos-big-btn w-100" {% if not passengers %}disabled{% endif %}>
+                    <i class="bi bi-check-circle me-2"></i>Xác nhận ghi nợ tài khoản
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll(".passenger-radio").forEach(function (radio) {
+    radio.addEventListener("change", function () {
+        document.querySelectorAll(".pos-passenger-card").forEach(c => c.classList.remove("selected"));
+        this.closest(".pos-passenger-card").classList.add("selected");
+        document.getElementById("selectedPassengerId").value = this.value;
+        document.getElementById("selectedPassengerName").value = this.dataset.name;
+    });
+});
+const firstRadio = document.querySelector(".passenger-radio");
+if (firstRadio) {
+    firstRadio.closest(".pos-passenger-card").classList.add("selected");
+}
+
+// Tìm kiếm hành khách - lọc client-side, không cần gọi lại API
+const searchInput = document.getElementById("passengerSearch");
+searchInput.addEventListener("input", function () {
+    const q = this.value.trim().toLowerCase();
+    let visibleCount = 0;
+    document.querySelectorAll(".passenger-item").forEach(function (el) {
+        const match = el.dataset.name.includes(q);
+        el.classList.toggle("d-none", !match);
+        if (match) visibleCount++;
+    });
+    document.getElementById("noPassengerFound").classList.toggle("d-none", visibleCount > 0);
+});
+</script>
+{% endblock %}

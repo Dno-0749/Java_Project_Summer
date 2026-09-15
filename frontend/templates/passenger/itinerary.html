@@ -1,0 +1,19 @@
+{% extends "layouts/passenger_base.html" %}
+
+{% block content %}
+{% for day in itinerary %}
+<div class="p-card">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+        <span class="fw-bold">Ngày {{ day.day }} — {{ day.date }}</span>
+        {% if "Cập nhật" in day.notes %}
+        <span class="badge bg-danger">Đã cập nhật</span>
+        {% endif %}
+    </div>
+    <div class="fw-semibold text-primary small mb-2"><i class="bi bi-geo-alt me-1"></i>{{ day.port }}</div>
+    {% if day.arrival != "-" %}
+    <div class="small text-muted mb-1">Cập bến: {{ day.arrival }} — Rời bến: {{ day.departure }}</div>
+    {% endif %}
+    <div class="small">{{ day.notes }}</div>
+</div>
+{% endfor %}
+{% endblock %}

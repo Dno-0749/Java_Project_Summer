@@ -1,0 +1,273 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Nhà cung cấp tour{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                Nhà cung cấp tour
+            </h2>
+
+            <p class="text-muted mb-0">
+                Quản lý các đơn vị cung cấp tour tham quan
+            </p>
+        </div>
+
+        {% if current_user.role in ["shore_excursion_manager", "admin"] %}
+        <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#providerModal"
+        >
+            <i class="bi bi-plus-lg me-1"></i>
+            Thêm nhà cung cấp
+        </button>
+        {% endif %}
+
+    </div>
+
+    <div class="row g-4">
+
+        {% for provider in providers %}
+
+        <div class="col-md-6 col-xl-4">
+
+            <div class="card border-0 shadow-sm provider-card h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+
+                        <div class="provider-icon">
+                            <i class="bi bi-building"></i>
+                        </div>
+
+                        {% if provider.status|default("Đang hợp tác") == "Đang hợp tác" %}
+                        <span class="badge bg-success-subtle text-success">
+                            Đang hợp tác
+                        </span>
+                        {% else %}
+                        <span class="badge bg-secondary-subtle text-secondary">
+                            {{ provider.status }}
+                        </span>
+                        {% endif %}
+
+                    </div>
+
+                    <h5 class="fw-bold mb-2">
+                        {{ provider.name }}
+                    </h5>
+
+                    <div class="provider-info">
+
+                        <div>
+                            <i class="bi bi-person text-muted me-2"></i>
+                            {{ provider.contact_person|default("-") }}
+                        </div>
+
+                        <div>
+                            <i class="bi bi-telephone text-muted me-2"></i>
+                            {{ provider.phone|default("-") }}
+                        </div>
+
+                        <div>
+                            <i class="bi bi-envelope text-muted me-2"></i>
+                            {{ provider.email|default("-") }}
+                        </div>
+
+                        <div>
+                            <i class="bi bi-geo-alt text-muted me-2"></i>
+                            {{ provider.address|default("-") }}
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+
+                        <div>
+                            <small class="text-muted">
+                                Số tour
+                            </small>
+
+                            <div class="fw-bold">
+                                {{ provider.excursion_count|default(0) }}
+                            </div>
+                        </div>
+
+                        {% if current_user.role in ["shore_excursion_manager", "admin"] %}
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-primary"
+                        >
+                            <i class="bi bi-pencil me-1"></i>
+                            Chỉnh sửa
+                        </button>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% else %}
+
+        <div class="col-12">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body text-center py-5">
+
+                    <i class="bi bi-building fs-1 text-muted"></i>
+
+                    <h5 class="mt-3">
+                        Chưa có nhà cung cấp
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Hiện chưa có nhà cung cấp tour nào.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<div
+    class="modal fade"
+    id="providerModal"
+    tabindex="-1"
+    aria-hidden="true"
+>
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content border-0">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold">
+                    Thêm nhà cung cấp
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+
+            </div>
+
+            <form method="POST" action="/excursions/providers/create">
+
+                <div class="modal-body">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">
+                                Tên nhà cung cấp
+                            </label>
+
+                            <input
+                                type="text"
+                                name="name"
+                                class="form-control"
+                                required
+                            >
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                Người liên hệ
+                            </label>
+
+                            <input
+                                type="text"
+                                name="contact_person"
+                                class="form-control"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Số điện thoại
+                            </label>
+
+                            <input
+                                type="tel"
+                                name="phone"
+                                class="form-control"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Email
+                            </label>
+
+                            <input
+                                type="email"
+                                name="email"
+                                class="form-control"
+                            >
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                                Địa chỉ
+                            </label>
+
+                            <input
+                                type="text"
+                                name="address"
+                                class="form-control"
+                            >
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal"
+                    >
+                        Hủy
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        <i class="bi bi-check-lg me-1"></i>
+                        Lưu nhà cung cấp
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

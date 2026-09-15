@@ -9,6 +9,8 @@ from blueprints.activities import activities_bp
 from blueprints.excursions import excursions_bp
 from blueprints.finance import finance_bp
 from models import User
+from blueprints.pos import pos_bp
+from blueprints.passenger import passenger_bp
 
 def create_app():
     app = Flask(__name__)
@@ -36,6 +38,8 @@ def create_app():
     app.register_blueprint(activities_bp)
     app.register_blueprint(excursions_bp)
     app.register_blueprint(finance_bp)
+    app.register_blueprint(pos_bp)
+    app.register_blueprint(passenger_bp)
 
     # Điều hướng tương thích cho URL cũ nếu có
     @app.route("/admin/dashboard")

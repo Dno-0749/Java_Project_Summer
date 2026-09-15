@@ -1,0 +1,221 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Chi tiết hoạt động{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+
+    <div class="mb-4">
+        <a href="/activities" class="text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i>
+            Quay lại danh sách
+        </a>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">{{ activity.name }}</h2>
+            <p class="text-muted mb-0">{{ activity.type }}</p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a
+                href="/activities/{{ activity.id }}/registrations"
+                class="btn btn-success"
+            >
+                <i class="bi bi-people me-1"></i>
+                Danh sách khách
+            </a>
+
+            {% if current_user.role in ["activity_manager", "admin"] %}
+            <a
+                href="/activities/{{ activity.id }}/edit"
+                class="btn btn-outline-primary"
+            >
+                <i class="bi bi-pencil me-1"></i>
+                Chỉnh sửa
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-semibold mb-0">Thông tin hoạt động</h5>
+                </div>
+
+                <div class="card-body">
+                    <div class="row g-4">
+
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <span class="detail-label">
+                                    <i class="bi bi-geo-alt text-primary me-2"></i>
+                                    Địa điểm
+                                </span>
+                                <span class="detail-value">
+                                    {{ activity.location }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <span class="detail-label">
+                                    <i class="bi bi-clock text-primary me-2"></i>
+                                    Thời gian
+                                </span>
+                                <span class="detail-value">
+                                    {{ activity.time }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <span class="detail-label">
+                                    <i class="bi bi-people text-primary me-2"></i>
+                                    Sức chứa
+                                </span>
+                                <span class="detail-value">
+                                    {{ activity.capacity }} người
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <span class="detail-label">
+                                    <i class="bi bi-ticket-perforated text-primary me-2"></i>
+                                    Phí tham gia
+                                </span>
+                                <span class="detail-value">
+                                    {% if activity.price == 0 %}
+                                        Miễn phí
+                                    {% else %}
+                                        {{ "{:,.0f}".format(activity.price) }} VNĐ
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="detail-item">
+                                <span class="detail-label">
+                                    <i class="bi bi-info-circle text-primary me-2"></i>
+                                    Trạng thái
+                                </span>
+                                <span class="detail-value">
+                                    {% if activity.status == "Đang diễn ra" %}
+                                        <span class="badge bg-success">
+                                            Đang diễn ra
+                                        </span>
+                                    {% elif activity.status == "Đã kết thúc" %}
+                                        <span class="badge bg-secondary">
+                                            Đã kết thúc
+                                        </span>
+                                    {% elif activity.status == "Đã hủy" %}
+                                        <span class="badge bg-danger">
+                                            Đã hủy
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">
+                                            {{ activity.status }}
+                                        </span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-semibold mb-0">Mô tả</h5>
+                </div>
+
+                <div class="card-body">
+                    <p class="text-muted mb-0">
+                        {{ activity.description|default("Chưa có mô tả cho hoạt động này.") }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center p-4">
+                    <div class="detail-stat-icon mx-auto mb-3">
+                        <i class="bi bi-people"></i>
+                    </div>
+
+                    <h6 class="text-muted mb-2">
+                        Số lượng đăng ký
+                    </h6>
+
+                    <h2 class="fw-bold mb-1">
+                        {{ activity.registered }}/{{ activity.capacity }}
+                    </h2>
+
+                    <p class="text-muted mb-3">
+                        người đăng ký
+                    </p>
+
+                    <div class="progress mb-2">
+                        <div
+                            class="progress-bar activity-progress"
+                            data-progress="{{ ((activity.registered / activity.capacity) * 100)|round|int }}"
+                        ></div>
+                    </div>
+
+                    <small class="text-muted">
+                        {{ ((activity.registered / activity.capacity) * 100)|round|int }}% sức chứa
+                    </small>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-semibold mb-0">Thống kê phản hồi</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="feedback-rating">
+                        <div class="rating-number">
+                            {{ activity.rating|default("4.8") }}
+                        </div>
+
+                        <div>
+                            <div class="text-warning">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-half"></i>
+                            </div>
+
+                            <small class="text-muted">
+                                {{ activity.feedback_count|default(24) }} phản hồi
+                            </small>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/activities.js') }}"></script>
+{% endblock %}

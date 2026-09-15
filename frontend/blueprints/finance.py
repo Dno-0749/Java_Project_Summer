@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_required, current_user
 from functools import wraps
+import api_client
 
 finance_bp = Blueprint("finance", __name__, url_prefix="/finance")
 
@@ -39,3 +40,110 @@ def passengers():
         {"id": 4, "name": "Phạm Minh D", "cabin": "0605", "card_id": "CR-8824", "checkin": "Đã lên tàu", "balance": 3_400_000},
     ]
     return render_template("finance/passengers.html", passengers=passengers_list, page_title="Quản lý Hành khách")
+
+
+# ==================== THANH TOÁN CUỐI CHUYẾN & XUẤT HÓA ĐƠN (dữ liệu thật) ====================
+
+@finance_bp.route("/settlement")
+@login_required
+@finance_access
+def settlement():
+    """UC28/UC29: Xem danh sách tài khoản hành khách để xác nhận thanh toán
+    cuối chuyến và xuất hóa đơn - dữ liệu thật từ backend/Supabase."""
+    cruise, err = api_client.ensure_demo_cruise()
+    if err:
+        flash(f"Lỗi kết nối backend: {err}", "danger")
+        return render_template("finance/settlement.html", accounts=[], page_title="Thanh toán cuối chuyến")
+
+    passengers, err = api_client.list_passengers(cruise["id"])
+    if err:
+        flash(f"Lỗi tải danh sách hành khách: {err}", "danger")
+        passengers = []
+
+    accounts = []
+    for p in passengers or []:
+        account, err2 = api_client.get_account(p["id"])
+        if err2 or not account:
+            continue
+        transactions, _ = api_client.list_passenger_transactions(p["id"])
+        transactions = transactions or []
+        has_pending_or_disputed = any(t["sync_status"] in ("pending_sync", "disputed") for t in transactions)
+        accounts.append({
+            "account_id": account["id"],
+            "passenger_name": p["full_name"],
+            "cabin": p.get("cabin_id") or "-",
+            "balance": float(account["balance"]),
+            "status": account["status"],
+            "transaction_count": len(transactions),
+            "has_pending_or_disputed": has_pending_or_disputed,
+        })
+
+    return render_template("finance/settlement.html", accounts=accounts, page_title="Thanh toán cuối chuyến")
+
+
+@finance_bp.route("/accounts/<int:account_id>/settle", methods=["POST"])
+@login_required
+@finance_access
+def settle(account_id):
+    """UC28: Xác nhận thanh toán cuối chuyến. Áp dụng BR-05 - backend sẽ
+    từ chối nếu tài khoản còn giao dịch pending_sync/disputed chưa xử lý."""
+    result, err = api_client.settle_account(account_id)
+    if err:
+        flash(f"Không thể xác nhận thanh toán: {err}", "danger")
+    else:
+        flash(f"Đã xác nhận thanh toán cuối chuyến cho tài khoản #{account_id}.", "success")
+    return redirect(url_for("finance.settlement"))
+
+
+@finance_bp.route("/accounts/<int:account_id>/invoice", methods=["POST"])
+@login_required
+@finance_access
+def issue_invoice(account_id):
+    """UC29: Xuất hóa đơn cuối chuyến (MSG08 nếu bị chặn, MSG09 nếu thành công)."""
+    invoice, err = api_client.issue_invoice(account_id)
+    if err:
+        # Đúng MSG08 trong SRS: "Không thể xuất hóa đơn. Tài khoản còn giao dịch tranh chấp chưa xử lý."
+        flash(err, "danger")
+        return redirect(url_for("finance.settlement"))
+
+    # Lưu tạm để hiển thị trang hóa đơn (backend chưa có endpoint GET 1 invoice theo id)
+    account_name = next(
+        (a["passenger_name"] for a in _get_settlement_accounts_cache() if a["account_id"] == account_id),
+        "Hành khách"
+    )
+    session["last_invoice"] = {
+        "id": invoice["id"], "account_id": account_id,
+        "total_amount": float(invoice["total_amount"]),
+        "issued_at": invoice.get("issued_at", ""), "status": invoice["status"],
+    }
+    flash("Hóa đơn cuối chuyến đã được xuất thành công.", "success")
+    return redirect(url_for("finance.invoice_view"))
+
+
+def _get_settlement_accounts_cache():
+    """Helper nhỏ để lấy lại tên hành khách hiển thị trên hóa đơn - tránh
+    gọi lại toàn bộ danh sách nếu không cần thiết."""
+    cruise, err = api_client.ensure_demo_cruise()
+    if err:
+        return []
+    passengers, err = api_client.list_passengers(cruise["id"])
+    if err:
+        return []
+    result = []
+    for p in passengers or []:
+        account, err2 = api_client.get_account(p["id"])
+        if account:
+            result.append({"account_id": account["id"], "passenger_name": p["full_name"]})
+    return result
+
+
+@finance_bp.route("/invoice")
+@login_required
+@finance_access
+def invoice_view():
+    """Xem hóa đơn vừa xuất."""
+    data = session.pop("last_invoice", None)
+    if not data:
+        flash("Không có hóa đơn nào để hiển thị.", "warning")
+        return redirect(url_for("finance.settlement"))
+    return render_template("finance/invoice.html", invoice=data, page_title="Hóa đơn cuối chuyến")

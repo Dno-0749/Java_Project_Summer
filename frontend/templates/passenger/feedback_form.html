@@ -1,0 +1,47 @@
+{% extends "layouts/passenger_base.html" %}
+
+{% block content %}
+<div class="p-card">
+    <h5 class="fw-bold mb-1">Đánh giá: {{ target_name }}</h5>
+    <div class="text-muted small mb-3">
+        {% if kind == 'activity' %}Hoạt động trên tàu{% elif kind == 'excursion' %}Tham quan bờ{% else %}Dịch vụ{% endif %}
+    </div>
+
+    <form method="POST" action="{{ url_for('passenger.feedback_new', kind=kind, item_id=item_id) }}">
+        <label class="form-label small fw-semibold">Đánh giá của bạn</label>
+        <div class="d-flex gap-2 mb-3" id="starPicker">
+            {% for i in range(1, 6) %}
+            <label class="star-label">
+                <input type="radio" name="rating" value="{{ i }}" class="d-none star-radio" {% if i == 5 %}checked{% endif %}>
+                <i class="bi bi-star-fill fs-3 star-icon" data-value="{{ i }}"></i>
+            </label>
+            {% endfor %}
+        </div>
+
+        <label class="form-label small fw-semibold">Nhận xét (không bắt buộc)</label>
+        <textarea name="comment" class="form-control mb-3" rows="4" placeholder="Chia sẻ trải nghiệm của bạn..."></textarea>
+
+        <button type="submit" class="btn btn-primary w-100">Gửi đánh giá</button>
+    </form>
+</div>
+
+<style>
+.star-icon { color: #dee2e6; cursor: pointer; }
+.star-icon.active { color: #ffc107; }
+</style>
+<script>
+const stars = document.querySelectorAll('.star-icon');
+const radios = document.querySelectorAll('.star-radio');
+function paintStars(value) {
+    stars.forEach(s => s.classList.toggle('active', parseInt(s.dataset.value) <= value));
+}
+stars.forEach(function (star) {
+    star.addEventListener('click', function () {
+        const value = parseInt(this.dataset.value);
+        radios.forEach(r => { if (parseInt(r.value) === value) r.checked = true; });
+        paintStars(value);
+    });
+});
+paintStars(5);
+</script>
+{% endblock %}
