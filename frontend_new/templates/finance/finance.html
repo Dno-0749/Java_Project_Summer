@@ -1,0 +1,80 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="bi bi-cash-stack text-primary me-2"></i>Tài chính & Đối soát Onboard Account</h4>
+        <small class="text-muted">Quản lý giao dịch POS quầy dịch vụ và xuất hóa đơn thanh toán cuối chuyến (UC26, UC27, UC29)</small>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm shadow-sm">
+            <i class="bi bi-download me-1"></i> Xuất Excel
+        </button>
+        <button class="btn btn-primary btn-sm shadow-sm">
+            <i class="bi bi-receipt me-1"></i> Xuất hóa đơn cuối chuyến
+        </button>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+            <div class="text-muted small">Tổng giao dịch hôm nay</div>
+            <div class="fs-4 fw-bold">128 giao dịch</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+            <div class="text-muted small">Doanh thu hôm nay</div>
+            <div class="fs-4 fw-bold text-success">245.800.000 ₫</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+            <div class="text-muted small">Giao dịch chờ đối soát</div>
+            <div class="fs-4 fw-bold text-warning">7</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+            <div class="text-muted small">Giao dịch ngoại tuyến (Offline POS)</div>
+            <div class="fs-4 fw-bold text-danger">3</div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-header bg-white fw-semibold py-3 border-bottom d-flex justify-content-between align-items-center">
+        <span>Giao dịch phát sinh gần đây</span>
+        <span class="badge bg-secondary">Cập nhật thời gian thực</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Mã GD</th>
+                        <th>Phòng (Cabin)</th>
+                        <th>Dịch vụ chi tiêu</th>
+                        <th>Số tiền</th>
+                        <th>Thời gian</th>
+                        <th class="pe-4 text-end">Nhân viên POS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-muted">{{ tx.id }}</td>
+                        <td><span class="badge bg-primary-subtle text-primary border border-primary-subtle">Cabin {{ tx.cabin }}</span></td>
+                        <td class="fw-semibold">{{ tx.item }}</td>
+                        <td class="fw-bold text-danger">+{{ "{:,.0f}".format(tx.amount) }} đ</td>
+                        <td class="text-muted small">{{ tx.time }}</td>
+                        <td class="pe-4 text-end"><span class="badge bg-light text-dark border">{{ tx.staff }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

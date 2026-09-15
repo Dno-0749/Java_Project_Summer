@@ -1,0 +1,50 @@
+<div class="bg-dark border-end" id="sidebar-wrapper">
+    <div class="sidebar-heading text-white fw-bold px-3 py-4 d-flex align-items-center gap-2">
+        <i class="bi bi-tsunami fs-4 text-info"></i>
+        <span>OpsPulse</span>
+    </div>
+
+    <div class="list-group list-group-flush">
+        <a href="{{ url_for('operations.dashboard') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'operations.dashboard' %}active{% endif %}">
+            <i class="bi bi-speedometer2 me-2"></i> Operations dashboard
+        </a>
+
+        <a href="{{ url_for('reports.index') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint.startswith('reports.') %}active{% endif %}">
+            <i class="bi bi-bar-chart-line me-2"></i> Báo cáo thống kê
+        </a>
+
+        <a href="{{ url_for('operations.checkin_monitor') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'operations.checkin_monitor' %}active{% endif %}">
+            <i class="bi bi-qr-code-scan me-2"></i> Giám sát check-in
+        </a>
+
+        <a href="{{ url_for('coordinator.itinerary') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint.startswith('coordinator.') %}active{% endif %}">
+            <i class="bi bi-calendar-week me-2"></i> Lịch trình
+        </a>
+
+        <a href="{{ url_for('activities.activities') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint.startswith('activities.') %}active{% endif %}">
+            <i class="bi bi-music-note-list me-2"></i> Hoạt động
+        </a>
+
+        <a href="{{ url_for('excursions.excursions') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint.startswith('excursions.') %}active{% endif %}">
+            <i class="bi bi-geo-alt me-2"></i> Tham quan bờ
+        </a>
+
+        <a href="{{ url_for('finance.passengers') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'finance.passengers' %}active{% endif %}">
+            <i class="bi bi-people me-2"></i> Hành khách
+        </a>
+    </div>
+
+    <div class="sidebar-footer px-3 py-3 mt-auto">
+        <div class="text-secondary small">
+            <div class="fw-semibold text-white">{{ current_user.full_name }}</div>
+            <div>{{ current_user.role_name }}</div>
+        </div>
+    </div>
+</div>

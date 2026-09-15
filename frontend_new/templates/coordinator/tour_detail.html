@@ -1,0 +1,51 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1"><i class="bi bi-info-circle text-primary me-2"></i>Chi tiết tour</h4>
+            <small class="text-muted">Thông tin chuyến du lịch</small>
+        </div>
+        <a href="{{ url_for('coordinator.itinerary') }}" class="btn btn-outline-secondary">Quay lại</a>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">{{ tour.name }}</h5>
+                {% if tour.status == 'Đang diễn ra' %}
+                    <span class="badge bg-success">{{ tour.status }}</span>
+                {% elif tour.status == 'Sắp khởi hành' %}
+                    <span class="badge bg-warning text-dark">{{ tour.status }}</span>
+                {% else %}
+                    <span class="badge bg-secondary">{{ tour.status }}</span>
+                {% endif %}
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="small text-muted">Thời gian</div>
+                    <div class="fw-semibold">{{ tour.start_date }} → {{ tour.end_date }}</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="small text-muted">Số hành khách</div>
+                    <div class="fw-semibold">{{ tour.passengers }}</div>
+                </div>
+                <div class="col-12">
+                    <div class="small text-muted">Danh sách cảng</div>
+                    <div>
+                        {% for port in tour.ports %}
+                            <span class="badge bg-light text-dark border me-2 mb-2">{{ port }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4 gap-2">
+                <a href="{{ url_for('coordinator.edit_ports', tour_id=tour.id) }}" class="btn btn-outline-secondary">Sửa cảng</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

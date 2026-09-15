@@ -1,0 +1,66 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="bi bi-gear text-primary me-2"></i>Cấu hình Hệ thống</h4>
+        <small class="text-muted">Tham số vận hành, chính sách hủy hoàn tiền và quản lý thiết bị</small>
+    </div>
+    <button class="btn btn-primary">
+        <i class="bi bi-save me-1"></i> Lưu cấu hình
+    </button>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-shield-check text-success me-2"></i>Chính sách hoàn tiền & Hủy tour (UC35)</h5>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Thời hạn hủy miễn phí trước giờ khởi hành</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" value="24">
+                    <span class="input-group-text">Giờ</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Tỷ lệ hoàn tiền khi hủy sau thời hạn</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" value="50">
+                    <span class="input-group-text">%</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Hạn mức chi tiêu tối đa mỗi phòng Cabin (Onboard Credit Limit)</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" value="10.000.000">
+                    <span class="input-group-text">VNĐ</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-broadcast text-info me-2"></i>Quản lý Thiết bị QR/RFID & BLE (UC36)</h5>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Giao thức đồng bộ ngoại tuyến POS (Offline Mode)</label>
+                <select class="form-select">
+                    <option selected>Tự động lưu LocalStorage & Đồng bộ khi có mạng</option>
+                    <option>Chỉ cho phép giao dịch khi có mạng vệ tinh</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Số lượng máy quét QR / POS đang kết nối</label>
+                <input type="text" class="form-control" value="8 thiết bị đang online" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Khoảng cách quét định vị BLE cho phép</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" value="15">
+                    <span class="input-group-text">Mét</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

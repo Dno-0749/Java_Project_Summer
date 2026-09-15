@@ -1,0 +1,51 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1"><i class="bi bi-plus-circle text-primary me-2"></i>Tạo tour bờ mới</h4>
+            <small class="text-muted">Thêm một tour khám phá mới cho khách hàng</small>
+        </div>
+        <a href="{{ url_for('excursions.excursions') }}" class="btn btn-outline-secondary">Quay lại</a>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <form method="post">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Tên tour</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Ngày khởi hành</label>
+                        <input type="date" name="date" class="form-control" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select name="status" class="form-select">
+                            <option value="Còn chỗ">Còn chỗ</option>
+                            <option value="Hết chỗ">Hết chỗ</option>
+                            <option value="Đã kết thúc">Đã kết thúc</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Sức chứa</label>
+                        <input type="number" name="capacity" class="form-control" min="0" value="0" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Giá vé</label>
+                        <input type="number" name="price" class="form-control" min="0" value="0">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{{ url_for('excursions.excursions') }}" class="btn btn-outline-secondary">Hủy</a>
+                    <button type="submit" class="btn btn-primary">Lưu tour</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

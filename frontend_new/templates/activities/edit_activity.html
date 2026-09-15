@@ -1,0 +1,54 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1"><i class="bi bi-pencil-square text-primary me-2"></i>Sửa hoạt động</h4>
+            <small class="text-muted">Cập nhật thông tin hoạt động</small>
+        </div>
+        <a href="{{ url_for('activities.activities') }}" class="btn btn-outline-secondary">Quay lại</a>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <form method="post">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Tên hoạt động</label>
+                        <input type="text" name="name" class="form-control" value="{{ activity.name }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Địa điểm</label>
+                        <input type="text" name="location" class="form-control" value="{{ activity.location }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Khung giờ</label>
+                        <input type="text" name="time" class="form-control" value="{{ activity.time }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Sức chứa</label>
+                        <input type="number" name="capacity" class="form-control" min="0" value="{{ activity.capacity }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Giá vé</label>
+                        <input type="number" name="price" class="form-control" min="0" value="{{ activity.price }}">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Loại phí</label>
+                        <select name="type" class="form-select">
+                            <option value="Miễn phí" {% if activity.type == 'Miễn phí' %}selected{% endif %}>Miễn phí</option>
+                            <option value="Trả phí" {% if activity.type == 'Trả phí' %}selected{% endif %}>Trả phí</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{{ url_for('activities.activity_guests', activity_id=activity.id) }}" class="btn btn-outline-secondary">Hủy</a>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

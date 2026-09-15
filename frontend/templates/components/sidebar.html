@@ -45,10 +45,6 @@
            class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'finance.finance' %}active{% endif %}">
             <i class="bi bi-cash-stack me-2"></i> Tài chính
         </a>
-        <a href="{{ url_for('finance.settlement') }}"
-           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint in ['finance.settlement', 'finance.invoice_view'] %}active{% endif %}">
-            <i class="bi bi-receipt-cutoff me-2"></i> Thanh toán cuối chuyến
-        </a>
         {% endif %}
 
         <!-- Quản trị hệ thống (Chỉ Admin) -->

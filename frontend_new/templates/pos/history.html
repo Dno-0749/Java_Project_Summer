@@ -1,0 +1,40 @@
+{% extends "layouts/pos_base.html" %}
+
+{% block content %}
+<h5 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Lịch sử giao dịch ca làm việc</h5>
+
+<div class="table-responsive">
+    <table class="table table-hover bg-white align-middle" style="border-radius: 12px; overflow: hidden;">
+        <thead>
+            <tr>
+                <th>Mã GD</th>
+                <th>Cabin</th>
+                <th>Dịch vụ</th>
+                <th>Số tiền</th>
+                <th>Giờ</th>
+                <th>Nhân viên</th>
+                <th>Trạng thái</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tx in transactions %}
+            <tr>
+                <td class="fw-semibold">{{ tx.id }}</td>
+                <td>{{ tx.cabin }}</td>
+                <td>{{ tx.item }}</td>
+                <td>{{ "{:,.0f}".format(tx.amount) }}đ</td>
+                <td>{{ tx.time }}</td>
+                <td>{{ tx.staff }}</td>
+                <td>
+                    {% if tx.sync_status == "pending_sync" %}
+                        <span class="sync-badge sync-pending"><i class="bi bi-cloud-arrow-up"></i> Chờ đồng bộ</span>
+                    {% else %}
+                        <span class="sync-badge sync-synced"><i class="bi bi-check-circle"></i> Đã đồng bộ</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

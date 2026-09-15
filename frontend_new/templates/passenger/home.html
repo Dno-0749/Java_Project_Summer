@@ -1,0 +1,45 @@
+{% extends "layouts/passenger_base.html" %}
+
+{% block content %}
+<div class="p-card text-center">
+    <div class="text-muted small mb-1">Xin chào,</div>
+    <div class="fw-bold fs-5 mb-2">{{ passenger.name }}</div>
+    <div class="text-muted small">Cabin {{ passenger.cabin }} · Mã thẻ {{ passenger.card_id }}</div>
+    <a href="{{ url_for('passenger.checkin') }}" class="btn btn-primary w-100 mt-3">
+        <i class="bi bi-qr-code me-2"></i>Mã QR check-in của tôi
+    </a>
+</div>
+
+<div class="row g-2 mb-3">
+    <div class="col-6">
+        <a href="{{ url_for('passenger.bill') }}" class="p-card d-block text-decoration-none text-dark text-center">
+            <i class="bi bi-wallet2 fs-4 text-primary"></i>
+            <div class="small mt-1">Số dư còn lại</div>
+            <div class="fw-bold">{{ "{:,.0f}".format(passenger.balance) }}đ</div>
+        </a>
+    </div>
+    <div class="col-6">
+        <a href="{{ url_for('passenger.notifications') }}" class="p-card d-block text-decoration-none text-dark text-center">
+            <i class="bi bi-bell fs-4 text-warning"></i>
+            <div class="small mt-1">Thông báo mới</div>
+            <div class="fw-bold">{{ unread_count }} tin</div>
+        </a>
+    </div>
+</div>
+
+<div class="p-card">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="fw-bold">Hoạt động hôm nay</span>
+        <a href="{{ url_for('passenger.activities') }}" class="small">Xem tất cả</a>
+    </div>
+    {% for a in today_activities %}
+    <a href="{{ url_for('passenger.activity_detail', activity_id=a.id) }}" class="d-flex justify-content-between align-items-center text-decoration-none text-dark py-2 {% if not loop.last %}border-bottom{% endif %}">
+        <div>
+            <div class="fw-semibold small">{{ a.name }}</div>
+            <div class="text-muted small">{{ a.time }} · {{ a.location }}</div>
+        </div>
+        <i class="bi bi-chevron-right text-muted"></i>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

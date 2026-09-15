@@ -6,8 +6,7 @@
     "full_name": "Nguyễn Chí Hải",
     "role": "admin",
     "role_name": "Quản trị viên hệ thống",
-    "status": "Active",
-    "passenger_id": null
+    "status": "Active"
   },
   {
     "id": "2",
@@ -16,8 +15,7 @@
     "full_name": "Nguyễn Hoàng Phát",
     "role": "operations",
     "role_name": "Quản lý vận hành",
-    "status": "Active",
-    "passenger_id": null
+    "status": "Active"
   },
   {
     "id": "3",
@@ -26,8 +24,7 @@
     "full_name": "Nguyễn Thị Thi",
     "role": "finance",
     "role_name": "Tài chính & Lễ tân",
-    "status": "Active",
-    "passenger_id": null
+    "status": "Active"
   },
   {
     "id": "4",
@@ -36,8 +33,7 @@
     "full_name": "Nguyễn Trọng Hải",
     "role": "coordinator",
     "role_name": "Điều phối lịch trình",
-    "status": "Active",
-    "passenger_id": null
+    "status": "Active"
   },
   {
     "id": "5",
@@ -46,27 +42,15 @@
     "full_name": "Lê Đình Quý",
     "role": "activity_manager",
     "role_name": "Quản lý hoạt động",
-    "status": "Active",
-    "passenger_id": null
+    "status": "Active"
   },
   {
     "id": "6",
-    "username": "posstaff",
+    "username": "tranvanan",
     "password": "123456",
-    "full_name": "Nhân viên POS Demo",
-    "role": "sales_staff",
-    "role_name": "Nhân viên bán hàng & dịch vụ",
-    "status": "Active",
-    "passenger_id": null
-  },
-  {
-    "id": "7",
-    "username": "passenger",
-    "password": "123456",
-    "full_name": "Hành khách Demo",
-    "role": "passenger",
-    "role_name": "Hành khách",
-    "status": "Active",
-    "passenger_id": 7
+    "full_name": "Trần Văn An",
+    "role": "coordinator",
+    "role_name": "Điều phối lịch trình",
+    "status": "Active"
   }
 ]

@@ -1,0 +1,37 @@
+{% extends "layouts/passenger_base.html" %}
+
+{% block content %}
+<div class="d-flex gap-2 mb-3">
+    <a href="{{ url_for('passenger.activities', filter='all') }}"
+       class="p-day-tab {% if filter_type == 'all' %}active{% endif %}">Tất cả</a>
+    <a href="{{ url_for('passenger.activities', filter='free') }}"
+       class="p-day-tab {% if filter_type == 'free' %}active{% endif %}">Miễn phí</a>
+    <a href="{{ url_for('passenger.activities', filter='paid') }}"
+       class="p-day-tab {% if filter_type == 'paid' %}active{% endif %}">Trả phí</a>
+</div>
+
+{% for a in activities %}
+<a href="{{ url_for('passenger.activity_detail', activity_id=a.id) }}" class="p-card d-block text-decoration-none text-dark">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <div class="fw-semibold">{{ a.name }}</div>
+            <div class="text-muted small">
+                {% if a.type == 'excursion' %}<i class="bi bi-geo-alt"></i>{% else %}<i class="bi bi-music-note"></i>{% endif %}
+                {{ a.location }} · {{ a.time }}
+            </div>
+        </div>
+        {% if a.registered >= a.capacity %}
+            <span class="badge p-badge-full">Đã đầy</span>
+        {% elif a.price == 0 %}
+            <span class="badge p-badge-free">Miễn phí</span>
+        {% else %}
+            <span class="badge p-badge-paid">{{ "{:,.0f}".format(a.price) }}đ</span>
+        {% endif %}
+    </div>
+    <div class="small text-muted mt-1">Đã đăng ký: {{ a.registered }}/{{ a.capacity }}</div>
+    {% if a.id in registrations %}
+    <span class="badge bg-primary-subtle text-primary mt-1"><i class="bi bi-check-circle"></i> Bạn đã đăng ký</span>
+    {% endif %}
+</a>
+{% endfor %}
+{% endblock %}

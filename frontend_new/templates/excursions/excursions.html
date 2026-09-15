@@ -1,0 +1,35 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="bi bi-geo-alt text-primary me-2"></i>Quản lý Tham quan bờ (Shore Excursions)</h4>
+        <small class="text-muted">Tạo tour, quản lý đơn vị đối tác địa phương và chia nhóm hành khách (UC18, UC19)</small>
+    </div>
+    <a href="{{ url_for('excursions.create_excursion') }}" class="btn btn-primary shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i> Tạo tour bờ mới
+    </a>
+</div>
+
+<div class="row g-3">
+    {% for ex in excursions %}
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100 p-4">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="fw-bold mb-0 text-dark">{{ ex.name }}</h5>
+                <span class="badge {% if ex.status == 'Còn chỗ' %}bg-success{% elif ex.status == 'Hết chỗ' %}bg-danger{% else %}bg-secondary{% endif %}">
+                    {{ ex.status }}
+                </span>
+            </div>
+            <div class="small text-muted mb-2"><i class="bi bi-calendar-event me-1"></i>Ngày: {{ ex.date }}</div>
+            <div class="small mb-2"><i class="bi bi-people me-1"></i>Đăng ký: {{ ex.registered }} / {{ ex.capacity }} khách</div>
+            <div class="fw-bold text-primary mb-3">{{ "{:,.0f}".format(ex.price) }} đ / vé</div>
+            <div class="mt-auto border-top pt-3 d-flex gap-2">
+                <a href="{{ url_for('excursions.excursion_detail', excursion_id=ex.id) }}" class="btn btn-sm btn-outline-primary flex-fill">Chi tiết</a>
+                <a href="{{ url_for('excursions.edit_excursion', excursion_id=ex.id) }}" class="btn btn-sm btn-outline-secondary flex-fill">Sửa tour</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "layouts/passenger_base.html" %}
+
+{% block content %}
+{% for n in notifications %}
+<div class="p-card {% if n.priority == 'high' %}border-danger{% endif %}">
+    <div class="d-flex justify-content-between align-items-start mb-1">
+        <span class="fw-semibold small">
+            {% if n.priority == 'high' %}<i class="bi bi-exclamation-triangle-fill text-danger me-1"></i>{% endif %}
+            {{ n.title }}
+        </span>
+    </div>
+    <div class="small text-muted mb-1">{{ n.time }}</div>
+    <div class="small">{{ n.content }}</div>
+</div>
+{% endfor %}
+{% endblock %}
