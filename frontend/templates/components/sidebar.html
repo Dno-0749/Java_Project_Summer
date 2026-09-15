@@ -20,24 +20,9 @@
             <i class="bi bi-qr-code-scan me-2"></i> Giám sát check-in
         </a>
 
-        <a href="{{ url_for('coordinator.itinerary') }}"
-           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint.startswith('coordinator.') %}active{% endif %}">
-            <i class="bi bi-calendar-week me-2"></i> Lịch trình
-        </a>
-
         <a href="{{ url_for('activities.activities') }}"
            class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint.startswith('activities.') %}active{% endif %}">
             <i class="bi bi-music-note-list me-2"></i> Hoạt động
-        </a>
-
-        <a href="{{ url_for('excursions.excursions') }}"
-           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint.startswith('excursions.') %}active{% endif %}">
-            <i class="bi bi-geo-alt me-2"></i> Tham quan bờ
-        </a>
-
-        <a href="{{ url_for('finance.passengers') }}"
-           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'finance.passengers' %}active{% endif %}">
-            <i class="bi bi-people me-2"></i> Hành khách
         </a>
     </div>
 

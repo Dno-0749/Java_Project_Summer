@@ -6,14 +6,15 @@ Web application focused on cruise operations: live operational metrics and passe
 
 ### 1. Cấu trúc thư mục
 
-```
-frontend_new/
+frontend/
 ├── app.py                 # Entry point chính
 ├── config.py              # Cấu hình
 ├── requirements.txt       # Thư viện cần thiết
 ├── blueprints/
 │   ├── auth.py            # Login / Logout
-│   └── operations.py      # Dashboard và giám sát check-in
+│   ├── operations.py      # Dashboard và giám sát check-in
+│   ├── activities.py      # Quản lý hoạt động và sức chứa
+│   └── reports.py         # Báo cáo vận hành và xuất file
 ├── templates/
 │   ├── layouts/
 │   │   └── base.html      # Layout chung

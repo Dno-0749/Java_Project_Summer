@@ -1,10 +1,14 @@
 import os
 import sys
+import json
+from urllib.error import URLError, HTTPError
+from urllib.request import Request, urlopen
 from datetime import datetime
 
 from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 from functools import wraps
+from config import Config
 
 SRC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 if SRC_DIR not in sys.path:
@@ -13,6 +17,19 @@ if SRC_DIR not in sys.path:
 from supabase_client import get_supabase_client
 
 operations_bp = Blueprint("operations", __name__, url_prefix="/operations")
+
+
+def _api_get(path):
+    """Read operations data from the backend API when it is available."""
+    request = Request(
+        f"{Config.API_BASE_URL.rstrip('/')}{path}",
+        headers={"Accept": "application/json"},
+    )
+    try:
+        with urlopen(request, timeout=2) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except (HTTPError, URLError, TimeoutError, ValueError):
+        return None
 
 
 def _safe_value(value, default=0):
@@ -36,7 +53,7 @@ def _normalise_checkins(rows):
         status_lower = status.lower()
         if status_lower in {"returned", "completed", "onboard", "đã quay lại"}:
             status = "Đã quay lại"
-        elif status_lower in {"late", "overdue", "quay lại trễ", "delayed"}:
+        elif status_lower in {"late", "overdue", "quay lại trễ", "delayed", "at_risk"}:
             status = "Quay lại trễ"
         elif status_lower in {"not_checked_in", "missing", "chưa check-in"}:
             status = "Chưa check-in"
@@ -45,11 +62,11 @@ def _normalise_checkins(rows):
 
         normalized.append({
             "id": item.get("id") or item.get("checkin_id") or f"CHK-{index:04d}",
-            "passenger": item.get("passenger_name") or item.get("passenger") or item.get("name") or "Không rõ",
+            "passenger": item.get("passenger_name") or item.get("passenger") or item.get("name") or item.get("passenger_id") or "Không rõ",
             "cabin": item.get("cabin") or item.get("room") or item.get("cabin_number") or "-",
-            "excursion": item.get("excursion_name") or item.get("excursion") or item.get("tour") or "-",
-            "checkin_time": item.get("checkin_time") or item.get("checked_in_at") or item.get("created_at") or "-",
-            "expected_return": item.get("expected_return") or item.get("return_deadline") or item.get("deadline") or "-",
+            "excursion": item.get("excursion_name") or item.get("excursion") or item.get("tour") or item.get("activity_id") or "-",
+            "checkin_time": item.get("checkin_time") or item.get("checked_in_at") or item.get("checked_at") or item.get("created_at") or "-",
+            "expected_return": item.get("expected_return") or item.get("expected_return_at") or item.get("return_deadline") or item.get("deadline") or "-",
             "returned_time": item.get("returned_time") or item.get("returned_at") or "",
             "status": status,
         })
@@ -57,6 +74,20 @@ def _normalise_checkins(rows):
 
 
 def _fetch_checkin_monitor_data():
+    api_rows = _api_get("/operations/checkins")
+    if api_rows is not None:
+        checkins = _normalise_checkins(api_rows)
+        return {
+            "checkins": checkins,
+            "summary": {
+                "total": len(checkins),
+                "returned": sum(item["status"] == "Đã quay lại" for item in checkins),
+                "outside": sum(item["status"] == "Đang ở ngoài tàu" for item in checkins),
+                "late": sum(item["status"] == "Quay lại trễ" for item in checkins),
+                "not_checked_in": sum(item["status"] == "Chưa check-in" for item in checkins),
+            },
+        }
+
     client = get_supabase_client()
     rows = _fetch_table(client, "checkins")
     checkins = _normalise_checkins(rows)
@@ -73,6 +104,22 @@ def _fetch_checkin_monitor_data():
 
 
 def _fetch_live_dashboard_data():
+    api_data = _api_get("/operations/dashboard")
+    if api_data is not None:
+        return {
+            "stats": {
+                "passengers": api_data.get("passengers_registered", 0),
+                "activities_today": api_data.get("activities", 0),
+                "excursions_today": api_data.get("services", 0),
+                "revenue_today": api_data.get("revenue", 0),
+                "checkins_today": api_data.get("checkins", 0),
+                "capacity_total": api_data.get("capacity", 0),
+                "capacity_used": api_data.get("capacity_used", 0),
+                "pending_registrations": 0,
+            },
+            "recent_activities": [],
+        }
+
     client = get_supabase_client()
 
     table_names = [
@@ -101,6 +148,11 @@ def _fetch_live_dashboard_data():
         "excursions_today": len(excursions),
         "revenue_today": sum(_safe_value(item.get("amount")) for item in transactions if item.get("amount") is not None),
         "checkins_today": len(checkins),
+        "capacity_total": sum(_safe_value(item.get("capacity")) for item in activities),
+        "capacity_used": sum(
+            _safe_value(item.get("registered") or item.get("participants"))
+            for item in activities
+        ),
         "pending_registrations": sum(1 for item in bookings if str(item.get("status", "")).lower() in {"pending", "waiting", "new"}),
     }
 

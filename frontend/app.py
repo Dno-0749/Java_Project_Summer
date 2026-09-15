@@ -3,10 +3,7 @@ from flask_login import LoginManager
 from config import Config
 from blueprints.auth import auth_bp
 from blueprints.operations import operations_bp
-from blueprints.coordinator import coordinator_bp
 from blueprints.activities import activities_bp
-from blueprints.excursions import excursions_bp
-from blueprints.finance import finance_bp
 from blueprints.reports import reports_bp
 from models import get_user_by_id
 
@@ -28,10 +25,7 @@ def create_app():
     # Operations brand chỉ công khai các luồng vận hành.
     app.register_blueprint(auth_bp)
     app.register_blueprint(operations_bp)
-    app.register_blueprint(coordinator_bp)
     app.register_blueprint(activities_bp)
-    app.register_blueprint(excursions_bp)
-    app.register_blueprint(finance_bp)
     app.register_blueprint(reports_bp)
 
     # Điều hướng tương thích cho URL cũ nếu có
