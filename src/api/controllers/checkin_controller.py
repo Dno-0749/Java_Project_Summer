@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+﻿from flask import Blueprint, request, jsonify
 from services.checkin_service import CheckInService
 from infrastructure.repositories.checkin_repository import CheckInRepository
 
@@ -25,7 +25,7 @@ def create_checkin():
     data = request.get_json() or {}
     passenger_id = data.get('passenger_id')
     if not passenger_id:
-        return jsonify({'message': 'passenger_id là bắt buộc'}), 400
+        return jsonify({'message': 'passenger_id lÃ  báº¯t buá»™c'}), 400
     row = service.create_checkin(
         passenger_id=passenger_id,
         booking_id=data.get('booking_id'),
@@ -48,5 +48,5 @@ def update_checkin_status(checkin_id):
     data = request.get_json() or {}
     status = data.get('status')
     if not status:
-        return jsonify({'message': 'status là bắt buộc'}), 400
+        return jsonify({'message': 'status lÃ  báº¯t buá»™c'}), 400
     return jsonify(service.update_status(checkin_id, status)), 200

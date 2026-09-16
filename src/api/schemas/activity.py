@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields
+﻿from marshmallow import Schema, fields
 
 
 class ActivityRequestSchema(Schema):
@@ -9,7 +9,7 @@ class ActivityRequestSchema(Schema):
     capacity = fields.Int(load_default=0)
     registered = fields.Int(load_default=0)
     price = fields.Int(load_default=0)
-    activity_type = fields.Str(load_default="Miễn phí")
+    activity_type = fields.Str(load_default="Miễn phí­")
 
 
 class ActivityResponseSchema(Schema):

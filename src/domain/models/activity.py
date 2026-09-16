@@ -1,4 +1,4 @@
-class Activity:
+﻿class Activity:
     def __init__(
         self,
         id=None,
@@ -9,7 +9,7 @@ class Activity:
         capacity=0,
         registered=0,
         price=0,
-        activity_type="Miễn phí",
+        activity_type="Miễn phí­",
         rating=0,
         feedback_count=0,
         created_at=None,

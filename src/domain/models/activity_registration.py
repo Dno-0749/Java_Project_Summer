@@ -1,4 +1,4 @@
-class ActivityRegistration:
+﻿class ActivityRegistration:
     def __init__(self, id=None, passenger_id=None, activity_id=None, booking_id=None, status='REGISTERED', notes=None):
         self.id = id
         self.passenger_id = passenger_id

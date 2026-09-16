@@ -1,6 +1,12 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from functools import wraps
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
+import json
+
+from config import Config
+
 
 activities_bp = Blueprint(
     "activities",
@@ -8,83 +14,6 @@ activities_bp = Blueprint(
     url_prefix="/activities"
 )
 
-activities_data = [
-    {
-        "id": 1,
-        "name": "Yoga buổi sáng",
-        "location": "Sundeck",
-        "date": "2026-09-12",
-        "time": "06:30 - 07:30",
-        "capacity": 40,
-        "registered": 35,
-        "price": 0,
-        "type": "Miễn phí",
-        "status": "Đang diễn ra",
-        "description": "Buổi tập yoga buổi sáng dành cho hành khách trên tàu.",
-        "rating": 4.8,
-        "feedback_count": 24
-    },
-    {
-        "id": 2,
-        "name": "Wine Tasting",
-        "location": "Sky Lounge",
-        "date": "2026-09-12",
-        "time": "16:00 - 17:30",
-        "capacity": 25,
-        "registered": 25,
-        "price": 850000,
-        "type": "Trả phí",
-        "status": "Sắp diễn ra",
-        "description": "Trải nghiệm thưởng thức và tìm hiểu các loại rượu.",
-        "rating": 4.7,
-        "feedback_count": 18
-    },
-    {
-        "id": 3,
-        "name": "Live Music Night",
-        "location": "Main Stage",
-        "date": "2026-09-12",
-        "time": "20:00 - 22:00",
-        "capacity": 200,
-        "registered": 178,
-        "price": 0,
-        "type": "Miễn phí",
-        "status": "Sắp diễn ra",
-        "description": "Đêm nhạc trực tiếp tại sân khấu chính của tàu.",
-        "rating": 4.9,
-        "feedback_count": 42
-    },
-    {
-        "id": 4,
-        "name": "Cooking Class",
-        "location": "Culinary Studio",
-        "date": "2026-09-13",
-        "time": "10:00 - 12:00",
-        "capacity": 15,
-        "registered": 12,
-        "price": 1200000,
-        "type": "Trả phí",
-        "status": "Sắp diễn ra",
-        "description": "Lớp học nấu ăn cùng đầu bếp chuyên nghiệp.",
-        "rating": 4.6,
-        "feedback_count": 15
-    },
-    {
-        "id": 5,
-        "name": "Kids Club",
-        "location": "Kids Zone",
-        "date": "2026-09-13",
-        "time": "09:00 - 11:00",
-        "capacity": 30,
-        "registered": 22,
-        "price": 0,
-        "type": "Miễn phí",
-        "status": "Sắp diễn ra",
-        "description": "Khu vui chơi và hoạt động dành cho trẻ em.",
-        "rating": 4.8,
-        "feedback_count": 20
-    }
-]
 
 registrations_data = {
     1: [
@@ -122,6 +51,92 @@ registrations_data = {
 }
 
 
+def api_request(path, method="GET", data=None):
+    url = f"{Config.API_BASE_URL}{path}"
+
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+
+    body = None
+
+    if data is not None:
+        body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+
+    req = Request(
+        url,
+        data=body,
+        headers=headers,
+        method=method
+    )
+
+    try:
+        with urlopen(req, timeout=10) as response:
+            raw = response.read().decode("utf-8")
+
+            if not raw:
+                return {}
+
+            return json.loads(raw)
+
+    except HTTPError as e:
+        try:
+            raw = e.read().decode("utf-8")
+            error_data = json.loads(raw)
+        except Exception:
+            error_data = {
+                "message": str(e)
+            }
+
+        return {
+            "_error": True,
+            "status": e.code,
+            "message": error_data
+        }
+
+    except URLError as e:
+        return {
+            "_error": True,
+            "status": 0,
+            "message": f"Không kết nối được Backend: {e}"
+        }
+
+    except Exception as e:
+        return {
+            "_error": True,
+            "status": 0,
+            "message": str(e)
+        }
+
+
+def normalize_activity(item):
+    return {
+        "id": item.get("id"),
+        "name": item.get("name", ""),
+        "location": item.get("location", ""),
+        "date": item.get("date", ""),
+        "time": item.get("time", ""),
+        "capacity": item.get("capacity", 0),
+        "registered": item.get("registered", 0),
+        "price": item.get("price", 0),
+        "type": item.get(
+            "activity_type",
+            item.get("type", "Miễn phí")
+        ),
+        "activity_type": item.get(
+            "activity_type",
+            item.get("type", "Miễn phí")
+        ),
+        "status": item.get("status", "Sắp diễn ra"),
+        "description": item.get("description", ""),
+        "rating": item.get("rating", 0),
+        "feedback_count": item.get("feedback_count", 0),
+        "created_at": item.get("created_at"),
+        "updated_at": item.get("updated_at")
+    }
+
+
 def activity_access(f):
     @wraps(f)
     @login_required
@@ -149,8 +164,13 @@ def manager_access(f):
             "activity_manager",
             "admin"
         ]:
-            flash("Bạn không có quyền thực hiện thao tác này.", "danger")
-            return redirect(url_for("activities.activities"))
+            flash(
+                "Bạn không có quyền thực hiện thao tác này.",
+                "danger"
+            )
+            return redirect(
+                url_for("activities.activities")
+            )
 
         return f(*args, **kwargs)
 
@@ -160,6 +180,27 @@ def manager_access(f):
 @activities_bp.route("/")
 @activity_access
 def activities():
+    result = api_request(
+        "/api/activities/",
+        method="GET"
+    )
+
+    if result.get("_error"):
+        flash(
+            "Không lấy được dữ liệu hoạt động từ Backend.",
+            "danger"
+        )
+
+        return render_template(
+            "activities/activities.html",
+            activities=[]
+        )
+
+    activities_data = [
+        normalize_activity(item)
+        for item in result
+    ]
+
     return render_template(
         "activities/activities.html",
         activities=activities_data
@@ -170,33 +211,92 @@ def activities():
 @manager_access
 def create_activity():
     if request.method == "POST":
-        activity_id = max(
-            [activity["id"] for activity in activities_data],
-            default=0
-        ) + 1
+        start_time = request.form.get(
+            "start_time",
+            ""
+        )
 
-        start_time = request.form.get("start_time", "")
-        end_time = request.form.get("end_time", "")
+        end_time = request.form.get(
+            "end_time",
+            ""
+        )
 
-        new_activity = {
-            "id": activity_id,
-            "name": request.form.get("name", ""),
-            "location": request.form.get("location", ""),
-            "date": request.form.get("date", ""),
-            "time": f"{start_time} - {end_time}",
-            "capacity": int(request.form.get("capacity", 0)),
+        activity_type = request.form.get(
+            "type",
+            "Miễn phí"
+        )
+
+        payload = {
+            "name": request.form.get(
+                "name",
+                ""
+            ).strip(),
+
+            "location": request.form.get(
+                "location",
+                ""
+            ).strip(),
+
+            "description": request.form.get(
+                "description",
+                ""
+            ).strip(),
+
+            "status": request.form.get(
+                "status",
+                "Sắp diễn ra"
+            ),
+
+            "capacity": int(
+                request.form.get(
+                    "capacity",
+                    0
+                ) or 0
+            ),
+
             "registered": 0,
-            "price": int(request.form.get("price", 0)),
-            "type": request.form.get("type", "Miễn phí"),
-            "status": request.form.get("status", "Sắp diễn ra"),
-            "description": request.form.get("description", ""),
-            "rating": 0,
-            "feedback_count": 0
+
+            "price": int(
+                request.form.get(
+                    "price",
+                    0
+                ) or 0
+            ),
+
+            "activity_type": activity_type
         }
 
-        activities_data.append(new_activity)
+        if start_time or end_time:
+            payload["description"] = (
+                payload["description"]
+                + (
+                    f"\nThời gian: {start_time} - {end_time}"
+                    if start_time or end_time
+                    else ""
+                )
+            )
 
-        flash("Tạo hoạt động thành công.", "success")
+        result = api_request(
+            "/api/activities/",
+            method="POST",
+            data=payload
+        )
+
+        if result.get("_error"):
+            flash(
+                f"Tạo hoạt động thất bại: {result.get('message')}",
+                "danger"
+            )
+
+            return render_template(
+                "activities/activity_form.html",
+                edit_mode=False
+            )
+
+        flash(
+            "Tạo hoạt động thành công.",
+            "success"
+        )
 
         return redirect(
             url_for("activities.activities")
@@ -211,21 +311,22 @@ def create_activity():
 @activities_bp.route("/<int:activity_id>")
 @activity_access
 def activity_detail(activity_id):
-    activity = next(
-        (
-            item
-            for item in activities_data
-            if item["id"] == activity_id
-        ),
-        None
+    result = api_request(
+        f"/api/activities/{activity_id}",
+        method="GET"
     )
 
-    if activity is None:
-        flash("Không tìm thấy hoạt động.", "danger")
+    if result.get("_error"):
+        flash(
+            "Không tìm thấy hoạt động.",
+            "danger"
+        )
 
         return redirect(
             url_for("activities.activities")
         )
+
+    activity = normalize_activity(result)
 
     return render_template(
         "activities/activity_detail.html",
@@ -233,70 +334,30 @@ def activity_detail(activity_id):
     )
 
 
-@activities_bp.route("/<int:activity_id>/edit", methods=["GET", "POST"])
+@activities_bp.route(
+    "/<int:activity_id>/edit",
+    methods=["GET", "POST"]
+)
 @manager_access
 def edit_activity(activity_id):
-    activity = next(
-        (
-            item
-            for item in activities_data
-            if item["id"] == activity_id
-        ),
-        None
+    result = api_request(
+        f"/api/activities/{activity_id}",
+        method="GET"
     )
 
-    if activity is None:
-        flash("Không tìm thấy hoạt động.", "danger")
+    if result.get("_error"):
+        flash(
+            "Không tìm thấy hoạt động.",
+            "danger"
+        )
 
         return redirect(
             url_for("activities.activities")
         )
 
+    activity = normalize_activity(result)
+
     if request.method == "POST":
-        activity["name"] = request.form.get(
-            "name",
-            ""
-        )
-
-        activity["location"] = request.form.get(
-            "location",
-            ""
-        )
-
-        activity["date"] = request.form.get(
-            "date",
-            ""
-        )
-
-        activity["capacity"] = int(
-            request.form.get(
-                "capacity",
-                0
-            )
-        )
-
-        activity["price"] = int(
-            request.form.get(
-                "price",
-                0
-            )
-        )
-
-        activity["type"] = request.form.get(
-            "type",
-            "Miễn phí"
-        )
-
-        activity["status"] = request.form.get(
-            "status",
-            "Sắp diễn ra"
-        )
-
-        activity["description"] = request.form.get(
-            "description",
-            ""
-        )
-
         start_time = request.form.get(
             "start_time",
             ""
@@ -307,9 +368,81 @@ def edit_activity(activity_id):
             ""
         )
 
+        activity_type = request.form.get(
+            "type",
+            activity.get(
+                "activity_type",
+                "Miễn phí"
+            )
+        )
+
+        description = request.form.get(
+            "description",
+            ""
+        ).strip()
+
         if start_time or end_time:
-            activity["time"] = (
-                f"{start_time} - {end_time}"
+            description = (
+                description
+                + f"\nThời gian: {start_time} - {end_time}"
+            )
+
+        payload = {
+            "name": request.form.get(
+                "name",
+                ""
+            ).strip(),
+
+            "location": request.form.get(
+                "location",
+                ""
+            ).strip(),
+
+            "description": description,
+
+            "status": request.form.get(
+                "status",
+                "Sắp diễn ra"
+            ),
+
+            "capacity": int(
+                request.form.get(
+                    "capacity",
+                    0
+                ) or 0
+            ),
+
+            "registered": activity.get(
+                "registered",
+                0
+            ),
+
+            "price": int(
+                request.form.get(
+                    "price",
+                    0
+                ) or 0
+            ),
+
+            "activity_type": activity_type
+        }
+
+        update_result = api_request(
+            f"/api/activities/{activity_id}",
+            method="PUT",
+            data=payload
+        )
+
+        if update_result.get("_error"):
+            flash(
+                f"Cập nhật thất bại: {update_result.get('message')}",
+                "danger"
+            )
+
+            return render_template(
+                "activities/activity_form.html",
+                activity=activity,
+                edit_mode=True
             )
 
         flash(
@@ -334,21 +467,22 @@ def edit_activity(activity_id):
 @activities_bp.route("/<int:activity_id>/registrations")
 @activity_access
 def registrations(activity_id):
-    activity = next(
-        (
-            item
-            for item in activities_data
-            if item["id"] == activity_id
-        ),
-        None
+    result = api_request(
+        f"/api/activities/{activity_id}",
+        method="GET"
     )
 
-    if activity is None:
-        flash("Không tìm thấy hoạt động.", "danger")
+    if result.get("_error"):
+        flash(
+            "Không tìm thấy hoạt động.",
+            "danger"
+        )
 
         return redirect(
             url_for("activities.activities")
         )
+
+    activity = normalize_activity(result)
 
     registrations = registrations_data.get(
         activity_id,
@@ -407,4 +541,40 @@ def checkin(activity_id, registration_id):
             "activities.registrations",
             activity_id=activity_id
         )
+    )
+
+
+@activities_bp.route(
+    "/<int:activity_id>/delete",
+    methods=["POST"]
+)
+@manager_access
+def delete_activity(activity_id):
+    result = api_request(
+        f"/api/activities/{activity_id}",
+        method="DELETE"
+    )
+
+    if result.get("_error"):
+        flash(
+            f"Xóa hoạt động thất bại: {result.get('message')}",
+            "danger"
+        )
+
+        return redirect(
+            url_for("activities.activities")
+        )
+
+    registrations_data.pop(
+        activity_id,
+        None
+    )
+
+    flash(
+        "Xóa hoạt động thành công.",
+        "success"
+    )
+
+    return redirect(
+        url_for("activities.activities")
     )

@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+﻿from flask import Blueprint, request, jsonify
 from services.activity_schedule_service import ActivityScheduleService
 from infrastructure.repositories.activity_schedule_repository import ActivityScheduleRepository
 from api.schemas.activity_schedule import ActivityScheduleRequestSchema, ActivityScheduleResponseSchema
@@ -31,7 +31,7 @@ def create_schedule():
     Create activity schedule
     ---
     post:
-      summary: Thiết lập thời gian địa điểm sức chứa cho hoạt động
+      summary: Thiết lập thời gian và địa điểmi gian Ä‘á»‹a Ä‘iá»ƒm sức chứa cho hoạt động
       tags:
         - ActivitySchedules
       responses:

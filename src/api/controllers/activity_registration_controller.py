@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+﻿from flask import Blueprint, jsonify, request
 
 from services.activity_registration_service import (
     ActivityRegistrationService

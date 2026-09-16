@@ -1,4 +1,4 @@
-import os
+﻿import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -51,7 +51,7 @@ class DevelopmentConfig(Config):
 
     DEBUG = True
 
-    # Ưu tiên PostgreSQL nếu có biến môi trường
+    # Ưu tiên PostgreSQL nếu có biến môi trườngng
     # Nếu không có thì dùng SQLite
     DATABASE_URI = (
         os.environ.get("POSTGREE_DATABASE_URL")

@@ -1,4 +1,4 @@
-class TourProvider:
+﻿class TourProvider:
     def __init__(
         self,
         id=None,

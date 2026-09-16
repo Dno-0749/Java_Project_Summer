@@ -1,4 +1,4 @@
-from domain.models.checkin import CheckIn
+﻿from domain.models.checkin import CheckIn
 
 class CheckInService:
     def __init__(self, repository):

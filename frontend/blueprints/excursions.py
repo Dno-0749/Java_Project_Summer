@@ -1,6 +1,12 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from functools import wraps
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
+import json
+
+from config import Config
+
 
 excursions_bp = Blueprint(
     "excursions",
@@ -8,139 +14,116 @@ excursions_bp = Blueprint(
     url_prefix="/excursions"
 )
 
-excursions_data = [
-    {
-        "id": 1,
-        "name": "Tour Phú Quốc - Hòn Thơm",
-        "date": "2026-09-12",
-        "time": "08:00 - 16:00",
-        "location": "Phú Quốc",
-        "provider": "Phú Quốc Travel",
-        "capacity": 80,
-        "registered": 72,
-        "price": 1500000,
-        "status": "Sắp diễn ra",
-        "description": "Khám phá Phú Quốc và Hòn Thơm với nhiều hoạt động tham quan.",
-        "rating": 4.8,
-        "feedback_count": 35
-    },
-    {
-        "id": 2,
-        "name": "Lặn ngắm san hô Cát Bà",
-        "date": "2026-09-11",
-        "time": "09:00 - 15:00",
-        "location": "Cát Bà",
-        "provider": "Cat Ba Ocean Tour",
-        "capacity": 30,
-        "registered": 30,
-        "price": 950000,
-        "status": "Sắp diễn ra",
-        "description": "Trải nghiệm lặn ngắm san hô cùng hướng dẫn viên chuyên nghiệp.",
-        "rating": 4.7,
-        "feedback_count": 21
-    },
-    {
-        "id": 3,
-        "name": "City Tour Nha Trang",
-        "date": "2026-08-21",
-        "time": "08:30 - 14:00",
-        "location": "Nha Trang",
-        "provider": "Nha Trang Explorer",
-        "capacity": 100,
-        "registered": 88,
-        "price": 600000,
-        "status": "Hoàn thành",
-        "description": "Tham quan các địa điểm nổi tiếng tại thành phố Nha Trang.",
-        "rating": 4.6,
-        "feedback_count": 42
-    }
-]
 
-providers_data = [
-    {
-        "id": 1,
-        "name": "Phú Quốc Travel",
-        "contact_person": "Nguyễn Hoàng Nam",
-        "phone": "0901234567",
-        "email": "contact@phuquoctravel.vn",
-        "address": "Phú Quốc, Kiên Giang",
-        "status": "Đang hợp tác",
-        "excursion_count": 1
-    },
-    {
-        "id": 2,
-        "name": "Cat Ba Ocean Tour",
-        "contact_person": "Trần Minh Đức",
-        "phone": "0912345678",
-        "email": "info@catbaocean.vn",
-        "address": "Cát Bà, Hải Phòng",
-        "status": "Đang hợp tác",
-        "excursion_count": 1
-    },
-    {
-        "id": 3,
-        "name": "Nha Trang Explorer",
-        "contact_person": "Lê Quốc Anh",
-        "phone": "0923456789",
-        "email": "hello@nhatrangexplorer.vn",
-        "address": "Nha Trang, Khánh Hòa",
-        "status": "Đang hợp tác",
-        "excursion_count": 1
-    }
-]
-
-excursion_registrations = {
-    1: [
-        {
-            "id": 1,
-            "guest_code": "G004",
-            "name": "Phạm Minh Tuấn",
-            "room": "B201",
-            "registered_at": "09/09/2026",
-            "checked_in": True,
-            "rating": 5,
-            "feedback": "Tour rất thú vị"
-        },
-        {
-            "id": 2,
-            "guest_code": "G005",
-            "name": "Võ Thị Lan",
-            "room": "B202",
-            "registered_at": "10/09/2026",
-            "checked_in": False,
-            "rating": 0,
-            "feedback": ""
-        }
-    ],
-    2: [
-        {
-            "id": 3,
-            "guest_code": "G006",
-            "name": "Đặng Quốc Huy",
-            "room": "B301",
-            "registered_at": "09/09/2026",
-            "checked_in": False,
-            "rating": 0,
-            "feedback": ""
-        }
-    ],
-    3: []
+STATUS_TO_API = {
+    "Sắp diễn ra": "OPEN",
+    "Đang diễn ra": "IN_PROGRESS",
+    "Hoàn thành": "COMPLETED",
+    "Trì hoãn": "DELAYED",
+    "Hủy": "CANCELLED"
 }
+
+
+STATUS_FROM_API = {
+    "OPEN": "Sắp diễn ra",
+    "IN_PROGRESS": "Đang diễn ra",
+    "COMPLETED": "Hoàn thành",
+    "DELAYED": "Trì hoãn",
+    "CANCELLED": "Hủy"
+}
+
+
+def api_request(path, method="GET", data=None):
+    url = f"{Config.API_BASE_URL}{path}"
+
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    body = None
+
+    if data is not None:
+        body = json.dumps(data).encode("utf-8")
+
+    req = Request(
+        url,
+        data=body,
+        headers=headers,
+        method=method
+    )
+
+    try:
+        with urlopen(req, timeout=10) as response:
+            content = response.read().decode("utf-8")
+
+            if not content:
+                return {}
+
+            return json.loads(content)
+
+    except HTTPError as e:
+        try:
+            content = e.read().decode("utf-8")
+
+            return {
+                "_error": True,
+                "_status": e.code,
+                "_data": json.loads(content)
+            }
+
+        except Exception:
+            return {
+                "_error": True,
+                "_status": e.code,
+                "_data": {}
+            }
+
+    except URLError:
+        return {
+            "_error": True,
+            "_status": 0,
+            "_data": {
+                "message": "Không thể kết nối Backend API."
+            }
+        }
+
+    except Exception as e:
+        return {
+            "_error": True,
+            "_status": 0,
+            "_data": {
+                "message": str(e)
+            }
+        }
 
 
 def excursion_access(f):
     @wraps(f)
     @login_required
     def decorated_function(*args, **kwargs):
-        if current_user.role not in [
+        role = getattr(
+            current_user,
+            "role",
+            None
+        )
+
+        allowed_roles = {
             "activity_manager",
             "operations",
             "admin",
             "passenger",
             "shore_excursion_manager"
-        ]:
-            flash("Bạn không có quyền truy cập.", "danger")
-            return redirect(url_for("auth.login"))
+        }
+
+        if role not in allowed_roles:
+            flash(
+                "Bạn không có quyền truy cập chức năng này.",
+                "error"
+            )
+
+            return redirect(
+                url_for("dashboard")
+            )
 
         return f(*args, **kwargs)
 
@@ -151,75 +134,316 @@ def excursion_manager_access(f):
     @wraps(f)
     @login_required
     def decorated_function(*args, **kwargs):
-        if current_user.role not in [
+        role = getattr(
+            current_user,
+            "role",
+            None
+        )
+
+        allowed_roles = {
+            "activity_manager",
             "shore_excursion_manager",
+            "operations",
             "admin"
-        ]:
-            flash("Bạn không có quyền thực hiện thao tác này.", "danger")
-            return redirect(url_for("excursions.excursions"))
+        }
+
+        if role not in allowed_roles:
+            flash(
+                "Bạn không có quyền quản lý hoạt động trên bờ.",
+                "error"
+            )
+
+            return redirect(
+                url_for("excursions.excursions")
+            )
 
         return f(*args, **kwargs)
 
     return decorated_function
 
 
+def normalize_provider(provider):
+    item = dict(provider)
+
+    item["phone"] = item.get(
+        "phone",
+        item.get("contact_phone", "")
+    )
+
+    item["email"] = item.get(
+        "email",
+        item.get("contact_email", "")
+    )
+
+    item["contact_person"] = item.get(
+        "contact_person",
+        ""
+    )
+
+    return item
+
+
+def normalize_excursion(
+    excursion,
+    providers=None
+):
+    item = dict(excursion)
+
+    item["status"] = STATUS_FROM_API.get(
+        item.get("status"),
+        item.get("status", "Sắp diễn ra")
+    )
+
+    item["price"] = item.get(
+        "price",
+        item.get("fee", 0)
+    )
+
+    item["registered"] = item.get(
+        "registered",
+        0
+    )
+
+    item["rating"] = item.get(
+        "rating",
+        0
+    )
+
+    item["feedback_count"] = item.get(
+        "feedback_count",
+        0
+    )
+
+    item["provider"] = item.get(
+        "provider_name",
+        ""
+    )
+
+    provider_id = item.get("provider_id")
+
+    if providers:
+        for provider in providers:
+            if provider.get("id") == provider_id:
+                item["provider"] = provider.get(
+                    "name",
+                    ""
+                )
+                break
+
+    return item
+
+
+def get_providers():
+    result = api_request(
+        "/tour-providers/"
+    )
+
+    if result.get("_error"):
+        return []
+
+    if not isinstance(result, list):
+        return []
+
+    return [
+        normalize_provider(item)
+        for item in result
+    ]
+
+
 @excursions_bp.route("/")
 @excursion_access
 def excursions():
+    providers = get_providers()
+
+    result = api_request(
+        "/shore-excursions/"
+    )
+
+    excursions_data = []
+
+    if result.get("_error"):
+        flash(
+            result.get(
+                "_data",
+                {}
+            ).get(
+                "message",
+                "Không thể tải danh sách tour."
+            ),
+            "error"
+        )
+
+    elif isinstance(result, list):
+        excursions_data = [
+            normalize_excursion(
+                item,
+                providers
+            )
+            for item in result
+        ]
+
     return render_template(
         "excursions/excursions.html",
-        excursions=excursions_data
+        excursions=excursions_data,
+        providers=providers
     )
 
 
-@excursions_bp.route("/create", methods=["GET", "POST"])
+@excursions_bp.route(
+    "/create",
+    methods=["GET", "POST"]
+)
 @excursion_manager_access
 def create_excursion():
+    providers = get_providers()
+
     if request.method == "POST":
-        excursion_id = max(
-            [item["id"] for item in excursions_data],
-            default=0
-        ) + 1
+        try:
+            provider_id = int(
+                request.form.get(
+                    "provider_id"
+                )
+            )
 
-        provider_id = request.form.get("provider_id")
+            capacity = int(
+                request.form.get(
+                    "capacity",
+                    0
+                )
+            )
 
-        provider = next(
-            (
-                item
-                for item in providers_data
-                if str(item["id"]) == str(provider_id)
-            ),
-            None
+            price = float(
+                request.form.get(
+                    "price",
+                    0
+                )
+            )
+
+        except (ValueError, TypeError):
+            flash(
+                "Dữ liệu số không hợp lệ.",
+                "error"
+            )
+
+            return render_template(
+                "excursions/excursion_form.html",
+                providers=providers,
+                excursion=None,
+                edit_mode=False
+            )
+
+        name = request.form.get(
+            "name",
+            ""
+        ).strip()
+
+        date = request.form.get(
+            "date",
+            ""
         )
 
-        new_excursion = {
-            "id": excursion_id,
-            "name": request.form.get("name", ""),
-            "date": request.form.get("date", ""),
-            "time": request.form.get("time", ""),
-            "location": request.form.get("location", ""),
-            "provider": provider["name"] if provider else "",
-            "capacity": int(request.form.get("capacity", 0)),
+        time = request.form.get(
+            "time",
+            ""
+        ).strip()
+
+        location = request.form.get(
+            "location",
+            ""
+        ).strip()
+
+        status = request.form.get(
+            "status",
+            "Sắp diễn ra"
+        )
+
+        description = request.form.get(
+            "description",
+            ""
+        ).strip()
+
+        if not name:
+            flash(
+                "Vui lòng nhập tên tour.",
+                "error"
+            )
+
+            return render_template(
+                "excursions/excursion_form.html",
+                providers=providers,
+                excursion=None,
+                edit_mode=False
+            )
+
+        if capacity <= 0:
+            flash(
+                "Sức chứa phải lớn hơn 0.",
+                "error"
+            )
+
+            return render_template(
+                "excursions/excursion_form.html",
+                providers=providers,
+                excursion=None,
+                edit_mode=False
+            )
+
+        if price < 0:
+            flash(
+                "Giá tour không được âm.",
+                "error"
+            )
+
+            return render_template(
+                "excursions/excursion_form.html",
+                providers=providers,
+                excursion=None,
+                edit_mode=False
+            )
+
+        payload = {
+            "provider_id": provider_id,
+            "name": name,
+            "date": date,
+            "time": time,
+            "location": location,
+            "port_name": location,
+            "description": description,
+            "duration_hours": 0,
+            "capacity": capacity,
             "registered": 0,
-            "price": int(request.form.get("price", 0)),
-            "status": request.form.get(
-                "status",
-                "Sắp diễn ra"
-            ),
-            "description": request.form.get(
-                "description",
-                ""
-            ),
-            "rating": 0,
-            "feedback_count": 0
+            "fee": price,
+            "price": price,
+            "status": STATUS_TO_API.get(
+                status,
+                "OPEN"
+            )
         }
 
-        excursions_data.append(new_excursion)
+        result = api_request(
+            "/shore-excursions/",
+            method="POST",
+            data=payload
+        )
 
-        excursion_registrations[excursion_id] = []
+        if result.get("_error"):
+            flash(
+                result.get(
+                    "_data",
+                    {}
+                ).get(
+                    "message",
+                    "Không thể tạo tour."
+                ),
+                "error"
+            )
 
-        if provider:
-            provider["excursion_count"] += 1
+            return render_template(
+                "excursions/excursion_form.html",
+                providers=providers,
+                excursion=payload,
+                edit_mode=False
+            )
 
         flash(
             "Tạo tour thành công.",
@@ -227,37 +451,46 @@ def create_excursion():
         )
 
         return redirect(
-            url_for("excursions.excursions")
+            url_for(
+                "excursions.excursions"
+            )
         )
 
     return render_template(
         "excursions/excursion_form.html",
-        providers=providers_data,
+        providers=providers,
+        excursion=None,
         edit_mode=False
     )
 
 
-@excursions_bp.route("/<int:excursion_id>")
+@excursions_bp.route(
+    "/<int:excursion_id>"
+)
 @excursion_access
 def excursion_detail(excursion_id):
-    excursion = next(
-        (
-            item
-            for item in excursions_data
-            if item["id"] == excursion_id
-        ),
-        None
+    providers = get_providers()
+
+    result = api_request(
+        f"/shore-excursions/{excursion_id}"
     )
 
-    if excursion is None:
+    if result.get("_error"):
         flash(
             "Không tìm thấy tour.",
-            "danger"
+            "error"
         )
 
         return redirect(
-            url_for("excursions.excursions")
+            url_for(
+                "excursions.excursions"
+            )
         )
+
+    excursion = normalize_excursion(
+        result,
+        providers
+    )
 
     return render_template(
         "excursions/excursion_detail.html",
@@ -271,105 +504,165 @@ def excursion_detail(excursion_id):
 )
 @excursion_manager_access
 def edit_excursion(excursion_id):
-    excursion = next(
-        (
-            item
-            for item in excursions_data
-            if item["id"] == excursion_id
-        ),
-        None
+    providers = get_providers()
+
+    result = api_request(
+        f"/shore-excursions/{excursion_id}"
     )
 
-    if excursion is None:
+    if result.get("_error"):
         flash(
             "Không tìm thấy tour.",
-            "danger"
+            "error"
         )
 
         return redirect(
-            url_for("excursions.excursions")
+            url_for(
+                "excursions.excursions"
+            )
         )
 
-    old_provider = next(
-        (
-            item
-            for item in providers_data
-            if item["name"] == excursion["provider"]
-        ),
-        None
+    excursion = normalize_excursion(
+        result,
+        providers
     )
 
     if request.method == "POST":
-        excursion["name"] = request.form.get(
-            "name",
-            ""
-        )
-
-        excursion["date"] = request.form.get(
-            "date",
-            ""
-        )
-
-        excursion["time"] = request.form.get(
-            "time",
-            ""
-        )
-
-        excursion["location"] = request.form.get(
-            "location",
-            ""
-        )
-
-        excursion["capacity"] = int(
-            request.form.get(
-                "capacity",
-                0
+        try:
+            provider_id = int(
+                request.form.get(
+                    "provider_id"
+                )
             )
-        )
 
-        excursion["price"] = int(
-            request.form.get(
-                "price",
-                0
+            capacity = int(
+                request.form.get(
+                    "capacity",
+                    0
+                )
             )
+
+            price = float(
+                request.form.get(
+                    "price",
+                    0
+                )
+            )
+
+        except (ValueError, TypeError):
+            flash(
+                "Dữ liệu không hợp lệ.",
+                "error"
+            )
+
+            return render_template(
+                "excursions/excursion_form.html",
+                providers=providers,
+                excursion=excursion,
+                edit_mode=True
+            )
+
+        registered = excursion.get(
+            "registered",
+            0
         )
 
-        excursion["status"] = request.form.get(
+        if capacity < registered:
+            flash(
+                "Sức chứa không được nhỏ hơn số người đã đăng ký.",
+                "error"
+            )
+
+            return render_template(
+                "excursions/excursion_form.html",
+                providers=providers,
+                excursion=excursion,
+                edit_mode=True
+            )
+
+        payload = {
+            "provider_id": provider_id,
+            "name": request.form.get(
+                "name",
+                ""
+            ).strip(),
+            "date": request.form.get(
+                "date",
+                ""
+            ),
+            "time": request.form.get(
+                "time",
+                ""
+            ).strip(),
+            "location": request.form.get(
+                "location",
+                ""
+            ).strip(),
+            "port_name": request.form.get(
+                "location",
+                ""
+            ).strip(),
+            "description": request.form.get(
+                "description",
+                ""
+            ).strip(),
+            "capacity": capacity,
+            "registered": registered,
+            "fee": price,
+            "price": price
+        }
+
+        update_result = api_request(
+            f"/shore-excursions/{excursion_id}",
+            method="PUT",
+            data=payload
+        )
+
+        if update_result.get("_error"):
+            flash(
+                update_result.get(
+                    "_data",
+                    {}
+                ).get(
+                    "message",
+                    "Không thể cập nhật tour."
+                ),
+                "error"
+            )
+
+            return render_template(
+                "excursions/excursion_form.html",
+                providers=providers,
+                excursion=excursion,
+                edit_mode=True
+            )
+
+        status = request.form.get(
             "status",
             "Sắp diễn ra"
         )
 
-        excursion["description"] = request.form.get(
-            "description",
-            ""
+        status_result = api_request(
+            f"/shore-excursions/{excursion_id}/status",
+            method="PUT",
+            data={
+                "status": STATUS_TO_API.get(
+                    status,
+                    "OPEN"
+                )
+            }
         )
 
-        provider_id = request.form.get(
-            "provider_id"
-        )
-
-        new_provider = next(
-            (
-                item
-                for item in providers_data
-                if str(item["id"]) == str(provider_id)
-            ),
-            None
-        )
-
-        if new_provider:
-            if old_provider and old_provider["id"] != new_provider["id"]:
-                if old_provider["excursion_count"] > 0:
-                    old_provider["excursion_count"] -= 1
-
-                new_provider["excursion_count"] += 1
-
-            excursion["provider"] = new_provider["name"]
-
-        flash(
-            "Cập nhật tour thành công.",
-            "success"
-        )
+        if status_result.get("_error"):
+            flash(
+                "Thông tin tour đã cập nhật nhưng trạng thái chưa cập nhật được.",
+                "warning"
+            )
+        else:
+            flash(
+                "Cập nhật tour thành công.",
+                "success"
+            )
 
         return redirect(
             url_for(
@@ -380,8 +673,8 @@ def edit_excursion(excursion_id):
 
     return render_template(
         "excursions/excursion_form.html",
+        providers=providers,
         excursion=excursion,
-        providers=providers_data,
         edit_mode=True
     )
 
@@ -391,7 +684,7 @@ def edit_excursion(excursion_id):
 def providers():
     return render_template(
         "excursions/providers.html",
-        providers=providers_data
+        providers=get_providers()
     )
 
 
@@ -401,51 +694,70 @@ def providers():
 )
 @excursion_manager_access
 def create_provider():
-    provider_id = max(
-        [item["id"] for item in providers_data],
-        default=0
-    ) + 1
+    name = request.form.get(
+        "name",
+        ""
+    ).strip()
 
-    new_provider = {
-        "id": provider_id,
-        "name": request.form.get(
-            "name",
-            ""
-        ),
-        "contact_person": request.form.get(
-            "contact_person",
-            ""
-        ),
-        "phone": request.form.get(
-            "phone",
-            ""
-        ),
-        "email": request.form.get(
-            "email",
-            ""
-        ),
-        "address": request.form.get(
-            "address",
-            ""
-        ),
-        "status": request.form.get(
-            "status",
-            "Đang hợp tác"
-        ),
-        "excursion_count": 0
-    }
+    phone = request.form.get(
+        "phone",
+        ""
+    ).strip()
 
-    providers_data.append(
-        new_provider
+    email = request.form.get(
+        "email",
+        ""
+    ).strip()
+
+    address = request.form.get(
+        "address",
+        ""
+    ).strip()
+
+    if not name:
+        flash(
+            "Vui lòng nhập tên nhà cung cấp.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "excursions.providers"
+            )
+        )
+
+    result = api_request(
+        "/tour-providers/",
+        method="POST",
+        data={
+            "name": name,
+            "contact_phone": phone,
+            "contact_email": email,
+            "address": address
+        }
     )
 
-    flash(
-        "Thêm nhà cung cấp thành công.",
-        "success"
-    )
+    if result.get("_error"):
+        flash(
+            result.get(
+                "_data",
+                {}
+            ).get(
+                "message",
+                "Không thể thêm nhà cung cấp."
+            ),
+            "error"
+        )
+    else:
+        flash(
+            "Thêm nhà cung cấp thành công.",
+            "success"
+        )
 
     return redirect(
-        url_for("excursions.providers")
+        url_for(
+            "excursions.providers"
+        )
     )
 
 
@@ -453,36 +765,130 @@ def create_provider():
     "/<int:excursion_id>/registrations"
 )
 @excursion_access
-def excursion_registrations_list(excursion_id):
-    excursion = next(
-        (
-            item
-            for item in excursions_data
-            if item["id"] == excursion_id
-        ),
-        None
+def excursion_registrations_list(
+    excursion_id
+):
+    providers = get_providers()
+
+    excursion_result = api_request(
+        f"/shore-excursions/{excursion_id}"
     )
 
-    if excursion is None:
+    if excursion_result.get("_error"):
         flash(
             "Không tìm thấy tour.",
-            "danger"
+            "error"
         )
 
         return redirect(
-            url_for("excursions.excursions")
+            url_for(
+                "excursions.excursions"
+            )
         )
 
-    registrations = excursion_registrations.get(
-        excursion_id,
-        []
+    excursion = normalize_excursion(
+        excursion_result,
+        providers
     )
 
+    result = api_request(
+        f"/excursion-registrations/?excursion_id={excursion_id}"
+    )
+
+    registrations = []
+
+    if not result.get("_error"):
+
+        if isinstance(result, list):
+            registrations = result
+
+        elif isinstance(result, dict):
+            registrations = result.get(
+                "items",
+                result.get("data", [])
+            )
+
     return render_template(
-        "activities/registrations.html",
-        activity=excursion,
-        registrations=registrations,
-        is_excursion=True
+        "excursions/excursion_registrations.html",
+        excursion=excursion,
+        registrations=registrations
+    )
+
+
+@excursions_bp.route(
+    "/<int:excursion_id>/register",
+    methods=["POST"]
+)
+@excursion_access
+def register_excursion(excursion_id):
+    guest_code = request.form.get(
+        "guest_code",
+        ""
+    ).strip()
+
+    passenger_name = request.form.get(
+        "passenger_name",
+        ""
+    ).strip()
+
+    room = request.form.get(
+        "room",
+        ""
+    ).strip()
+
+    notes = request.form.get(
+        "notes",
+        ""
+    ).strip()
+
+    if not guest_code or not passenger_name:
+        flash(
+            "Vui lòng nhập mã khách và tên hành khách.",
+            "error"
+        )
+
+        return redirect(
+            url_for(
+                "excursions.excursion_detail",
+                excursion_id=excursion_id
+            )
+        )
+
+    result = api_request(
+        "/excursion-registrations/",
+        method="POST",
+        data={
+            "excursion_id": excursion_id,
+            "guest_code": guest_code,
+            "passenger_name": passenger_name,
+            "room": room,
+            "notes": notes,
+            "status": "REGISTERED"
+        }
+    )
+
+    if result.get("_error"):
+        flash(
+            result.get(
+                "_data",
+                {}
+            ).get(
+                "message",
+                "Không thể đăng ký tour."
+            ),
+            "error"
+        )
+    else:
+        flash(
+            "Đăng ký tour thành công.",
+            "success"
+        )
+
+    return redirect(
+        url_for(
+            "excursions.excursion_detail",
+            excursion_id=excursion_id
+        )
     )
 
 
@@ -490,44 +896,32 @@ def excursion_registrations_list(excursion_id):
     "/<int:excursion_id>/registrations/<int:registration_id>/checkin",
     methods=["POST"]
 )
-@excursion_access
+@excursion_manager_access
 def excursion_checkin(
     excursion_id,
     registration_id
 ):
-    registrations = excursion_registrations.get(
-        excursion_id,
-        []
+    result = api_request(
+        f"/excursion-registrations/{registration_id}/checkin",
+        method="PUT"
     )
 
-    registration = next(
-        (
-            item
-            for item in registrations
-            if item["id"] == registration_id
-        ),
-        None
-    )
-
-    if registration is None:
+    if result.get("_error"):
         flash(
-            "Không tìm thấy đăng ký.",
-            "danger"
+            result.get(
+                "_data",
+                {}
+            ).get(
+                "message",
+                "Không thể check-in."
+            ),
+            "error"
         )
-
-        return redirect(
-            url_for(
-                "excursions.excursion_registrations_list",
-                excursion_id=excursion_id
-            )
+    else:
+        flash(
+            "Check-in thành công.",
+            "success"
         )
-
-    registration["checked_in"] = True
-
-    flash(
-        "Check-in thành công.",
-        "success"
-    )
 
     return redirect(
         url_for(

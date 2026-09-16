@@ -1,4 +1,4 @@
-from infrastructure.models.activity_registration_model import (
+﻿from infrastructure.models.activity_registration_model import (
     ActivityRegistrationModel
 )
 from infrastructure.repositories.activity_registration_repository import (

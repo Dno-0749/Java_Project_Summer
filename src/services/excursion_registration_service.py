@@ -1,28 +1,114 @@
-from domain.models.excursion_registration import ExcursionRegistration
+﻿from datetime import datetime
+
+from infrastructure.repositories.excursion_registration_repository import (
+    ExcursionRegistrationRepository
+)
+
 
 class ExcursionRegistrationService:
-    def __init__(self, repository):
-        self.repository = repository
 
-    def list_registrations(self):
-        return self.repository.list()
+    def __init__(self):
+        self.repository = ExcursionRegistrationRepository()
 
-    def create_registration(self, passenger_id, excursion_id, booking_id=None, notes=None):
-        item = ExcursionRegistration(
-            id=None,
+    def list_registrations(
+        self,
+        excursion_id=None
+    ):
+        return self.repository.list(
+            excursion_id=excursion_id
+        )
+
+    def create_registration(
+        self,
+        passenger_id,
+        excursion_id,
+        booking_id=None,
+        guest_code=None,
+        passenger_name=None,
+        room=None,
+        status="REGISTERED",
+        notes=None
+    ):
+        allowed_statuses = {
+            "REGISTERED",
+            "CONFIRMED",
+            "CANCELLED",
+            "COMPLETED"
+        }
+
+        if status not in allowed_statuses:
+            raise ValueError(
+                "Trạng thái đăng ký không hợp lệ."
+            )
+
+        existing = self.repository.find_active_registration(
+            excursion_id,
+            passenger_id,
+            guest_code
+        )
+
+        if existing is not None:
+            raise ValueError(
+                "HÃ nh khÃ¡ch Ä‘Ã£ Ä‘Đăng ký tour nÃ y."
+            )
+
+        return self.repository.add(
             passenger_id=passenger_id,
             excursion_id=excursion_id,
             booking_id=booking_id,
-            status='REGISTERED',
-            notes=notes,
+            guest_code=guest_code,
+            passenger_name=passenger_name,
+            room=room,
+            status=status,
+            notes=notes
         )
-        return self.repository.add(item)
 
-    def update_status(self, registration_id, status):
-        allowed = {'REGISTERED', 'CONFIRMED', 'CANCELLED', 'COMPLETED'}
-        if status not in allowed:
-            return {'ok': False, 'message': 'Trạng thái không hợp lệ'}
-        row = self.repository.update_status(registration_id, status)
-        if not row:
-            return {'ok': False, 'message': 'Không tìm thấy đăng ký excursion'}
-        return {'ok': True, 'id': row.id, 'status': row.status}
+    def update_status(
+        self,
+        registration_id,
+        status
+    ):
+        allowed_statuses = {
+            "REGISTERED",
+            "CONFIRMED",
+            "CANCELLED",
+            "COMPLETED"
+        }
+
+        if status not in allowed_statuses:
+            raise ValueError(
+                "Trạng thái đăng ký không hợp lệ."
+            )
+
+        registration = self.repository.get_by_id(
+            registration_id
+        )
+
+        if registration is None:
+            return None
+
+        return self.repository.update_status(
+            registration_id,
+            status
+        )
+
+    def check_in(
+        self,
+        registration_id
+    ):
+        registration = self.repository.get_by_id(
+            registration_id
+        )
+
+        if registration is None:
+            return None
+
+        if registration.status == "CANCELLED":
+            raise ValueError(
+                "Không thể check-in đăng ký đã hủy."
+            )
+
+        return self.repository.check_in(
+            registration_id,
+            datetime.utcnow()
+        )

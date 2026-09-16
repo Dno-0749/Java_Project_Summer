@@ -1,4 +1,4 @@
-class ShoreExcursion:
+﻿class ShoreExcursion:
     def __init__(
         self,
         id=None,

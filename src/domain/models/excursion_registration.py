@@ -1,4 +1,4 @@
-class ExcursionRegistration:
+﻿class ExcursionRegistration:
     def __init__(self, id=None, passenger_id=None, excursion_id=None, booking_id=None, status='REGISTERED', notes=None):
         self.id = id
         self.passenger_id = passenger_id

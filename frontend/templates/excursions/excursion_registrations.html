@@ -1,0 +1,247 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Danh sách đăng ký tour
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-people"></i>
+                Danh sách đăng ký
+            </h2>
+
+            <p class="text-muted mb-0">
+                {{ excursion.name }}
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for('excursions.excursion_detail', excursion_id=excursion.id) }}"
+            class="btn btn-outline-secondary"
+        >
+            <i class="bi bi-arrow-left"></i>
+            Quay lại tour
+        </a>
+
+    </div>
+
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-3">
+                    <div class="text-muted">
+                        Địa điểm
+                    </div>
+                    <strong>
+                        {{ excursion.location }}
+                    </strong>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="text-muted">
+                        Ngày
+                    </div>
+                    <strong>
+                        {{ excursion.date }}
+                    </strong>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="text-muted">
+                        Thời gian
+                    </div>
+                    <strong>
+                        {{ excursion.time }}
+                    </strong>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="text-muted">
+                        Sức chứa
+                    </div>
+                    <strong>
+                        {{ excursion.registered }}
+                        /
+                        {{ excursion.capacity }}
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body">
+
+            {% if registrations %}
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead>
+
+                        <tr>
+                            <th>#</th>
+                            <th>Mã khách</th>
+                            <th>Hành khách</th>
+                            <th>Phòng</th>
+                            <th>Ngày đăng ký</th>
+                            <th>Trạng thái</th>
+                            <th>Check-in</th>
+                            <th></th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for registration in registrations %}
+
+                        <tr>
+
+                            <td>
+                                {{ registration.id }}
+                            </td>
+
+                            <td>
+                                {{ registration.guest_code or "-" }}
+                            </td>
+
+                            <td>
+                                <strong>
+                                    {{ registration.passenger_name or "-" }}
+                                </strong>
+                            </td>
+
+                            <td>
+                                {{ registration.room or "-" }}
+                            </td>
+
+                            <td>
+                                {{ registration.registered_at or "-" }}
+                            </td>
+
+                            <td>
+
+                                {% if registration.status == "COMPLETED" %}
+
+                                    <span class="badge bg-success">
+                                        Hoàn thành
+                                    </span>
+
+                                {% elif registration.status == "CANCELLED" %}
+
+                                    <span class="badge bg-danger">
+                                        Đã hủy
+                                    </span>
+
+                                {% elif registration.status == "CONFIRMED" %}
+
+                                    <span class="badge bg-primary">
+                                        Đã xác nhận
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-warning text-dark">
+                                        Đã đăng ký
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if registration.checked_in %}
+
+                                    <span class="text-success">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        Đã check-in
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="text-muted">
+                                        Chưa check-in
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if not registration.checked_in and registration.status != "CANCELLED" %}
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('excursions.excursion_checkin', excursion_id=excursion.id, registration_id=registration.id) }}"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-sm btn-success"
+                                    >
+                                        <i class="bi bi-check-lg"></i>
+                                        Check-in
+                                    </button>
+
+                                </form>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div class="text-center py-5">
+
+                <i class="bi bi-people fs-1 text-muted"></i>
+
+                <h5 class="mt-3">
+                    Chưa có hành khách đăng ký
+                </h5>
+
+                <p class="text-muted mb-0">
+                    Danh sách đăng ký tour sẽ hiển thị tại đây.
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

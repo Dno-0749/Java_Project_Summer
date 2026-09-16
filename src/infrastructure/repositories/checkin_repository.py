@@ -1,4 +1,4 @@
-from typing import List, Optional
+﻿from typing import List, Optional
 from sqlalchemy.orm import Session
 from domain.models.checkin import CheckIn
 from infrastructure.models.checkin_model import CheckInModel

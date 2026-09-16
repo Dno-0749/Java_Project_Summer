@@ -1,4 +1,4 @@
-from apispec import APISpec
+﻿from apispec import APISpec
 from apispec.ext.marshmallow import MarshmallowPlugin
 from apispec_webframeworks.flask import FlaskPlugin
 from api.schemas.auth import LoginUserRequestSchema, LoginUserResponseSchema, RigisterUserRequestSchema, RigisterUserResponseSchema
@@ -11,7 +11,7 @@ spec = APISpec(
     plugins=[FlaskPlugin(), MarshmallowPlugin()],
 )
 
-# Đăng ký schema để tự động sinh model
+# ĐĐăng ký schema để tự động sinh model
 spec.components.schema("TodoRequest", schema=TodoRequestSchema)
 spec.components.schema("TodoResponse", schema=TodoResponseSchema)
 spec.components.schema("LoginUserRequest", schema= LoginUserRequestSchema)

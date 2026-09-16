@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+﻿from flask import Blueprint, request, jsonify
 from services.todo_service import TodoService
 from infrastructure.repositories.todo_repository import TodoRepository
 from api.schemas.todo import TodoRequestSchema, TodoResponseSchema
@@ -6,7 +6,7 @@ from datetime import datetime
 
 bp = Blueprint('course', __name__, url_prefix='/courses')
 
-# Khởi tạo service và repository (dùng memory, chưa kết nối DB thật)
+# Khởi tạo service vÃ  repository (dùng memory, chưa kết nối DB thật)
 todo_service = TodoService(TodoRepository())
 
 request_schema = TodoRequestSchema()

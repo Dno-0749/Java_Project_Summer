@@ -1,4 +1,4 @@
-from infrastructure.databases.factory_database import FactoryDatabase
+﻿from infrastructure.databases.factory_database import FactoryDatabase
 from infrastructure.models.activity_registration_model import ActivityRegistrationModel
 
 
