@@ -1,0 +1,31 @@
+{% extends "layouts/passenger_base.html" %}
+
+{% block content %}
+<div class="p-card text-center">
+    <div class="text-muted small mb-3">Đưa mã này cho nhân viên quét để check-in</div>
+
+    <div id="qrcode-canvas" class="d-flex justify-content-center mb-2"></div>
+    <div class="text-muted small font-monospace mb-3">{{ passenger.card_id }}</div>
+
+    <div class="fw-bold">{{ passenger.name }}</div>
+    <div class="text-muted small">Cabin {{ passenger.cabin }}</div>
+
+    <div class="alert alert-info small mt-3 mb-0 text-start">
+        <i class="bi bi-info-circle me-1"></i>
+        Mã này cũng dùng để xác thực tại các điểm bán hàng (POS) trên tàu.
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/vendor/qrcode.js') }}"></script>
+<script>
+    // Sinh ảnh QR thật NGAY TRÊN TRÌNH DUYỆT từ mã qr_code của hành khách -
+    // không cần gọi thêm API nào, dữ liệu mã hoá CHỈ là chuỗi mã định danh
+    // (vô nghĩa với người ngoài), không phải thông tin cá nhân.
+    var qr = qrcode(0, 'M');
+    qr.addData("{{ passenger.card_id }}");
+    qr.make();
+    document.getElementById('qrcode-canvas').innerHTML = qr.createImgTag(6, 8);
+</script>
+{% endblock %}

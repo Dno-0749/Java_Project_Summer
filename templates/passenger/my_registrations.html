@@ -1,0 +1,41 @@
+{% extends "layouts/passenger_base.html" %}
+
+{% block content %}
+{% if not registrations %}
+<div class="p-card text-center text-muted">Bạn chưa đăng ký hoạt động/tham quan nào.</div>
+{% endif %}
+
+{% for r in registrations %}
+<div class="p-card">
+    <div class="d-flex justify-content-between align-items-start mb-1">
+        <div>
+            <div class="fw-semibold small">
+                {% if r.kind == 'excursion' %}<i class="bi bi-geo-alt"></i>{% else %}<i class="bi bi-music-note"></i>{% endif %}
+                {{ r.name }}
+            </div>
+            <div class="text-muted small">{{ r.location }} · {{ r.time }}</div>
+        </div>
+        {% if r.status == 'checked_in' %}
+            <span class="badge p-badge-free">Đã check-in</span>
+        {% elif r.status == 'cancelled' %}
+            <span class="badge p-badge-full">Đã hủy</span>
+        {% elif r.status == 'no_show' %}
+            <span class="badge p-badge-full">Vắng mặt</span>
+        {% else %}
+            <span class="badge p-badge-paid">Đã đăng ký</span>
+        {% endif %}
+    </div>
+
+    {% if r.status == 'registered' %}
+    <div class="d-flex gap-2 mt-2">
+        <form method="POST" action="{{ url_for('passenger.self_checkin', registration_id=r.registration_id) }}" class="flex-grow-1">
+            <button type="submit" class="btn btn-success btn-sm w-100"><i class="bi bi-qr-code-scan me-1"></i>Check-in</button>
+        </form>
+        <form method="POST" action="{{ url_for('passenger.cancel_registration_route', registration_id=r.registration_id) }}">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Hủy</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+{% endblock %}

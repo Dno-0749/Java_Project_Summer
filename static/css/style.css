@@ -1,0 +1,113 @@
+:root {
+    --sidebar-width: 260px;
+    --primary: #0d6efd;
+}
+
+body {
+    background-color: #f4f6f9;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Sidebar */
+#sidebar-wrapper {
+    min-width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+    min-height: 100vh;
+    transition: margin 0.25s ease-out;
+    display: flex;
+    flex-direction: column;
+}
+
+#sidebar-wrapper .list-group-item {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.925rem;
+}
+
+#sidebar-wrapper .list-group-item:hover {
+    background-color: #1a1d21 !important;
+}
+
+#sidebar-wrapper .list-group-item.active {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+
+.sidebar-heading {
+    font-size: 1.15rem;
+    letter-spacing: 0.3px;
+}
+
+.sidebar-section-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.8px;
+}
+
+.sidebar-footer {
+    border-top: 1px solid #2c3034;
+    margin-top: auto;
+}
+
+/* Page content */
+#page-content-wrapper {
+    min-height: 100vh;
+}
+
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: calc(-1 * var(--sidebar-width));
+}
+
+/* Login page */
+.login-page {
+    background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 50%, #0d2137 100%);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    border-radius: 16px;
+}
+
+/* Stat cards */
+.stat-card .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+}
+
+/* Cards */
+.card {
+    border-radius: 12px;
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
+    padding: 0.85rem 1.25rem;
+}
+
+/* Tables */
+.table th {
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: #6c757d;
+}
+
+/* Progress bars in tables */
+.table .progress {
+    border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: calc(-1 * var(--sidebar-width));
+    }
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: 0;
+    }
+}
