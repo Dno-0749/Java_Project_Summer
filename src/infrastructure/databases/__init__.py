@@ -11,6 +11,7 @@ from infrastructure.models.pay import pay_tran_model
 from infrastructure.models.cruise import (
     port_model,
     cruise_model,
+    booking_model,
     cruise_day_model,
     cabin_model,
     passenger_model,

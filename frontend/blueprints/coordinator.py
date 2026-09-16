@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+import api_client
 from flask_login import login_required, current_user
 from functools import wraps
 
@@ -17,33 +18,47 @@ def coordinator_access(f):
 @login_required
 @coordinator_access
 def itinerary():
-    tours = [
-        {
-            "id": 1,
-            "name": "Hạ Long - Cát Bà 5 ngày",
-            "start_date": "2026-09-10",
-            "end_date": "2026-09-14",
-            "status": "Đang diễn ra",
-            "passengers": 420,
-            "ports": ["Hạ Long", "Cát Bà", "Lan Hạ"],
-        },
-        {
-            "id": 2,
-            "name": "Phú Quốc - Nam Du 4 ngày",
-            "start_date": "2026-09-18",
-            "end_date": "2026-09-21",
-            "status": "Sắp khởi hành",
-            "passengers": 380,
-            "ports": ["Phú Quốc", "Nam Du"],
-        },
-        {
-            "id": 3,
-            "name": "Nha Trang - Bình Hưng 3 ngày",
-            "start_date": "2026-08-20",
-            "end_date": "2026-08-22",
-            "status": "Đã kết thúc",
-            "passengers": 310,
-            "ports": ["Nha Trang", "Bình Hưng"],
-        },
-    ]
-    return render_template("coordinator/itinerary.html", tours=tours, page_title="Quản lý Lịch trình")
+    bookings, error = api_client.list_bookings()
+    if error:
+        flash(error, "danger")
+        bookings = []
+    return render_template("coordinator/itinerary.html", bookings=bookings, page_title="Quản lý Lịch trình")
+
+
+@coordinator_bp.route("/bookings", methods=["POST"])
+@login_required
+@coordinator_access
+def create_booking():
+    data = {key: request.form.get(key, "").strip() for key in ("ship_name", "customer_name", "start_date", "end_date", "status")}
+    data["status"] = data["status"] or "pending"
+    _, error = api_client.create_booking(data)
+    flash(error or "Đã tạo booking.", "danger" if error else "success")
+    return redirect(url_for("coordinator.itinerary"))
+
+
+@coordinator_bp.route("/bookings/<int:booking_id>/update", methods=["POST"])
+@login_required
+@coordinator_access
+def edit_booking(booking_id):
+    data = {key: request.form.get(key, "").strip() for key in ("ship_name", "customer_name", "start_date", "end_date", "status")}
+    _, error = api_client.update_booking(booking_id, data)
+    flash(error or "Đã cập nhật booking.", "danger" if error else "success")
+    return redirect(url_for("coordinator.itinerary"))
+
+
+@coordinator_bp.route("/bookings/<int:booking_id>/delete", methods=["POST"])
+@login_required
+@coordinator_access
+def delete_booking(booking_id):
+    _, error = api_client.delete_booking(booking_id)
+    flash(error or "Đã xóa booking.", "danger" if error else "success")
+    return redirect(url_for("coordinator.itinerary"))
+
+
+@coordinator_bp.route("/bookings/<int:booking_id>/status", methods=["POST"])
+@login_required
+@coordinator_access
+def update_booking_status(booking_id):
+    _, error = api_client.update_booking_status(booking_id, request.form.get("status", "pending"))
+    flash(error or "Đã cập nhật trạng thái.", "danger" if error else "success")
+    return redirect(url_for("coordinator.itinerary"))

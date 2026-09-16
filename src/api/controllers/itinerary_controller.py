@@ -5,6 +5,7 @@ from api.schemas.itinerary import (
     PortRequestSchema, PortResponseSchema,
     CruiseDayRequestSchema, CruiseDayResponseSchema,
     CabinRequestSchema, CabinResponseSchema,
+    BookingRequestSchema, BookingResponseSchema,
 )
 
 bp = Blueprint("itinerary", __name__)
@@ -18,6 +19,8 @@ day_req = CruiseDayRequestSchema()
 day_res = CruiseDayResponseSchema()
 cabin_req = CabinRequestSchema()
 cabin_res = CabinResponseSchema()
+booking_req = BookingRequestSchema()
+booking_res = BookingResponseSchema()
 
 
 # ==================== CRUISE ====================
@@ -426,3 +429,57 @@ def create_cabin(cruise_id):
         return jsonify(errors), 400
     cabin = service.create_cabin(cabin_req.load(data))
     return jsonify(cabin_res.dump(cabin)), 201
+
+
+# ==================== BOOKING ====================
+@bp.route("/bookings", methods=["GET"])
+def list_bookings():
+    bookings = service.list_bookings()
+    return jsonify(booking_res.dump(bookings, many=True)), 200
+
+
+@bp.route("/bookings", methods=["POST"])
+def create_booking():
+    data = request.get_json(silent=True) or {}
+    errors = booking_req.validate(data)
+    if errors:
+        return jsonify(errors), 400
+    try:
+        booking = service.create_booking(booking_req.load(data))
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    return jsonify(booking_res.dump(booking)), 201
+
+
+@bp.route("/bookings/<int:booking_id>", methods=["PUT"])
+def update_booking(booking_id):
+    data = request.get_json(silent=True) or {}
+    errors = booking_req.validate(data)
+    if errors:
+        return jsonify(errors), 400
+    try:
+        booking = service.update_booking(booking_id, booking_req.load(data))
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    if not booking:
+        return jsonify({"message": "Booking not found"}), 404
+    return jsonify(booking_res.dump(booking)), 200
+
+
+@bp.route("/bookings/<int:booking_id>/status", methods=["PATCH"])
+def update_booking_status(booking_id):
+    data = request.get_json(silent=True) or {}
+    try:
+        booking = service.update_booking_status(booking_id, data.get("status"))
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    if not booking:
+        return jsonify({"message": "Booking not found"}), 404
+    return jsonify(booking_res.dump(booking)), 200
+
+
+@bp.route("/bookings/<int:booking_id>", methods=["DELETE"])
+def delete_booking(booking_id):
+    if not service.delete_booking(booking_id):
+        return jsonify({"message": "Booking not found"}), 404
+    return "", 204
