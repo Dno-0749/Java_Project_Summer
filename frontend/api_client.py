@@ -78,6 +78,10 @@ def lookup_passenger(code):
     return _request("GET", f"/passengers/lookup/{code}")
 
 
+def lookup_passenger(code):
+    return _request("GET", f"/passengers/lookup/{code}")
+
+
 def create_passenger(cruise_id, full_name, cabin_id=None):
     return _request("POST", f"/cruises/{cruise_id}/passengers",
                      json={"full_name": full_name, "cabin_id": cabin_id})
