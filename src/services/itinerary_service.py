@@ -37,7 +37,6 @@ class ItineraryService:
         return self.repository.list_cruise_days(cruise_id)
 
     def create_cruise_day(self, data: dict):
-        # Business rule (SRS 3.3.2): giờ rời bến phải sau giờ cập bến
         arrival = data.get("arrival_time")
         departure = data.get("departure_time")
         if arrival and departure and departure <= arrival:
