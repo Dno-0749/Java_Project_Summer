@@ -3,7 +3,6 @@ from flask_login import login_required, current_user
 from functools import wraps
 from collections import defaultdict
 import uuid
-import store
 import api_client
 
 pos_bp = Blueprint("pos", __name__, url_prefix="/pos")
@@ -18,16 +17,32 @@ def pos_access(f):
     return decorated_function
 
 
+def _get_products(cruise_id):
+    """Danh mục bán hàng POS = chính bảng Activity thật trên Supabase (đã
+    tạo qua Quản lý hoạt động/Swagger). Không còn dữ liệu giả trong
+    store.py - đảm bảo POS, Activities, Passenger đều đọc CÙNG 1 nguồn."""
+    activities, err = api_client.list_activities(cruise_id)
+    if err:
+        return [], err
+    products = [{
+        "id": a["id"],
+        "name": a["name"],
+        "price": float(a.get("fee") or 0),
+    } for a in activities or []]
+    return products, None
+
+
 def _get_cart():
     return session.setdefault("pos_cart", {})
 
 
-def _cart_details():
+def _cart_details(cruise_id):
     cart = _get_cart()
+    products, _ = _get_products(cruise_id)
     items = []
     total = 0
     for item_id, qty in cart.items():
-        item = next((i for i in store.POS_ITEMS if i["id"] == int(item_id)), None)
+        item = next((i for i in products if i["id"] == int(item_id)), None)
         if item:
             subtotal = item["price"] * qty
             items.append({**item, "qty": qty, "subtotal": subtotal})
@@ -42,26 +57,31 @@ def _cart_details():
 @login_required
 @pos_access
 def sales():
-    items, total = _cart_details()
-    q = request.args.get("q", "").strip().lower()
-    categories = sorted(set(i["category"] for i in store.POS_ITEMS))
-    current_cat = request.args.get("cat", categories[0])
+    cruise, err = api_client.ensure_demo_cruise()
+    if err:
+        flash(f"Lỗi kết nối backend: {err}", "danger")
+        return render_template("pos/sales.html", products=[], cart_items=[], cart_total=0,
+                                search_query="", page_title="Bán hàng POS")
 
-    products = store.POS_ITEMS
+    items, total = _cart_details(cruise["id"])
+    q = request.args.get("q", "").strip().lower()
+
+    products, err2 = _get_products(cruise["id"])
+    if err2:
+        flash(f"Lỗi tải danh mục dịch vụ: {err2}", "danger")
+        products = []
     if q:
-        # Tìm kiếm sản phẩm/dịch vụ - tìm trên TOÀN BỘ danh mục, không giới hạn theo category
         products = [p for p in products if q in p["name"].lower()]
 
     return render_template(
         "pos/sales.html",
         products=products,
-        categories=categories,
-        current_cat=current_cat,
         search_query=q,
         cart_items=items,
         cart_total=total,
         page_title="Bán hàng POS",
     )
+
 
 
 @pos_bp.route("/cart/add/<int:item_id>", methods=["POST"])
@@ -105,27 +125,27 @@ def cart_clear():
 @login_required
 @pos_access
 def checkout():
-    items, total = _cart_details()
+    cruise, err = api_client.ensure_demo_cruise()
+    if err:
+        flash(f"Lỗi kết nối backend: {err}", "danger")
+        return redirect(url_for("pos.sales"))
+
+    items, total = _cart_details(cruise["id"])
     if not items:
         flash("Giỏ hàng đang trống. Vui lòng chọn dịch vụ trước.", "warning")
         return redirect(url_for("pos.sales"))
 
-    cruise, err = api_client.ensure_demo_cruise()
-    passengers = []
-    if err:
-        flash(f"Lỗi kết nối backend: {err}", "danger")
-    else:
-        passengers, err2 = api_client.list_passengers(cruise["id"])
-        if err2:
-            flash(f"Lỗi tải danh sách hành khách: {err2}", "danger")
-            passengers = []
-        elif not passengers:
-            names = ["Nguyễn Văn A", "Trần Thị B", "Lê Hoàng C"]
-            passengers = []
-            for n in names:
-                p, e = api_client.create_passenger(cruise["id"], n)
-                if p:
-                    passengers.append(p)
+    passengers, err2 = api_client.list_passengers(cruise["id"])
+    if err2:
+        flash(f"Lỗi tải danh sách hành khách: {err2}", "danger")
+        passengers = []
+    elif not passengers:
+        names = ["Nguyễn Văn A", "Trần Thị B", "Lê Hoàng C"]
+        passengers = []
+        for n in names:
+            p, e = api_client.create_passenger(cruise["id"], n)
+            if p:
+                passengers.append(p)
 
     view_passengers = []
     for p in passengers:
@@ -154,7 +174,12 @@ def checkout():
 @pos_access
 def checkout_confirm():
     """Xác nhận giao dịch khi ĐANG CÓ MẠNG - ghi thẳng vào backend."""
-    items, total = _cart_details()
+    cruise, err = api_client.ensure_demo_cruise()
+    if err:
+        flash(f"Lỗi kết nối backend: {err}", "danger")
+        return redirect(url_for("pos.sales"))
+
+    items, total = _cart_details(cruise["id"])
     if not items:
         return redirect(url_for("pos.sales"))
 
@@ -210,7 +235,12 @@ def save_offline():
     Chuyển sang trang trung gian, trang đó dùng JavaScript lưu giao dịch
     vào localStorage của trình duyệt (thực sự lưu tại thiết bị, không qua
     server), rồi tự động quay lại màn bán hàng."""
-    items, total = _cart_details()
+    cruise, err = api_client.ensure_demo_cruise()
+    if err:
+        flash(f"Lỗi kết nối backend: {err}", "danger")
+        return redirect(url_for("pos.sales"))
+
+    items, total = _cart_details(cruise["id"])
     if not items:
         return redirect(url_for("pos.sales"))
 
@@ -275,6 +305,28 @@ def sync_now():
     return jsonify({"synced_local_ids": synced_local_ids, "failed": failed})
 
 
+@pos_bp.route("/lookup/<string:code>", methods=["GET"])
+@login_required
+@pos_access
+def lookup_passenger(code):
+    """Được gọi bằng JS (fetch) ngay sau khi camera quét được mã QR/RFID
+    của hành khách - tra cứu thật qua backend (UC22: Xác thực hành khách
+    tại POS), trả JSON cho trang checkout tự động chọn đúng khách."""
+    passenger, err = api_client.lookup_passenger(code)
+    if err or not passenger:
+        return jsonify({"found": False, "message": err or "Không tìm thấy hành khách với mã này"}), 404
+
+    account, _ = api_client.get_account(passenger["id"])
+    return jsonify({
+        "found": True,
+        "id": passenger["id"],
+        "name": passenger["full_name"],
+        "cabin": passenger.get("cabin_id") or "-",
+        "card_id": passenger.get("qr_code") or "-",
+        "balance": float(account["balance"]) if account else 0,
+    })
+
+
 # ==================== LỊCH SỬ, TÌM KIẾM, HOÀN TIỀN ====================
 
 @pos_bp.route("/history")
@@ -334,6 +386,12 @@ def reconciliation():
         flash(f"Lỗi tải giao dịch: {err}", "danger")
         transactions = []
 
+    anomalies, err2 = api_client.get_anomalies()
+    if err2:
+        anomalies = []
+    # Map transaction_id -> danh sách lý do bất thường, để tra nhanh khi render
+    anomaly_map = {a["transaction_id"]: a["reasons"] for a in (anomalies or [])}
+
     # Nhóm theo onboard_account_id để đối soát theo từng tài khoản
     groups = defaultdict(list)
     for t in transactions or []:
@@ -348,9 +406,11 @@ def reconciliation():
             "total_transactions": len(txs),
             "unreconciled_count": len(unreconciled),
             "disputed_count": len(disputed),
+            "anomaly_count": len([t for t in txs if t["id"] in anomaly_map]),
             "transactions": [{
                 "id": t["id"], "item": t.get("description") or "-",
                 "amount": float(t["amount"]), "sync_status": t["sync_status"],
+                "anomaly_reasons": anomaly_map.get(t["id"]),
             } for t in txs],
         })
 

@@ -68,3 +68,52 @@ class ReportService:
             "total_checked_in": total_checked_in,
             "checkin_rate": round(total_checked_in / total_registered, 2) if total_registered else 0,
         }
+
+    # Ngưỡng coi là "số tiền lớn bất thường" cho 1 giao dịch đơn lẻ - vượt
+    # ngưỡng này không có nghĩa là sai, chỉ là CẦN CHÚ Ý xem lại khi đối soát.
+    LARGE_AMOUNT_THRESHOLD = 3_000_000
+    # Khoảng thời gian (giây) để coi 2 giao dịch giống nhau là "nghi trùng"
+    DUPLICATE_WINDOW_SECONDS = 300  # 5 phút
+
+    def detect_anomalies(self):
+        """UC27 (Đối soát): Tự động phát hiện giao dịch bất thường, thay vì
+        chỉ dựa vào nhân viên tự đánh dấu tranh chấp thủ công. 2 quy tắc:
+          1. Số tiền 1 giao dịch vượt ngưỡng lớn bất thường
+          2. Nghi trùng lặp (double-charge): cùng tài khoản, cùng số tiền,
+             tạo cách nhau rất gần (trong vài phút) - dấu hiệu bấm nhầm 2 lần.
+        """
+        transactions = self.repository.list_all_transactions_for_anomaly_scan()
+
+        anomalies = []
+        by_account = {}
+        for tx in transactions:
+            by_account.setdefault(tx.onboard_account_id, []).append(tx)
+
+        for account_id, txs in by_account.items():
+            for i, tx in enumerate(txs):
+                reasons = []
+                if float(tx.amount) >= self.LARGE_AMOUNT_THRESHOLD:
+                    reasons.append(f"Số tiền lớn bất thường (≥ {self.LARGE_AMOUNT_THRESHOLD:,.0f}đ)")
+
+                if i > 0:
+                    prev = txs[i - 1]
+                    if (
+                        float(prev.amount) == float(tx.amount)
+                        and prev.created_at and tx.created_at
+                        and abs((tx.created_at - prev.created_at).total_seconds()) <= self.DUPLICATE_WINDOW_SECONDS
+                    ):
+                        reasons.append(
+                            f"Nghi trùng lặp - giống hệt giao dịch #{prev.id} "
+                            f"tạo cách đây {int((tx.created_at - prev.created_at).total_seconds())}s"
+                        )
+
+                if reasons:
+                    anomalies.append({
+                        "transaction_id": tx.id,
+                        "account_id": account_id,
+                        "amount": float(tx.amount),
+                        "description": tx.description,
+                        "reasons": reasons,
+                    })
+
+        return anomalies

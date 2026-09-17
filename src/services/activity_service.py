@@ -66,12 +66,27 @@ class ActivityService:
             if excursion.capacity is not None and current_count >= excursion.capacity:
                 raise ValueError("Đăng ký thất bại. Hoạt động đã đạt sức chứa tối đa.")
 
-        return self.repository.add_registration({
+        registration = self.repository.add_registration({
             "passenger_id": passenger_id,
             "activity_id": activity_id,
             "excursion_id": excursion_id,
             "status": "registered",
         })
+
+        try:
+            from services.notification_service import NotificationService
+            name = activity.name if activity_id else excursion.name
+            NotificationService().create(
+                title="Đăng ký thành công",
+                content=f"Bạn đã đăng ký thành công: {name}.",
+                passenger_id=passenger_id,
+                category="registration",
+                priority="normal",
+            )
+        except Exception:
+            pass
+
+        return registration
 
     def cancel_registration(self, registration_id: int):
         return self.repository.update_registration_status(registration_id, "cancelled")

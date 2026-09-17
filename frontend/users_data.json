@@ -67,6 +67,6 @@
     "role": "passenger",
     "role_name": "Hành khách",
     "status": "Active",
-    "passenger_id": 7
+    "passenger_id": null
   }
 ]

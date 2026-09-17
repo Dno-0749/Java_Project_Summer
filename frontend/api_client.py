@@ -9,6 +9,7 @@ Cách trả về theo tuple giúp code gọi phía blueprint dễ xử lý flash
 mà không cần try/except lặp lại ở khắp nơi.
 """
 import requests
+from flask import session
 from config import Config
 
 BASE_URL = Config.API_BASE_URL
@@ -17,6 +18,12 @@ TIMEOUT = 5  # giây - tránh treo giao diện quá lâu nếu backend không ph
 
 def _request(method, path, **kwargs):
     url = f"{BASE_URL}{path}"
+    headers = dict(kwargs.pop("headers", {}) or {})
+    token = session.get("access_token")
+    if token:
+        headers.setdefault("Authorization", f"Bearer {token}")
+    if headers:
+        kwargs["headers"] = headers
     try:
         resp = requests.request(method, url, timeout=TIMEOUT, **kwargs)
     except requests.exceptions.ConnectionError:
@@ -38,6 +45,19 @@ def _request(method, path, **kwargs):
         return resp.json(), None
     except Exception:
         return None, "Backend trả về dữ liệu không hợp lệ (không phải JSON)."
+
+
+# ==================== AUTHENTICATION ====================
+def login(username, password):
+    """Authenticate against the backend and return its canonical user/token."""
+    return _request("POST", "/auth/login", json={
+        "username": username,
+        "password": password,
+    })
+
+
+def get_current_user():
+    return _request("GET", "/auth/me")
 
 
 # ==================== ITINERARY ====================
@@ -63,6 +83,34 @@ def list_cruise_days(cruise_id):
 
 def create_cruise_day(cruise_id, data):
     return _request("POST", f"/cruises/{cruise_id}/days", json=data)
+
+
+def update_cruise_day(day_id, data):
+    return _request("PUT", f"/cruise-days/{day_id}", json=data)
+
+
+def create_port(data):
+    return _request("POST", "/ports", json=data)
+
+
+def list_bookings():
+    return _request("GET", "/bookings")
+
+
+def create_booking(data):
+    return _request("POST", "/bookings", json=data)
+
+
+def update_booking(booking_id, data):
+    return _request("PUT", f"/bookings/{booking_id}", json=data)
+
+
+def update_booking_status(booking_id, status):
+    return _request("PATCH", f"/bookings/{booking_id}/status", json={"status": status})
+
+
+def delete_booking(booking_id):
+    return _request("DELETE", f"/bookings/{booking_id}")
 
 
 # ==================== PASSENGER ====================
@@ -196,6 +244,10 @@ def ensure_demo_passenger(cruise_id, full_name="Hành khách Demo"):
 # ==================== REPORT ====================
 def reconcile_account(account_id):
     return _request("POST", f"/accounts/{account_id}/reconcile")
+
+
+def get_anomalies():
+    return _request("GET", "/transactions/anomalies")
 
 
 def settle_account(account_id):

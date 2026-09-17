@@ -11,7 +11,9 @@ from api.controllers.report_controller import bp as report_bp
 from api.controllers.passenger_controller import bp as passenger_bp
 from api.controllers.feedback_controller import bp as feedback_bp
 from api.controllers.notification_controller import bp as notification_bp
+from api.controllers.booking_controller import bp as booking_bp
 from api.middleware import middleware
+from cors import init_cors
 from api.responses import success_response
 from infrastructure.databases import init_db
 from config import Config
@@ -19,9 +21,11 @@ from flasgger import Swagger
 from config import SwaggerConfig
 from flask_swagger_ui import get_swaggerui_blueprint
 
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    init_cors(app)
     Swagger(app)
     # Đăng ký blueprint trước
     app.register_blueprint(todo_bp)
@@ -34,6 +38,7 @@ def create_app():
     app.register_blueprint(passenger_bp)
     app.register_blueprint(feedback_bp)
     app.register_blueprint(notification_bp)
+    app.register_blueprint(booking_bp)
     # register_routes(app)
      # Thêm Swagger UI blueprint
     SWAGGER_URL = '/docs'
@@ -59,7 +64,7 @@ def create_app():
             # Thêm các endpoint khác nếu cần
             if rule.endpoint.startswith(('todo.', 'course.', 'user.', 'auth.',
                                           'itinerary.', 'activity.', 'checkin.', 'account.',
-                                          'report.', 'passenger.', 'feedback.', 'notification.')):
+                                          'report.', 'passenger.', 'feedback.', 'notification.', 'booking.')):
                 view_func = app.view_functions[rule.endpoint]
                 print(f"Adding path: {rule.rule} -> {view_func}")
                 spec.path(view=view_func)

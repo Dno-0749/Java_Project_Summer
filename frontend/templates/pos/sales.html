@@ -15,34 +15,34 @@
             </div>
         </form>
 
-        {% if not search_query %}
-        <div class="d-flex gap-2 mb-3 flex-wrap">
-            {% for cat in categories %}
-            <a href="{{ url_for('pos.sales', cat=cat) }}"
-               class="btn {% if cat == current_cat %}btn-primary{% else %}btn-outline-secondary{% endif %} pos-big-btn px-4">
-                {{ cat }}
-            </a>
-            {% endfor %}
+        <div class="mb-3 text-muted small">
+            {% if search_query %}
+                Kết quả tìm kiếm cho "{{ search_query }}" ({{ products|length }} dịch vụ)
+            {% else %}
+                {{ products|length }} dịch vụ đang mở bán
+            {% endif %}
         </div>
-        {% else %}
-        <div class="mb-3 text-muted small">Kết quả tìm kiếm cho "{{ search_query }}" ({{ products|length }} dịch vụ)</div>
-        {% endif %}
 
         <div class="row g-3">
-            {% for p in products if search_query or p.category == current_cat %}
+            {% for p in products %}
             <div class="col-6 col-md-4">
                 <form method="POST" action="{{ url_for('pos.cart_add', item_id=p.id) }}">
                     <button type="submit" class="pos-product-card w-100">
                         <div>
                             <div class="fw-semibold">{{ p.name }}</div>
-                            <div class="text-muted small">{{ p.category }}</div>
                         </div>
                         <div class="price">{{ "{:,.0f}".format(p.price) }}đ</div>
                     </button>
                 </form>
             </div>
             {% else %}
-            <div class="text-muted text-center py-5">Không tìm thấy dịch vụ nào phù hợp.</div>
+            <div class="text-muted text-center py-5">
+                {% if search_query %}
+                    Không tìm thấy dịch vụ nào phù hợp.
+                {% else %}
+                    Chưa có dịch vụ nào được tạo. Vào "Quản lý hoạt động" để tạo dịch vụ mới.
+                {% endif %}
+            </div>
             {% endfor %}
         </div>
     </div>
