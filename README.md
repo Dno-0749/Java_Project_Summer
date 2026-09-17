@@ -37,7 +37,3 @@ To get started with the project, ensure you have the necessary dependencies inst
 ## Contributing
 
 Contributions are welcome! Please follow the contribution guidelines outlined in the project documentation.
-
-The frontend modules from the `fe` branch are included in the repository
-alongside the backend application. Frontend-specific setup is documented in
-the frontend package files and its blueprint modules.
