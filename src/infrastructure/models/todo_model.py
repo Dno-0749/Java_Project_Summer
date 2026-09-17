@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+﻿from sqlalchemy import Column, Integer, String, DateTime
 from infrastructure.databases.base import Base
 
 class TodoModel(Base):

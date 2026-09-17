@@ -1,166 +1,144 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Nhà cung cấp tour{% endblock %}
+{% block title %}
+Nhà cung cấp tour
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid px-4 py-4">
+
+<div class="container-fluid py-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
             <h2 class="fw-bold mb-1">
+                <i class="bi bi-building"></i>
                 Nhà cung cấp tour
             </h2>
 
             <p class="text-muted mb-0">
-                Quản lý các đơn vị cung cấp tour tham quan
+                Quản lý các đơn vị cung cấp hoạt động tham quan trên bờ
             </p>
         </div>
 
-        {% if current_user.role in ["shore_excursion_manager", "admin"] %}
-        <button
-            type="button"
-            class="btn btn-primary"
-            data-bs-toggle="modal"
-            data-bs-target="#providerModal"
-        >
-            <i class="bi bi-plus-lg me-1"></i>
-            Thêm nhà cung cấp
-        </button>
-        {% endif %}
+        <div class="d-flex gap-2">
+
+            <a
+                href="{{ url_for('excursions.excursions') }}"
+                class="btn btn-outline-secondary"
+            >
+                <i class="bi bi-arrow-left"></i>
+                Quay lại
+            </a>
+
+            <button
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#providerModal"
+            >
+                <i class="bi bi-plus-lg"></i>
+                Thêm nhà cung cấp
+            </button>
+
+        </div>
 
     </div>
 
-    <div class="row g-4">
 
-        {% for provider in providers %}
+    <div class="card border-0 shadow-sm">
 
-        <div class="col-md-6 col-xl-4">
+        <div class="card-body">
 
-            <div class="card border-0 shadow-sm provider-card h-100">
+            {% if providers %}
 
-                <div class="card-body p-4">
+            <div class="table-responsive">
 
-                    <div class="d-flex justify-content-between align-items-start mb-3">
+                <table class="table align-middle">
 
-                        <div class="provider-icon">
-                            <i class="bi bi-building"></i>
-                        </div>
+                    <thead>
 
-                        {% if provider.status|default("Đang hợp tác") == "Đang hợp tác" %}
-                        <span class="badge bg-success-subtle text-success">
-                            Đang hợp tác
-                        </span>
-                        {% else %}
-                        <span class="badge bg-secondary-subtle text-secondary">
-                            {{ provider.status }}
-                        </span>
-                        {% endif %}
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên nhà cung cấp</th>
+                            <th>Số điện thoại</th>
+                            <th>Email</th>
+                            <th>Địa chỉ</th>
+                        </tr>
 
-                    </div>
+                    </thead>
 
-                    <h5 class="fw-bold mb-2">
-                        {{ provider.name }}
-                    </h5>
+                    <tbody>
 
-                    <div class="provider-info">
+                        {% for provider in providers %}
 
-                        <div>
-                            <i class="bi bi-person text-muted me-2"></i>
-                            {{ provider.contact_person|default("-") }}
-                        </div>
+                        <tr>
 
-                        <div>
-                            <i class="bi bi-telephone text-muted me-2"></i>
-                            {{ provider.phone|default("-") }}
-                        </div>
+                            <td>
+                                {{ provider.id }}
+                            </td>
 
-                        <div>
-                            <i class="bi bi-envelope text-muted me-2"></i>
-                            {{ provider.email|default("-") }}
-                        </div>
+                            <td>
+                                <strong>
+                                    {{ provider.name }}
+                                </strong>
+                            </td>
 
-                        <div>
-                            <i class="bi bi-geo-alt text-muted me-2"></i>
-                            {{ provider.address|default("-") }}
-                        </div>
+                            <td>
+                                {{ provider.phone or "-" }}
+                            </td>
 
-                    </div>
+                            <td>
+                                {{ provider.email or "-" }}
+                            </td>
 
-                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <td>
+                                {{ provider.address or "-" }}
+                            </td>
 
-                        <div>
-                            <small class="text-muted">
-                                Số tour
-                            </small>
+                        </tr>
 
-                            <div class="fw-bold">
-                                {{ provider.excursion_count|default(0) }}
-                            </div>
-                        </div>
+                        {% endfor %}
 
-                        {% if current_user.role in ["shore_excursion_manager", "admin"] %}
-                        <button
-                            type="button"
-                            class="btn btn-sm btn-outline-primary"
-                        >
-                            <i class="bi bi-pencil me-1"></i>
-                            Chỉnh sửa
-                        </button>
-                        {% endif %}
+                    </tbody>
 
-                    </div>
-
-                </div>
+                </table>
 
             </div>
 
-        </div>
+            {% else %}
 
-        {% else %}
+            <div class="text-center py-5">
 
-        <div class="col-12">
+                <i class="bi bi-building fs-1 text-muted"></i>
 
-            <div class="card border-0 shadow-sm">
-
-                <div class="card-body text-center py-5">
-
-                    <i class="bi bi-building fs-1 text-muted"></i>
-
-                    <h5 class="mt-3">
-                        Chưa có nhà cung cấp
-                    </h5>
-
-                    <p class="text-muted mb-0">
-                        Hiện chưa có nhà cung cấp tour nào.
-                    </p>
-
-                </div>
+                <h5 class="mt-3">
+                    Chưa có nhà cung cấp
+                </h5>
 
             </div>
 
-        </div>
+            {% endif %}
 
-        {% endfor %}
+        </div>
 
     </div>
 
 </div>
 
+
 <div
     class="modal fade"
     id="providerModal"
     tabindex="-1"
-    aria-hidden="true"
 >
 
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog">
 
-        <div class="modal-content border-0">
+        <div class="modal-content">
 
             <div class="modal-header">
 
-                <h5 class="modal-title fw-bold">
+                <h5 class="modal-title">
                     Thêm nhà cung cấp
                 </h5>
 
@@ -172,82 +150,82 @@
 
             </div>
 
-            <form method="POST" action="/excursions/providers/create">
+
+            <form
+                method="POST"
+                action="{{ url_for('excursions.create_provider') }}"
+            >
 
                 <div class="modal-body">
 
-                    <div class="row g-3">
+                    <div class="mb-3">
 
-                        <div class="col-md-8">
-                            <label class="form-label fw-semibold">
-                                Tên nhà cung cấp
-                            </label>
+                        <label class="form-label">
+                            Tên nhà cung cấp
+                        </label>
 
-                            <input
-                                type="text"
-                                name="name"
-                                class="form-control"
-                                required
-                            >
-                        </div>
+                        <input
+                            type="text"
+                            name="name"
+                            class="form-control"
+                            required
+                        >
 
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">
-                                Người liên hệ
-                            </label>
+                    </div>
 
-                            <input
-                                type="text"
-                                name="contact_person"
-                                class="form-control"
-                            >
-                        </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Số điện thoại
-                            </label>
+                    <div class="mb-3">
 
-                            <input
-                                type="tel"
-                                name="phone"
-                                class="form-control"
-                            >
-                        </div>
+                        <label class="form-label">
+                            Số điện thoại
+                        </label>
 
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Email
-                            </label>
+                        <input
+                            type="text"
+                            name="phone"
+                            class="form-control"
+                        >
 
-                            <input
-                                type="email"
-                                name="email"
-                                class="form-control"
-                            >
-                        </div>
+                    </div>
 
-                        <div class="col-12">
-                            <label class="form-label fw-semibold">
-                                Địa chỉ
-                            </label>
 
-                            <input
-                                type="text"
-                                name="address"
-                                class="form-control"
-                            >
-                        </div>
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Email
+                        </label>
+
+                        <input
+                            type="email"
+                            name="email"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Địa chỉ
+                        </label>
+
+                        <textarea
+                            name="address"
+                            class="form-control"
+                            rows="3"
+                        ></textarea>
 
                     </div>
 
                 </div>
 
+
                 <div class="modal-footer">
 
                     <button
                         type="button"
-                        class="btn btn-light"
+                        class="btn btn-secondary"
                         data-bs-dismiss="modal"
                     >
                         Hủy
@@ -257,8 +235,7 @@
                         type="submit"
                         class="btn btn-primary"
                     >
-                        <i class="bi bi-check-lg me-1"></i>
-                        Lưu nhà cung cấp
+                        Thêm
                     </button>
 
                 </div>
@@ -270,4 +247,5 @@
     </div>
 
 </div>
+
 {% endblock %}

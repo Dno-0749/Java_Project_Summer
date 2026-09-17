@@ -1,4 +1,4 @@
-from infrastructure.databases.factory_database import FactoryDatabase
+﻿from infrastructure.databases.factory_database import FactoryDatabase
 from infrastructure.databases.base import Base
 # from infrastructure.databases.mssql import init_mssql
 # from infrastructure.databases.postgres import init_postgres
@@ -11,6 +11,7 @@ from infrastructure.models.pay import pay_tran_model
 from infrastructure.models.cruise import (
     port_model,
     cruise_model,
+    booking_model,
     cruise_day_model,
     cabin_model,
     passenger_model,
@@ -23,13 +24,13 @@ from infrastructure.models.cruise import (
     invoice_model,
     feedback_model,
     notification_model,
+    booking_model,
 )
+from infrastructure.models import admin_models
 
 def init_db(app):
     # init_mssql(app)
     FactoryDatabase.get_database('POSTGREE').init_database(app)
     # init_postgres(app)
-
-# Base ở đây được import từ infrastructure.databases.base, dùng chung
-# cho MỌI model (kể cả các model cruise mới) để Base.metadata.create_all()
-# trong DatabasePostgres.init_database() có thể tạo đủ bảng trên Supabase.
+    
+# Base is shared by all SQLAlchemy models, including cruise models.

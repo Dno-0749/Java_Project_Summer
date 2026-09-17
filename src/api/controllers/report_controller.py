@@ -178,6 +178,23 @@ def late_return_risk(cruise_day_id):
     return jsonify(result), 200
 
 
+@bp.route("/transactions/anomalies", methods=["GET"])
+def anomalies():
+    """
+    Phát hiện giao dịch bất thường
+    ---
+    get:
+      summary: Tự động phát hiện giao dịch bất thường (số tiền lớn, nghi trùng lặp) - hỗ trợ UC27 Đối soát
+      tags:
+        - Report
+      responses:
+        200:
+          description: Danh sách giao dịch bất thường kèm lý do
+    """
+    result = service.detect_anomalies()
+    return jsonify(result), 200
+
+
 @bp.route("/cruises/<int:cruise_id>/operations-summary", methods=["GET"])
 def operations_summary(cruise_id):
     """

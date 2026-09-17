@@ -1,9 +1,6 @@
-# Configuration settings for the Flask application
-
 import os
 from dotenv import load_dotenv
-
-load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+load_dotenv()
 
 class FactoryConfig:
     """Factory to get configuration based on environment."""
@@ -19,33 +16,33 @@ class FactoryConfig:
             return Config
 
 class Config:
-    """Base configuration.
-
-    DATABASE_URI mặc định lấy từ POSTGREE_DATABASE_URL (connection string
-    Supabase/Postgres, đặt trong file .env). Mọi environment (development,
-    testing, production) đều kế thừa giá trị này trừ khi override riêng.
-    """
+    """Base configuration."""
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'a_default_secret_key'
     DEBUG = os.environ.get('DEBUG', 'False').lower() in ['true', '1']
     TESTING = os.environ.get('TESTING', 'False').lower() in ['true', '1']
-    DATABASE_URI = os.environ.get('DATABASE_URI') or os.environ.get('POSTGREE_DATABASE_URL')
+    DATABASE_URI = os.environ.get('DATABASE_URI') or 'mssql+pymssql://sa:Aa%40123456@127.0.0.1:1433/DemoFlaskApi'
     CORS_HEADERS = 'Content-Type'
 
 class DevelopmentConfig(Config):
     """Development configuration."""
     DEBUG = True
-    DATABASE_URI = os.environ.get('POSTGREE_DATABASE_URL') or Config.DATABASE_URI
+    DATABASE_URI = (
+        os.environ.get("POSTGRES_DATABASE_URL")
+        or os.environ.get("POSTGREE_DATABASE_URL")
+        or os.environ.get("DATABASE_URI")
+        or "sqlite:///src/default.db"
+    )
 
 
 class TestingConfig(Config):
     """Testing configuration."""
     TESTING = True
-    DATABASE_URI = os.environ.get('TEST_POSTGREE_DATABASE_URL') or Config.DATABASE_URI
+    DATABASE_URI = os.environ.get('DATABASE_URI') or 'mssql+pymssql://sa:Aa%40123456@127.0.0.1:1433/DemoFlaskApi'
 
 
 class ProductionConfig(Config):
     """Production configuration."""
-    DATABASE_URI = os.environ.get('POSTGREE_DATABASE_URL') or Config.DATABASE_URI
+    DATABASE_URI = os.environ.get('DATABASE_URI') or 'mssql+pymssql://sa:Aa%40123456@127.0.0.1:1433/DemoFlaskApi'
 
     
 template = {

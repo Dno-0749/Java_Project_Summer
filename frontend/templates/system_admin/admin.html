@@ -1,0 +1,97 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Quản trị hệ thống</h2>
+        <p class="text-muted mb-0">Quản lý tài nguyên, chính sách, thiết bị và nhật ký qua Backend.</p>
+    </div>
+    <a class="btn btn-outline-primary" href="{{ config.API_BASE_URL }}/api/admin/logs/export.csv" target="_blank">
+        <i class="bi bi-download me-1"></i> Xuất log CSV
+    </a>
+</div>
+
+<div class="row g-3 mb-4">
+    {% for label, value, icon, color in [
+        ('Tàu', ships|length, 'bi-water', 'primary'),
+        ('Khu vực', areas|length, 'bi-grid-3x3-gap', 'success'),
+        ('Thiết bị', devices|length, 'bi-cpu', 'warning'),
+        ('Nhật ký', logs|length, 'bi-journal-text', 'info')
+    ] %}
+    <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100"><div class="card-body">
+            <div class="d-flex justify-content-between"><span class="text-muted">{{ label }}</span><i class="bi {{ icon }} text-{{ color }} fs-4"></i></div>
+            <div class="fs-3 fw-bold">{{ value }}</div>
+        </div></div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white fw-semibold"><i class="bi bi-water me-2"></i>Tàu</div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('system_admin.admin_create_ship') }}" class="row g-2 mb-3">
+                    <div class="col-md-6"><input class="form-control" name="name" placeholder="Tên tàu" required></div>
+                    <div class="col-md-3"><input class="form-control" name="code" placeholder="Mã tàu" required></div>
+                    <div class="col-md-3"><input class="form-control" name="capacity" type="number" min="0" placeholder="Sức chứa"></div>
+                    <div class="col-12"><input class="form-control" name="description" placeholder="Mô tả"></div>
+                    <div class="col-12"><button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-plus-lg"></i> Thêm tàu</button></div>
+                </form>
+                <div class="table-responsive"><table class="table table-sm align-middle"><thead><tr><th>Tên</th><th>Mã</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+                {% for item in ships %}<tr><td>{{ item.name }}</td><td>{{ item.code }}</td><td>{{ item.status }}</td><td class="text-end"><form method="post" action="{{ url_for('system_admin.admin_delete_ship', ship_id=item.id) }}"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form></td></tr>{% else %}<tr><td colspan="4" class="text-muted">Chưa có dữ liệu.</td></tr>{% endfor %}
+                </tbody></table></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white fw-semibold"><i class="bi bi-grid-3x3-gap me-2"></i>Khu vực trên tàu</div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('system_admin.admin_create_area') }}" class="row g-2 mb-3">
+                    <div class="col-md-6"><input class="form-control" name="name" placeholder="Tên khu vực" required></div>
+                    <div class="col-md-3"><input class="form-control" name="deck" placeholder="Tầng boong"></div>
+                    <div class="col-md-3"><button class="btn btn-success w-100" type="submit"><i class="bi bi-plus-lg"></i> Thêm</button></div>
+                    <div class="col-12"><input class="form-control" name="description" placeholder="Mô tả"></div>
+                </form>
+                <div class="table-responsive"><table class="table table-sm align-middle"><thead><tr><th>Khu vực</th><th>Boong</th><th></th></tr></thead><tbody>
+                {% for item in areas %}<tr><td>{{ item.name }}</td><td>{{ item.deck or '-' }}</td><td class="text-end"><form method="post" action="{{ url_for('system_admin.admin_delete_area', area_id=item.id) }}"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form></td></tr>{% else %}<tr><td colspan="3" class="text-muted">Chưa có dữ liệu.</td></tr>{% endfor %}
+                </tbody></table></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold"><i class="bi bi-sliders me-2"></i>Chính sách đăng ký, hủy và hoàn tiền</div>
+            <div class="card-body">{% for item in policies %}<form method="post" action="{{ url_for('system_admin.admin_update_policy', policy_key=item.policy_key) }}" class="row g-2 align-items-center mb-2"><div class="col-md-7"><label class="small fw-semibold">{{ item.description or item.policy_key }}</label></div><div class="col-md-3"><input class="form-control form-control-sm" name="policy_value" value="{{ item.policy_value }}"></div><div class="col-md-2"><button class="btn btn-sm btn-outline-primary w-100">Lưu</button></div></form>{% else %}<p class="text-muted mb-0">Chưa có chính sách.</p>{% endfor %}</div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white fw-semibold"><i class="bi bi-cpu me-2"></i>Thiết bị QR, thẻ và RFID/NFC</div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('system_admin.admin_create_device') }}" class="row g-2 mb-3">
+                    <div class="col-md-5"><input class="form-control" name="device_code" placeholder="Mã thiết bị" required></div>
+                    <div class="col-md-4"><select class="form-select" name="device_type"><option value="qr_scanner">QR scanner</option><option value="cruise_card">Thẻ du thuyền</option><option value="rfid_nfc">RFID/NFC</option></select></div>
+                    <div class="col-md-3"><button class="btn btn-warning w-100" type="submit">Đăng ký</button></div>
+                    <div class="col-md-6"><input class="form-control" name="location" placeholder="Vị trí"></div><div class="col-md-6"><input class="form-control" name="assigned_to" placeholder="Phụ trách"></div>
+                </form>
+                <div class="table-responsive"><table class="table table-sm align-middle"><thead><tr><th>Mã</th><th>Loại</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+                {% for item in devices %}<tr><td>{{ item.device_code }}</td><td>{{ item.device_type }}</td><td>{{ item.status }}</td><td class="text-end"><form method="post" action="{{ url_for('system_admin.admin_delete_device', device_id=item.id) }}"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form></td></tr>{% else %}<tr><td colspan="4" class="text-muted">Chưa có thiết bị.</td></tr>{% endfor %}
+                </tbody></table></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white fw-semibold"><i class="bi bi-journal-text me-2"></i>Nhật ký hệ thống</div>
+    <div class="table-responsive"><table class="table table-sm table-hover mb-0"><thead><tr><th>Thời gian</th><th>Actor</th><th>Thao tác</th><th>Tài nguyên</th><th>Chi tiết</th></tr></thead><tbody>
+    {% for item in logs %}<tr><td>{{ item.created_at }}</td><td>{{ item.actor_username or item.actor_user_id or '-' }}</td><td>{{ item.action }}</td><td>{{ item.resource }} #{{ item.resource_id or '-' }}</td><td class="text-truncate" style="max-width:260px">{{ item.details or '-' }}</td></tr>{% else %}<tr><td colspan="5" class="text-muted">Chưa có nhật ký.</td></tr>{% endfor %}
+    </tbody></table></div>
+</div>
+{% endblock %}

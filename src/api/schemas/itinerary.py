@@ -1,6 +1,28 @@
 from marshmallow import Schema, fields
 
 
+BOOKING_STATUSES = ("pending", "confirmed", "completed", "cancelled")
+
+
+class BookingRequestSchema(Schema):
+    ship_name = fields.Str(required=True)
+    customer_name = fields.Str(required=True)
+    start_date = fields.Date(required=True)
+    end_date = fields.Date(required=True)
+    status = fields.Str(required=False, load_default="pending")
+
+
+class BookingResponseSchema(Schema):
+    id = fields.Int()
+    ship_name = fields.Str(allow_none=True)
+    customer_name = fields.Str(allow_none=True)
+    start_date = fields.Date(allow_none=True)
+    end_date = fields.Date(allow_none=True)
+    status = fields.Str()
+    created_at = fields.Raw()
+    updated_at = fields.Raw()
+
+
 class CruiseRequestSchema(Schema):
     name = fields.Str(required=True)
     start_date = fields.Date(required=True)

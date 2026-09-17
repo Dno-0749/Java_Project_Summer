@@ -1,9 +1,9 @@
-from infrastructure.repositories.checkin_repository import CheckinRepository
+from infrastructure.repositories.checkin_repository import CheckInRepository
 
 
-class CheckinService:
-    def __init__(self, repository: CheckinRepository = None):
-        self.repository = repository or CheckinRepository()
+class CheckInService:
+    def __init__(self, repository: CheckInRepository = None):
+        self.repository = repository or CheckInRepository()
 
     def checkin(self, registration_id: int, method: str):
         """UC09/UC17: Check-in bằng QR/thẻ/RFID-NFC.
@@ -22,4 +22,18 @@ class CheckinService:
         if method not in ["qr", "card", "rfid"]:
             raise ValueError("Phương thức check-in không hợp lệ (chỉ nhận qr/card/rfid).")
 
-        return self.repository.add_checkin(registration_id, method)
+        checkin = self.repository.add_checkin(registration_id, method)
+
+        try:
+            from services.notification_service import NotificationService
+            NotificationService().create(
+                title="Check-in thành công",
+                content="Bạn đã check-in thành công cho hoạt động vừa tham gia.",
+                passenger_id=registration.passenger_id,
+                category="registration",
+                priority="normal",
+            )
+        except Exception:
+            pass
+
+        return checkin

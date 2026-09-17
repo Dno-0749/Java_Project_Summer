@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float
+﻿from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float
 from infrastructure.databases.base import Base
 
 class FeedbackModel(Base):
@@ -16,5 +16,5 @@ class FeedbackModel(Base):
     
 #ORM : Object Relational Mapping
 # Ánh xạ đối tượng trong Python với bảng trong cơ sở dữ liệu
-#Ánh xạ các thuộc tính của lớp với các cột trong bảng
-#Ánh xạ các mối quan hệ giữa các lớp với các khóa ngoại trong bảng
+#Ãnh xáº¡ các thuộc tính cá»§a lá»›p với cÃ¡c cá»™t trong bảng
+#Ãnh xáº¡ các mối quan hệ giá»¯a cÃ¡c lá»›p với cÃ¡c khóa ngoại trong bảng

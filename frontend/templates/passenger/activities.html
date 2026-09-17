@@ -13,7 +13,17 @@
     <a href="{{ url_for('passenger.my_registrations') }}" class="small text-nowrap"><i class="bi bi-clipboard-check"></i> Của tôi</a>
 </div>
 
-{% for a in activities %}
+{% if not grouped_activities %}
+<div class="p-card text-center text-muted">Chưa có hoạt động nào.</div>
+{% endif %}
+
+{% for group in grouped_activities %}
+<div class="fw-bold small text-muted text-uppercase mt-3 mb-2">
+    <i class="bi bi-calendar-event"></i>
+    {% if group.day_label == "Chưa xếp lịch" %}Chưa xếp lịch{% else %}Ngày {{ group.day_label }}{% endif %}
+</div>
+
+{% for a in group.activities_list %}
 <a href="{{ url_for('passenger.activity_detail', kind=a.kind, item_id=a.id) }}" class="p-card d-block text-decoration-none text-dark">
     <div class="d-flex justify-content-between align-items-start">
         <div>
@@ -36,5 +46,6 @@
     <span class="badge bg-primary-subtle text-primary mt-1"><i class="bi bi-check-circle"></i> Bạn đã đăng ký</span>
     {% endif %}
 </a>
+{% endfor %}
 {% endfor %}
 {% endblock %}

@@ -12,3 +12,4 @@ apispec
 apispec_webframeworks
 flask-swagger-ui
 PyJWT>=2.8
+supabase>=2.0

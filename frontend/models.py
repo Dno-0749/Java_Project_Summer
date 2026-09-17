@@ -26,7 +26,12 @@ class User(UserMixin):
         self.role = role
         self.role_name = role_name or ROLE_DISPLAY_NAMES.get(role, role)
         self.status = status
+        # ID của bản ghi Passenger THẬT trên backend/Supabase (chỉ có ý nghĩa
+        # với role='passenger'). None nghĩa là tài khoản này chưa liên kết
+        # với 1 hành khách thật nào (sẽ tự tạo/gán khi cần).
         self.passenger_id = passenger_id
+        # Mật khẩu đã băm - chỉ có với tài khoản xác thực qua Supabase
+        # (bảng auth_users), tài khoản local vẫn dùng self.password thường.
         self.password_hash = password_hash
 
     def get_id(self):
@@ -53,17 +58,13 @@ class User(UserMixin):
         return cls(
             id=data["id"],
             username=data["username"],
-            password=data.get("password", ""),
+            password=data["password"],
             full_name=data["full_name"],
             role=data["role"],
             role_name=data.get("role_name"),
             status=data.get("status", "Active"),
             passenger_id=data.get("passenger_id"),
         )
-
-    @classmethod
-    def from_api(cls, data):
-        return cls.from_dict(data)
 
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), "users_data.json")
@@ -155,46 +156,6 @@ def _save_users(users_map):
 
 users_db = _load_users()
 
-SUPABASE_ROLE_MAP = {
-    "ADMIN": "admin",
-    "OPERATIONS_MANAGER": "operations",
-    "FINANCE": "finance",
-    "ITINERARY_STAFF": "coordinator",
-    "ACTIVITY_STAFF": "activity_manager",
-}
-
-
-def _supabase_users():
-    try:
-        client = get_supabase_client()
-        users = client.table("auth_users").select("id, username, email, password_hash").execute().data or []
-        roles = client.table("auth_roles").select("id, name").execute().data or []
-        user_roles = client.table("auth_user_roles").select("user_id, role_id").execute().data or []
-    except Exception:
-        return {}
-    role_names = {str(role["id"]): role["name"] for role in roles}
-    roles_by_user = {}
-    for user_role in user_roles:
-        role_name = role_names.get(str(user_role["role_id"]))
-        if role_name:
-            roles_by_user[str(user_role["user_id"])] = role_name
-
-    result = {}
-    for row in users:
-        role_name = roles_by_user.get(str(row["id"]), "")
-        role = SUPABASE_ROLE_MAP.get(role_name, role_name.lower())
-        username = row["username"]
-        result[str(row["id"])] = User(
-            id=row["id"],
-            username=username,
-            password="",
-            full_name=username,
-            role=role,
-            role_name=ROLE_DISPLAY_NAMES.get(role, role_name or role),
-            password_hash=row["password_hash"],
-        )
-    return result
-
 def slugify_username(full_name):
     """
     Chuyển họ và tên tiếng Việt thành username viết thường liền không dấu.
@@ -218,45 +179,70 @@ SUPABASE_ROLE_MAP = {
     "FINANCE": "finance",
     "ITINERARY_STAFF": "coordinator",
     "ACTIVITY_STAFF": "activity_manager",
+    "SALES_STAFF": "sales_staff",
+    "PASSENGER": "passenger",
 }
 
 
 def _supabase_users():
     """Lấy danh sách user THẬT từ bảng auth_users/auth_roles/auth_user_roles
-    trên Supabase (nếu đã cấu hình SUPABASE_URL/SUPABASE_KEY). Chỉ áp dụng
-    cho các role quản trị (admin/operations/finance/coordinator/activity_manager)
-    - KHÔNG ảnh hưởng tới tài khoản sales_staff/passenger vốn vẫn quản lý
-    local qua users_data.json (vì các role thiết bị này không có trong
-    bảng auth_users của boilerplate gốc)."""
+    trên Supabase (nếu đã cấu hình SUPABASE_URL/SUPABASE_KEY) - áp dụng cho
+    TẤT CẢ role, bao gồm cả sales_staff/passenger (đã chuyển hẳn sang
+    Supabase, không còn phụ thuộc users_data.json local nữa).
+
+    QUAN TRỌNG: hàm này chạy ở MỌI request (qua load_user của Flask-Login),
+    nên toàn bộ xử lý dữ liệu phải nằm trong try/except - nếu Supabase trả
+    về dữ liệu bất thường (sai schema, bảng trống, lỗi cấu trúc...) thì
+    phải rơi về {} an toàn, không được để crash lan ra ngoài (sẽ sập toàn
+    bộ Frontend vì mọi trang đều gọi current_user)."""
     try:
         client = get_supabase_client()
-        users = client.table("auth_users").select("id, username, email, password_hash").execute().data or []
+    except Exception as e:
+        print(f"[_supabase_users] Không kết nối được Supabase: {e}")
+        return {}
+
+    try:
+        users = client.table("auth_users").select(
+            "id, username, email, password_hash, full_name, status, passenger_id"
+        ).execute().data or []
         roles = client.table("auth_roles").select("id, name").execute().data or []
         user_roles = client.table("auth_user_roles").select("user_id, role_id").execute().data or []
-    except Exception:
-        return {}
-    role_names = {str(role["id"]): role["name"] for role in roles}
-    roles_by_user = {}
-    for user_role in user_roles:
-        role_name = role_names.get(str(user_role["role_id"]))
-        if role_name:
-            roles_by_user[str(user_role["user_id"])] = role_name
 
-    result = {}
-    for row in users:
-        role_name = roles_by_user.get(str(row["id"]), "")
-        role = SUPABASE_ROLE_MAP.get(role_name, role_name.lower())
-        username = row["username"]
-        result[str(row["id"])] = User(
-            id=row["id"],
-            username=username,
-            password="",
-            full_name=username,
-            role=role,
-            role_name=ROLE_DISPLAY_NAMES.get(role, role_name or role),
-            password_hash=row["password_hash"],
-        )
-    return result
+        role_names = {
+            str(role["id"]): role["name"]
+            for role in roles
+            if isinstance(role, dict) and "id" in role and "name" in role
+        }
+        roles_by_user = {}
+        for user_role in user_roles:
+            if not isinstance(user_role, dict):
+                continue
+            role_name = role_names.get(str(user_role.get("role_id")))
+            if role_name:
+                roles_by_user[str(user_role.get("user_id"))] = role_name
+
+        result = {}
+        for row in users:
+            if not isinstance(row, dict) or "id" not in row or "username" not in row:
+                continue
+            role_name = roles_by_user.get(str(row["id"]), "")
+            role = SUPABASE_ROLE_MAP.get(role_name, role_name.lower() if role_name else "")
+            username = row["username"]
+            result[str(row["id"])] = User(
+                id=row["id"],
+                username=username,
+                password="",
+                full_name=row.get("full_name") or username,
+                role=role,
+                role_name=ROLE_DISPLAY_NAMES.get(role, role_name or role),
+                status=row.get("status", "Active"),
+                passenger_id=row.get("passenger_id"),
+                password_hash=row.get("password_hash"),
+            )
+        return result
+    except Exception as e:
+        print(f"[_supabase_users] Lỗi xử lý dữ liệu Supabase: {type(e).__name__}: {e}")
+        return {}
 
 
 def authenticate(username, password):
@@ -287,10 +273,6 @@ def get_user_by_id(user_id):
 
 def get_all_users():
     global users_db
-    if is_supabase_configured():
-        users_db = _supabase_users()
-        if users_db:
-            return list(users_db.values())
     users_db = _load_users()
     result = list(users_db.values())
     if is_supabase_configured():
@@ -302,15 +284,14 @@ def get_all_users():
 
 def add_user(full_name, role, custom_username=None, password="123456"):
     """Thêm người dùng mới và tự động sinh username.
-    Nếu Supabase đã cấu hình VÀ role thuộc nhóm quản trị (có trong
-    SUPABASE_ROLE_MAP) -> tạo trên Supabase (bảng auth_users thật).
-    Ngược lại (role sales_staff/passenger, hoặc Supabase chưa cấu hình)
-    -> vẫn tạo local như cũ, không ảnh hưởng gì tới POS/Passenger.
+    Nếu Supabase đã cấu hình -> tạo trên Supabase (bảng auth_users thật),
+    áp dụng cho MỌI role (kể cả sales_staff). Nếu chưa cấu hình Supabase
+    -> tạo local như cũ (users_data.json).
     """
     global users_db
-    role_is_admin_tier = role in SUPABASE_ROLE_MAP.values()
+    role_is_supabase_managed = role in SUPABASE_ROLE_MAP.values()
 
-    if is_supabase_configured() and role_is_admin_tier:
+    if is_supabase_configured() and role_is_supabase_managed:
         client = get_supabase_client()
         remote_users = _supabase_users()
         base_username = custom_username.strip().lower() if custom_username else slugify_username(full_name)
@@ -327,37 +308,13 @@ def add_user(full_name, role, custom_username=None, password="123456"):
         }).execute().data[0]
         role_name = next((name for name, code in SUPABASE_ROLE_MAP.items() if code == role), role.upper())
         role_rows = client.table("auth_roles").select("id").eq("name", role_name).execute().data
-        if role_rows:
-            client.table("auth_user_roles").insert({"user_id": inserted["id"], "role_id": role_rows[0]["id"]}).execute()
+        if not role_rows:
+            role_rows = [client.table("auth_roles").insert(
+                {"name": role_name, "description": ROLE_DISPLAY_NAMES.get(role, role_name)}
+            ).execute().data[0]]
+        client.table("auth_user_roles").insert({"user_id": inserted["id"], "role_id": role_rows[0]["id"]}).execute()
         return _supabase_users().get(str(inserted["id"]))
 
-    return _add_local_user(full_name, role, custom_username, password)
-
-
-def _add_local_user(full_name, role, custom_username=None, password="123456"):
-    global users_db
-    if is_supabase_configured():
-        client = get_supabase_client()
-        remote_users = _supabase_users()
-        base_username = custom_username.strip().lower() if custom_username else slugify_username(full_name)
-        username = base_username or "user"
-        existing_usernames = {user.username for user in remote_users.values()}
-        counter = 1
-        while username in existing_usernames:
-            username = f"{base_username}{counter}"
-            counter += 1
-        inserted = client.table("auth_users").insert({
-            "username": username,
-            "email": f"{username}@local.invalid",
-            "password_hash": generate_password_hash(password),
-        }).execute().data[0]
-        role_name = next((name for name, code in SUPABASE_ROLE_MAP.items() if code == role), role.upper())
-        role_rows = client.table("auth_roles").select("id").eq("name", role_name).execute().data
-        if role_rows:
-            client.table("auth_user_roles").insert({"user_id": inserted["id"], "role_id": role_rows[0]["id"]}).execute()
-        users_db = _supabase_users()
-        return users_db.get(str(inserted["id"]))
-    users_db = _load_users()
     return _add_local_user(full_name, role, custom_username, password)
 
 
@@ -400,8 +357,6 @@ def toggle_user_status(user_id):
     Chỉ áp dụng cho tài khoản local - Supabase auth_users hiện chưa có cột
     trạng thái tương ứng trong boilerplate gốc."""
     global users_db
-    if is_supabase_configured():
-        return None
     users_db = _load_users()
     user = users_db.get(str(user_id))
     if user:
@@ -414,7 +369,9 @@ def toggle_user_status(user_id):
 
 
 def delete_user(user_id):
-    """Xóa tài khoản local; tài khoản Supabase không bị xóa từ giao diện này."""
+    """Xóa hẳn tài khoản (chỉ áp dụng tài khoản local, ví dụ sales_staff/
+    passenger tạo thủ công qua Admin - không xóa tài khoản Supabase từ đây
+    để tránh xóa nhầm dữ liệu auth_users thật)."""
     global users_db
     users_db = _load_users()
     user = users_db.pop(str(user_id), None)
@@ -425,16 +382,43 @@ def delete_user(user_id):
 
 
 def username_exists(username):
+    username = (username or "").strip().lower()
+    if is_supabase_configured():
+        if any(u.username == username for u in _supabase_users().values()):
+            return True
     global users_db
     users_db = _load_users()
-    username = (username or "").strip().lower()
     return any(u.username == username for u in users_db.values())
 
 
 def register_passenger_user(username, password, full_name, passenger_id):
     """Tạo tài khoản đăng nhập mới cho Hành khách tự đăng ký (UC: Đăng ký
     tài khoản), liên kết với 1 bản ghi Passenger thật (passenger_id) đã
-    được tạo trước đó trên backend/Supabase."""
+    được tạo trước đó trên backend/Supabase.
+    Nếu Supabase đã cấu hình -> ghi thẳng vào auth_users (role PASSENGER),
+    kèm cột passenger_id để liên kết. Nếu chưa cấu hình -> tạo local như cũ."""
+    username = username.strip().lower()
+
+    if is_supabase_configured():
+        client = get_supabase_client()
+        inserted = client.table("auth_users").insert({
+            "username": username,
+            "email": f"{username}@local.invalid",
+            "password_hash": generate_password_hash(password),
+            "full_name": full_name.strip(),
+            "status": "Active",
+            "passenger_id": passenger_id,
+        }).execute().data[0]
+        role_rows = client.table("auth_roles").select("id").eq("name", "PASSENGER").execute().data
+        if not role_rows:
+            role_rows = [client.table("auth_roles").insert(
+                {"name": "PASSENGER", "description": "Hành khách"}
+            ).execute().data[0]]
+        client.table("auth_user_roles").insert(
+            {"user_id": inserted["id"], "role_id": role_rows[0]["id"]}
+        ).execute()
+        return _supabase_users().get(str(inserted["id"]))
+
     global users_db
     users_db = _load_users()
 
@@ -443,7 +427,7 @@ def register_passenger_user(username, password, full_name, passenger_id):
 
     new_user = User(
         id=next_id,
-        username=username.strip().lower(),
+        username=username,
         password=password,
         full_name=full_name.strip(),
         role="passenger",
@@ -457,6 +441,14 @@ def register_passenger_user(username, password, full_name, passenger_id):
 
 
 def update_password(user_id, new_password):
+    if is_supabase_configured():
+        client = get_supabase_client()
+        result = client.table("auth_users").update(
+            {"password_hash": generate_password_hash(new_password)}
+        ).eq("id", user_id).execute()
+        if result.data:
+            return _supabase_users().get(str(user_id))
+
     global users_db
     users_db = _load_users()
     user = users_db.get(str(user_id))

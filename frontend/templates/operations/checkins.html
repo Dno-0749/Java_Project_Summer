@@ -1,0 +1,69 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="bi bi-shield-check text-warning me-2"></i>Giám sát check-in</h4>
+        <small class="text-muted">Theo dõi hành khách ngoài tàu và cảnh báo quay lại trễ</small>
+    </div>
+    <a href="{{ url_for('operations.dashboard') }}" class="btn btn-outline-secondary">Về dashboard</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">Tổng lượt</div><div class="fs-4 fw-bold">{{ summary.total }}</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">Đã quay lại</div><div class="fs-4 fw-bold text-success">{{ summary.returned }}</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">Đang ở ngoài tàu</div><div class="fs-4 fw-bold text-warning">{{ summary.outside }}</div></div></div></div>
+    <div class="col-6 col-lg-3"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">Quay lại trễ</div><div class="fs-4 fw-bold text-danger">{{ summary.late }}</div></div></div></div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <span class="fw-semibold"><i class="bi bi-list-check text-primary me-2"></i>Trạng thái hành khách</span>
+        <div class="btn-group btn-group-sm" role="group">
+            <a href="{{ url_for('operations.checkin_monitor', status='all') }}" class="btn {% if selected_status == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}">Tất cả</a>
+            <a href="{{ url_for('operations.checkin_monitor', status='Đang ở ngoài tàu') }}" class="btn {% if selected_status == 'Đang ở ngoài tàu' %}btn-warning{% else %}btn-outline-warning{% endif %}">Đang ở ngoài</a>
+            <a href="{{ url_for('operations.checkin_monitor', status='Quay lại trễ') }}" class="btn {% if selected_status == 'Quay lại trễ' %}btn-danger{% else %}btn-outline-danger{% endif %}">Trễ giờ</a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Hành khách</th>
+                    <th>Phòng</th>
+                    <th>Chuyến tham quan</th>
+                    <th>Check-in</th>
+                    <th>Giờ phải về</th>
+                    <th>Giờ quay lại</th>
+                    <th class="pe-4">Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in checkins %}
+                <tr>
+                    <td class="ps-4 fw-semibold">{{ item.passenger }}</td>
+                    <td>{{ item.cabin }}</td>
+                    <td>{{ item.excursion }}</td>
+                    <td>{{ item.checkin_time }}</td>
+                    <td>{{ item.expected_return }}</td>
+                    <td>{{ item.returned_time or '-' }}</td>
+                    <td class="pe-4">
+                        {% if item.status == 'Đã quay lại' %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">{{ item.status }}</span>
+                        {% elif item.status == 'Quay lại trễ' %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle"><i class="bi bi-exclamation-triangle me-1"></i>{{ item.status }}</span>
+                        {% elif item.status == 'Chưa check-in' %}
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">{{ item.status }}</span>
+                        {% else %}
+                            <span class="badge bg-warning-subtle text-dark border border-warning-subtle">{{ item.status }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center text-muted py-4">Không có dữ liệu theo bộ lọc.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

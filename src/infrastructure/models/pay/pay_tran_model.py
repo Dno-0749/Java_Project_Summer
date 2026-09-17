@@ -1,5 +1,5 @@
-# Pay Transaction Model
-# Chứa các thông tin về giao dịch thanh toán của hoá đơn(invoice)
+﻿# Pay Transaction Model
+# Chứa các thông tin vá» giao dịch thanh toán cá»§a hoÃ¡ Ä‘ơn(invoice)
 from datetime import datetime
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float
 from infrastructure.databases.base import Base
