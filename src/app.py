@@ -12,6 +12,11 @@ from api.controllers.passenger_controller import bp as passenger_bp
 from api.controllers.feedback_controller import bp as feedback_bp
 from api.controllers.notification_controller import bp as notification_bp
 from api.controllers.booking_controller import bp as booking_bp
+from api.controllers.activity_registration_controller import bp as activity_registration_bp
+from api.controllers.excursion_registration_controller import excursion_registration_bp
+from api.controllers.shore_excursion_controller import bp as shore_excursion_bp
+from api.controllers.tour_provider_controller import bp as tour_provider_bp
+from api.controllers.admin_controller import bp as admin_bp
 from api.middleware import middleware
 from cors import init_cors
 from api.responses import success_response
@@ -39,6 +44,11 @@ def create_app():
     app.register_blueprint(feedback_bp)
     app.register_blueprint(notification_bp)
     app.register_blueprint(booking_bp)
+    app.register_blueprint(activity_registration_bp)
+    app.register_blueprint(excursion_registration_bp)
+    app.register_blueprint(shore_excursion_bp)
+    app.register_blueprint(tour_provider_bp)
+    app.register_blueprint(admin_bp)
     # register_routes(app)
      # Thêm Swagger UI blueprint
     SWAGGER_URL = '/docs'

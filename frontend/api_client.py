@@ -133,11 +133,11 @@ def create_passenger(cruise_id, full_name, cabin_id=None):
 
 # ==================== ACTIVITY / EXCURSION / REGISTRATION ====================
 def list_activities(cruise_id):
-    return _request("GET", f"/cruises/{cruise_id}/activities")
+    return _request("GET", "/api/activities/")
 
 
 def create_activity(cruise_id, data):
-    return _request("POST", f"/cruises/{cruise_id}/activities", json=data)
+    return _request("POST", "/api/activities/", json=data)
 
 
 def list_excursions(cruise_day_id):
@@ -149,15 +149,21 @@ def create_excursion(cruise_day_id, data):
 
 
 def register_activity(passenger_id, activity_id=None, excursion_id=None):
-    return _request("POST", "/registrations", json={
-        "passenger_id": passenger_id,
-        "activity_id": activity_id,
-        "excursion_id": excursion_id,
-    })
+    if activity_id is not None:
+        return _request("POST", "/api/activity-registrations/", json={
+            "passenger_id": passenger_id,
+            "activity_id": activity_id,
+        })
+    if excursion_id is not None:
+        return _request("POST", "/excursion-registrations/", json={
+            "passenger_id": passenger_id,
+            "excursion_id": excursion_id,
+        })
+    return None, "Cần có activity_id hoặc excursion_id để đăng ký."
 
 
 def list_activity_registrations(activity_id):
-    return _request("GET", f"/activities/{activity_id}/registrations")
+    return _request("GET", f"/api/activity-registrations/activity/{activity_id}")
 
 
 def list_excursion_registrations(excursion_id):
@@ -169,12 +175,12 @@ def list_passenger_registrations(passenger_id):
 
 
 def cancel_registration(registration_id):
-    return _request("PUT", f"/registrations/{registration_id}/cancel")
+    return _request("POST", f"/api/activity-registrations/{registration_id}/cancel")
 
 
 # ==================== CHECKIN ====================
 def checkin(registration_id, method="qr"):
-    return _request("POST", "/checkins", json={"registration_id": registration_id, "method": method})
+    return _request("POST", f"/api/activity-registrations/{registration_id}/checkin")
 
 
 # ==================== ACCOUNT / TRANSACTION (offline-sync) ====================
@@ -207,6 +213,87 @@ def list_passenger_transactions(passenger_id):
 
 def list_all_transactions():
     return _request("GET", "/transactions")
+
+
+# ==================== SYSTEM ADMIN ====================
+def admin_catalog():
+    return _request("GET", "/api/admin/catalog")
+
+
+def admin_users():
+    return _request("GET", "/api/admin/users")
+
+
+def create_admin_user(data):
+    return _request("POST", "/api/admin/users", json=data)
+
+
+def update_admin_user(user_id, data):
+    return _request("PUT", f"/api/admin/users/{user_id}", json=data)
+
+
+def delete_admin_user(user_id):
+    return _request("DELETE", f"/api/admin/users/{user_id}")
+
+
+def admin_ships():
+    return _request("GET", "/api/admin/ships")
+
+
+def create_admin_ship(data):
+    return _request("POST", "/api/admin/ships", json=data)
+
+
+def update_admin_ship(ship_id, data):
+    return _request("PUT", f"/api/admin/ships/{ship_id}", json=data)
+
+
+def delete_admin_ship(ship_id):
+    return _request("DELETE", f"/api/admin/ships/{ship_id}")
+
+
+def admin_areas():
+    return _request("GET", "/api/admin/areas")
+
+
+def create_admin_area(data):
+    return _request("POST", "/api/admin/areas", json=data)
+
+
+def update_admin_area(area_id, data):
+    return _request("PUT", f"/api/admin/areas/{area_id}", json=data)
+
+
+def delete_admin_area(area_id):
+    return _request("DELETE", f"/api/admin/areas/{area_id}")
+
+
+def admin_policies():
+    return _request("GET", "/api/admin/policies")
+
+
+def update_admin_policy(policy_key, data):
+    return _request("PUT", f"/api/admin/policies/{policy_key}", json=data)
+
+
+def admin_devices():
+    return _request("GET", "/api/admin/devices")
+
+
+def create_admin_device(data):
+    return _request("POST", "/api/admin/devices", json=data)
+
+
+def update_admin_device(device_id, data):
+    return _request("PUT", f"/api/admin/devices/{device_id}", json=data)
+
+
+def delete_admin_device(device_id):
+    return _request("DELETE", f"/api/admin/devices/{device_id}")
+
+
+def admin_logs(limit=200):
+    return _request("GET", f"/api/admin/logs?limit={limit}")
 
 
 def refund_transaction(transaction_id):

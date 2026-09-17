@@ -1,0 +1,27 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="fw-bold mb-1">Cấu hình hệ thống</h2>
+    <p class="text-muted mb-0">Thông tin trạng thái các dịch vụ đang sử dụng.</p>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-database-check text-success me-2"></i>Cơ sở dữ liệu</h5>
+                <p class="text-muted mb-0">Ứng dụng sử dụng Supabase cho dữ liệu và xác thực.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-shield-check text-primary me-2"></i>Bảo mật</h5>
+                <p class="text-muted mb-0">Quyền truy cập được kiểm soát theo vai trò tài khoản.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

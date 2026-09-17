@@ -1,9 +1,9 @@
-from infrastructure.repositories.checkin_repository import CheckinRepository
+from infrastructure.repositories.checkin_repository import CheckInRepository
 
 
-class CheckinService:
-    def __init__(self, repository: CheckinRepository = None):
-        self.repository = repository or CheckinRepository()
+class CheckInService:
+    def __init__(self, repository: CheckInRepository = None):
+        self.repository = repository or CheckInRepository()
 
     def checkin(self, registration_id: int, method: str):
         """UC09/UC17: Check-in bằng QR/thẻ/RFID-NFC.

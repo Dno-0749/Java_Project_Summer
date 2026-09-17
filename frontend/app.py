@@ -7,9 +7,9 @@ from blueprints.operations import operations_bp
 from blueprints.coordinator import coordinator_bp
 from blueprints.activities import activities_bp
 from blueprints.excursions import excursions_bp
-from blueprints.finance import finance_bp
 from blueprints.pos import pos_bp
 from blueprints.passenger import passenger_bp
+from blueprints.reports import reports_bp
 from models import User, get_user_by_id
 
 def create_app():
@@ -34,9 +34,9 @@ def create_app():
     app.register_blueprint(coordinator_bp)
     app.register_blueprint(activities_bp)
     app.register_blueprint(excursions_bp)
-    app.register_blueprint(finance_bp)
     app.register_blueprint(pos_bp)
     app.register_blueprint(passenger_bp)
+    app.register_blueprint(reports_bp)
 
     # Điều hướng tương thích cho URL cũ nếu có
     @app.route("/admin/dashboard")

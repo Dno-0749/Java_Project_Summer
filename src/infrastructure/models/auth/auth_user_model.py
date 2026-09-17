@@ -7,6 +7,9 @@ class AuthUserModel(Base):
     username = Column(String(50), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     password_hash = Column(String(512), nullable=False)
+    full_name = Column(String(255), nullable=True)
+    status = Column(String(40), nullable=False, default="Active")
+    passenger_id = Column(Integer, nullable=True)
     created_at = Column(DateTime)
     updated_at = Column(DateTime) 
 

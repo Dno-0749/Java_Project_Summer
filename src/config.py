@@ -27,7 +27,8 @@ class DevelopmentConfig(Config):
     """Development configuration."""
     DEBUG = True
     DATABASE_URI = (
-        os.environ.get("POSTGREE_DATABASE_URL")
+        os.environ.get("POSTGRES_DATABASE_URL")
+        or os.environ.get("POSTGREE_DATABASE_URL")
         or os.environ.get("DATABASE_URI")
         or "sqlite:///src/default.db"
     )

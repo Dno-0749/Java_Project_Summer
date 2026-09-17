@@ -11,7 +11,7 @@ class AbstractDatabase(ABC):
         if self.database_uri.startswith("postgresql://"):
             self.database_uri = self.database_uri.replace(
                 "postgresql://",
-                "postgresql+psycopg://",
+                "postgresql+psycopg2://",
                 1
             )
 
@@ -27,6 +27,9 @@ class AbstractDatabase(ABC):
         )
 
         self.session = self.SessionLocal()
+
+    def new_session(self):
+        return self.SessionLocal()
 
     @abstractmethod
     def init_database(self, app):

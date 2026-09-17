@@ -26,6 +26,7 @@ from infrastructure.models.cruise import (
     notification_model,
     booking_model,
 )
+from infrastructure.models import admin_models
 
 def init_db(app):
     # init_mssql(app)

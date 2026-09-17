@@ -5,6 +5,12 @@
     </div>
 
     <div class="list-group list-group-flush">
+        {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('system_admin.admin_control_panel') }}"
+           class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'system_admin.admin_control_panel' %}active{% endif %}">
+            <i class="bi bi-shield-lock me-2"></i> Quản trị hệ thống
+        </a>
+        {% endif %}
         <a href="{{ url_for('operations.dashboard') }}"
            class="list-group-item list-group-item-action bg-dark text-white border-0 {% if request.endpoint == 'operations.dashboard' %}active{% endif %}">
             <i class="bi bi-speedometer2 me-2"></i> Operations dashboard
