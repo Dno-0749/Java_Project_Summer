@@ -10,6 +10,8 @@ ROLE_DISPLAY_NAMES = {
     "finance": "Tài chính & Lễ tân",
     "coordinator": "Điều phối lịch trình",
     "activity_manager": "Quản lý hoạt động",
+    "sales_staff": "Nhân viên bán hàng & dịch vụ",
+    "passenger": "Hành khách",
 }
 
 class User(UserMixin):
@@ -100,6 +102,24 @@ DEFAULT_USERS = [
         "full_name": "Lê Đình Quý",
         "role": "activity_manager",
         "role_name": "Quản lý hoạt động",
+        "status": "Active"
+    },
+    {
+        "id": "6",
+        "username": "posstaff",
+        "password": "123456",
+        "full_name": "Nhân viên POS Demo",
+        "role": "sales_staff",
+        "role_name": "Nhân viên bán hàng & dịch vụ",
+        "status": "Active"
+    },
+    {
+        "id": "7",
+        "username": "passenger",
+        "password": "123456",
+        "full_name": "Hành khách Demo",
+        "role": "passenger",
+        "role_name": "Hành khách",
         "status": "Active"
     }
 ]

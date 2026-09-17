@@ -46,11 +46,20 @@
   },
   {
     "id": "6",
-    "username": "tranvanan",
+    "username": "posstaff",
     "password": "123456",
-    "full_name": "Trần Văn An",
-    "role": "coordinator",
-    "role_name": "Điều phối lịch trình",
+    "full_name": "Nhân viên POS Demo",
+    "role": "sales_staff",
+    "role_name": "Nhân viên bán hàng & dịch vụ",
+    "status": "Active"
+  },
+  {
+    "id": "7",
+    "username": "passenger",
+    "password": "123456",
+    "full_name": "Hành khách Demo",
+    "role": "passenger",
+    "role_name": "Hành khách",
     "status": "Active"
   }
 ]

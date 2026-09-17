@@ -4,14 +4,7 @@ from models import authenticate, get_all_users
 
 auth_bp = Blueprint("auth", __name__)
 
-# Bản đồ điều hướng thông minh theo chuyên môn của từng vai trò
-ROLE_REDIRECT_MAP = {
-    "admin": "system_admin.users",              # Nguyễn Chí Hải -> Trang Quản lý & Phân quyền
-    "operations": "operations.dashboard",       # Nguyễn Hoàng Phát -> Dashboard Vận hành
-    "coordinator": "coordinator.itinerary",     # Nguyễn Trọng Hải -> Quản lý Lịch trình
-    "activity_manager": "activities.activities",# Lê Đình Quý -> Quản lý Hoạt động trên tàu
-    "finance": "finance.finance",               # Nguyễn Thị Thi -> Tài chính & Đối soát
-}
+ROLE_REDIRECT_MAP = {"operations": "operations.dashboard"}
 
 @auth_bp.route("/")
 def index():
@@ -33,6 +26,10 @@ def login():
 
         user = authenticate(username, password)
         if user:
+            if user.role != "operations":
+                flash("Tài khoản này không thuộc Operations Control Center.", "danger")
+                return render_template("auth/login.html")
+
             if not user.is_active:
                 flash("Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ Quản trị viên.", "danger")
                 return render_template("auth/login.html", demo_users=get_all_users())
