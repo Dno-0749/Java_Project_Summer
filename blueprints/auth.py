@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, login_required, current_user
-from models import User, get_all_users, get_user_by_id, ROLE_DISPLAY_NAMES
-from api_client import login as api_login, get_current_user
+from models import authenticate, get_all_users, ROLE_DISPLAY_NAMES
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -34,40 +33,16 @@ def login():
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
 
-        auth_data, api_error = api_login(username, password)
-        user = None
-        if not api_error and auth_data:
-            remote = auth_data.get("user") or {}
-            session["access_token"] = auth_data.get("access_token") or auth_data.get("token")
-            session["api_user"] = remote
-
-            # Keep FE-only presentation fields (full_name/role_name) from the
-            # existing local catalogue, while credentials and identity come
-            # from the backend. This avoids a second password authority.
-            for candidate in get_all_users():
-                if candidate.username == username:
-                    user = candidate
-                    break
-            if user is None:
-                role = remote.get("role", "passenger").lower()
-                user = User(
-                    id=remote.get("id"),
-                    username=remote.get("username", username),
-                    password="",
-                    full_name=remote.get("username", username),
-                    role=role,
-                    status="Active",
-                )
-            user.id = str(remote.get("id", user.id))
-            user.username = remote.get("username", user.username)
-            user.role = remote.get("role", user.role).lower()
-            user.role_name = ROLE_DISPLAY_NAMES.get(user.role, user.role)
-            user.password = ""
+        # Xác thực qua models.authenticate() - tự động thử Supabase (nếu đã
+        # cấu hình SUPABASE_URL/SUPABASE_KEY) trước, rơi về kho local
+        # (users_data.json) nếu không tìm thấy/chưa cấu hình. Áp dụng đồng
+        # nhất cho MỌI role (admin/operations/coordinator/activity_manager/
+        # finance/sales_staff/passenger) - không phụ thuộc bảng user riêng
+        # của Backend (vốn chỉ seed sẵn 1 vài tài khoản demo).
+        user = authenticate(username, password)
 
         if user:
             if not user.is_active:
-                session.pop("access_token", None)
-                session.pop("api_user", None)
                 flash("Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ Quản trị viên.", "danger")
                 return render_template("auth/login.html", demo_users=get_all_users())
 
@@ -82,7 +57,7 @@ def login():
             target_endpoint = ROLE_REDIRECT_MAP.get(user.role, "operations.dashboard")
             return redirect(url_for(target_endpoint))
         else:
-            flash(api_error or "Tên đăng nhập hoặc mật khẩu không đúng.", "danger")
+            flash("Tên đăng nhập hoặc mật khẩu không đúng.", "danger")
 
     return render_template("auth/login.html", demo_users=get_all_users())
 
@@ -90,8 +65,6 @@ def login():
 @auth_bp.route("/logout")
 @login_required
 def logout():
-    session.pop("access_token", None)
-    session.pop("api_user", None)
     logout_user()
     flash("Bạn đã đăng xuất an toàn khỏi hệ thống.", "info")
     return redirect(url_for("auth.login"))

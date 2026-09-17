@@ -25,31 +25,6 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        # Backend is the authentication source of truth. The session keeps the
-        # canonical API user so Flask-Login does not need to query Supabase or
-        # another database on every request.
-        remote = session.get("api_user") or {}
-        if str(remote.get("id")) == str(user_id):
-            role = str(remote.get("role") or "passenger").lower()
-            role_names = {
-                "admin": "Quản trị viên hệ thống",
-                "operations": "Quản lý vận hành",
-                "finance": "Tài chính & Lễ tân",
-                "coordinator": "Điều phối lịch trình",
-                "activity_manager": "Quản lý hoạt động",
-                "sales_staff": "Nhân viên bán hàng & dịch vụ",
-                "passenger": "Hành khách",
-            }
-            return User(
-                id=remote.get("id"),
-                username=remote.get("username", ""),
-                password="",
-                full_name=remote.get("full_name") or remote.get("username", ""),
-                role=role,
-                role_name=role_names.get(role, role),
-                status=remote.get("status", "Active"),
-                passenger_id=remote.get("passenger_id"),
-            )
         return get_user_by_id(user_id)
 
     # Đăng ký các Blueprint mở rộng theo từng Actor
