@@ -1,20 +1,16 @@
 from flask import Flask, jsonify
 from api.routes import register_routes
+from flasgger import Swagger
+from flask_swagger_ui import get_swaggerui_blueprint
 from api.swagger import spec
 from api.middleware import middleware
-from api.responses import success_response
 from infrastructure.databases import init_db
-from config import Config
-from flasgger import Swagger
-from config import SwaggerConfig
-from flask_swagger_ui import get_swaggerui_blueprint
 
 
 def create_app():
     app = Flask(__name__)
     Swagger(app)
     register_routes(app)
-     # Thêm Swagger UI blueprint
     SWAGGER_URL = '/docs'
     API_URL = '/swagger.json'
     swaggerui_blueprint = get_swaggerui_blueprint(
@@ -50,4 +46,8 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(host='0.0.0.0', port=9999, debug=True)
+    app.run(
+        host="0.0.0.0",
+        port=9999,
+        debug=True
+    )

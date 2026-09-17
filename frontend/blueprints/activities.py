@@ -1,225 +1,580 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from functools import wraps
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
+import json
 
-import os
-import sys
-from datetime import datetime
+from config import Config
 
-SRC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
-if SRC_DIR not in sys.path:
-    sys.path.insert(0, SRC_DIR)
 
-from supabase_client import get_supabase_client
+activities_bp = Blueprint(
+    "activities",
+    __name__,
+    url_prefix="/activities"
+)
 
-activities_bp = Blueprint("activities", __name__, url_prefix="/activities")
 
-ACTIVITY_ITEMS = [
-    {"id": 1, "name": "Yoga buổi sáng", "location": "Sundeck", "time": "06:30 - 07:30", "capacity": 40, "registered": 35, "price": 0, "type": "Miễn phí"},
-    {"id": 2, "name": "Wine Tasting", "location": "Sky Lounge", "time": "16:00 - 17:30", "capacity": 25, "registered": 25, "price": 850000, "type": "Trả phí"},
-    {"id": 3, "name": "Live Music Night", "location": "Main Stage", "time": "20:00 - 22:00", "capacity": 200, "registered": 178, "price": 0, "type": "Miễn phí"},
-    {"id": 4, "name": "Cooking Class", "location": "Culinary Studio", "time": "10:00 - 12:00", "capacity": 15, "registered": 12, "price": 1200000, "type": "Trả phí"},
-    {"id": 5, "name": "Kids Club", "location": "Kids Zone", "time": "09:00 - 11:00", "capacity": 30, "registered": 22, "price": 0, "type": "Miễn phí"},
-]
+registrations_data = {
+    1: [
+        {
+            "id": 1,
+            "guest_code": "G001",
+            "name": "Nguyễn Văn An",
+            "room": "A101",
+            "registered_at": "10/09/2026",
+            "checked_in": True,
+            "rating": 5,
+            "feedback": "Rất tuyệt vời"
+        },
+        {
+            "id": 2,
+            "guest_code": "G002",
+            "name": "Trần Thị Bình",
+            "room": "A102",
+            "registered_at": "10/09/2026",
+            "checked_in": False,
+            "rating": 0,
+            "feedback": ""
+        },
+        {
+            "id": 3,
+            "guest_code": "G003",
+            "name": "Lê Minh Anh",
+            "room": "A103",
+            "registered_at": "11/09/2026",
+            "checked_in": True,
+            "rating": 5,
+            "feedback": "Hoạt động rất thú vị"
+        }
+    ]
+}
+
+
+def api_request(path, method="GET", data=None):
+    url = f"{Config.API_BASE_URL}{path}"
+
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+
+    body = None
+
+    if data is not None:
+        body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+
+    req = Request(
+        url,
+        data=body,
+        headers=headers,
+        method=method
+    )
+
+    try:
+        with urlopen(req, timeout=10) as response:
+            raw = response.read().decode("utf-8")
+
+            if not raw:
+                return {}
+
+            return json.loads(raw)
+
+    except HTTPError as e:
+        try:
+            raw = e.read().decode("utf-8")
+            error_data = json.loads(raw)
+        except Exception:
+            error_data = {
+                "message": str(e)
+            }
+
+        return {
+            "_error": True,
+            "status": e.code,
+            "message": error_data
+        }
+
+    except URLError as e:
+        return {
+            "_error": True,
+            "status": 0,
+            "message": f"Không kết nối được Backend: {e}"
+        }
+
+    except Exception as e:
+        return {
+            "_error": True,
+            "status": 0,
+            "message": str(e)
+        }
+
+
+def normalize_activity(item):
+    return {
+        "id": item.get("id"),
+        "name": item.get("name", ""),
+        "location": item.get("location", ""),
+        "date": item.get("date", ""),
+        "time": item.get("time", ""),
+        "capacity": item.get("capacity", 0),
+        "registered": item.get("registered", 0),
+        "price": item.get("price", 0),
+        "type": item.get(
+            "activity_type",
+            item.get("type", "Miễn phí")
+        ),
+        "activity_type": item.get(
+            "activity_type",
+            item.get("type", "Miễn phí")
+        ),
+        "status": item.get("status", "Sắp diễn ra"),
+        "description": item.get("description", ""),
+        "rating": item.get("rating", 0),
+        "feedback_count": item.get("feedback_count", 0),
+        "created_at": item.get("created_at"),
+        "updated_at": item.get("updated_at")
+    }
 
 
 def activity_access(f):
     @wraps(f)
+    @login_required
     def decorated_function(*args, **kwargs):
-        if current_user.role not in ["activity_manager", "operations", "admin"]:
-            return render_template("system_admin/403.html"), 403
+        if current_user.role not in [
+            "activity_manager",
+            "operations",
+            "admin",
+            "passenger",
+            "shore_excursion_manager"
+        ]:
+            flash("Bạn không có quyền truy cập.", "danger")
+            return redirect(url_for("auth.login"))
+
         return f(*args, **kwargs)
+
     return decorated_function
 
 
-def get_activity_by_id(activity_id):
-    response = get_supabase_client().table("activities").select("*").eq("id", activity_id).limit(1).execute()
-    row = response.data[0] if response.data else None
-    return _normalise_activity(row) if row else None
+def manager_access(f):
+    @wraps(f)
+    @login_required
+    def decorated_function(*args, **kwargs):
+        if current_user.role not in [
+            "activity_manager",
+            "admin"
+        ]:
+            flash(
+                "Bạn không có quyền thực hiện thao tác này.",
+                "danger"
+            )
+            return redirect(
+                url_for("activities.activities")
+            )
 
+        return f(*args, **kwargs)
 
-def _normalise_activity(row):
-    start_time = row.get("start_time") or ""
-    end_time = row.get("end_time") or ""
-    time_slot = f"{start_time} - {end_time}".strip(" -") or row.get("time") or "-"
-    return {
-        "id": row.get("id"),
-        "cruise_day_id": row.get("cruise_day_id"),
-        "ship_area_id": row.get("ship_area_id"),
-        "name": row.get("name") or row.get("title") or "Hoạt động",
-        "location": row.get("location") or row.get("ship_area_id") or "-",
-        "time": time_slot,
-        "capacity": int(row.get("capacity") or 0),
-        "registered": int(row.get("registered") or row.get("participants") or 0),
-        "price": int(row.get("fee") or row.get("price") or 0),
-        "type": "Miễn phí" if row.get("is_included_in_package") else (row.get("type") or "Trả phí"),
-        "status": row.get("status") or "active",
-        "_source": "supabase",
-    }
-
-
-def _live_activities():
-    response = get_supabase_client().table("activities").select("*").limit(200).execute()
-    rows = response.data if hasattr(response, "data") and response.data else []
-
-    activities = []
-    for row in rows:
-        capacity = int(row.get("capacity") or 0)
-        activities.append(_normalise_activity(row))
-    return activities
-
-
-def _live_ship_areas():
-    response = get_supabase_client().table("ship_areas").select("*").limit(200).execute()
-    return response.data if hasattr(response, "data") and response.data else []
-
-
-def _cruise_day(cruise_day_id=None):
-    query = get_supabase_client().table("cruise_days").select("id,date,day_number")
-    if cruise_day_id:
-        query = query.eq("id", cruise_day_id)
-    response = query.limit(1).execute()
-    return response.data[0] if response.data else None
-
-
-def _activity_payload(form, cruise_day=None):
-    time_parts = form.get("time", "").strip().split("-")
-    start_time = time_parts[0].strip() if time_parts else ""
-    end_time = time_parts[1].strip() if len(time_parts) > 1 else None
-    payload = {
-        "name": form.get("name", "").strip(),
-        "capacity": int(form.get("capacity", "0") or 0),
-        "fee": int(form.get("price", "0") or 0),
-        "is_included_in_package": form.get("type", "Miễn phí") == "Miễn phí",
-        "status": "scheduled",
-    }
-    activity_date = (cruise_day or {}).get("date")
-    if activity_date and start_time:
-        payload["start_time"] = datetime.fromisoformat(
-            f"{activity_date}T{start_time}:00+00:00"
-        ).isoformat()
-    if activity_date and end_time:
-        payload["end_time"] = datetime.fromisoformat(
-            f"{activity_date}T{end_time}:00+00:00"
-        ).isoformat()
-
-    ship_area_id = form.get("ship_area_id", "").strip()
-    if ship_area_id:
-        payload["ship_area_id"] = int(ship_area_id)
-    return payload
-
-
-def _with_cruise_day(payload):
-    cruise_day = _cruise_day()
-    if not cruise_day:
-        raise RuntimeError("Supabase chưa có cruise_days để gắn hoạt động.")
-    return {"cruise_day_id": cruise_day["id"], **payload}
+    return decorated_function
 
 
 @activities_bp.route("/")
-@activities_bp.route("/list")
-@login_required
 @activity_access
 def activities():
-    live_activities = _live_activities()
+    result = api_request(
+        "/api/activities/",
+        method="GET"
+    )
+
+    if result.get("_error"):
+        flash(
+            "Không lấy được dữ liệu hoạt động từ Backend.",
+            "danger"
+        )
+
+        return render_template(
+            "activities/activities.html",
+            activities=[]
+        )
+
+    activities_data = [
+        normalize_activity(item)
+        for item in result
+    ]
+
     return render_template(
         "activities/activities.html",
-        activities=live_activities,
-        page_title="Quản lý Hoạt động trên tàu",
+        activities=activities_data
     )
 
 
-@activities_bp.route("/new", methods=["GET", "POST"])
-@login_required
-@activity_access
+@activities_bp.route("/create", methods=["GET", "POST"])
+@manager_access
 def create_activity():
     if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        ship_area_id = request.form.get("ship_area_id", "").strip()
-        time_slot = request.form.get("time", "").strip()
-        capacity = request.form.get("capacity", "0").strip()
+        start_time = request.form.get(
+            "start_time",
+            ""
+        )
 
-        errors = []
-        if not name:
-            errors.append("Tên hoạt động")
-        if not time_slot:
-            errors.append("Khung giờ")
-        if errors:
-            flash(f"Vui lòng nhập: {', '.join(errors)}.", "danger")
-            return render_template(
-                "activities/new_activity.html",
-                ship_areas=_live_ship_areas(),
-                page_title="Thêm hoạt động mới",
+        end_time = request.form.get(
+            "end_time",
+            ""
+        )
+
+        activity_type = request.form.get(
+            "type",
+            "Miễn phí"
+        )
+
+        payload = {
+            "name": request.form.get(
+                "name",
+                ""
+            ).strip(),
+
+            "location": request.form.get(
+                "location",
+                ""
+            ).strip(),
+
+            "description": request.form.get(
+                "description",
+                ""
+            ).strip(),
+
+            "status": request.form.get(
+                "status",
+                "Sắp diễn ra"
+            ),
+
+            "capacity": int(
+                request.form.get(
+                    "capacity",
+                    0
+                ) or 0
+            ),
+
+            "registered": 0,
+
+            "price": int(
+                request.form.get(
+                    "price",
+                    0
+                ) or 0
+            ),
+
+            "activity_type": activity_type
+        }
+
+        if start_time or end_time:
+            payload["description"] = (
+                payload["description"]
+                + (
+                    f"\nThời gian: {start_time} - {end_time}"
+                    if start_time or end_time
+                    else ""
+                )
             )
 
-        try:
-            capacity_value = int(capacity)
-            if capacity_value < 1:
-                raise ValueError
-        except (TypeError, ValueError):
-            flash("Sức chứa phải là số nguyên lớn hơn 0.", "danger")
-            return render_template(
-                "activities/new_activity.html",
-                ship_areas=_live_ship_areas(),
-                page_title="Thêm hoạt động mới",
+        result = api_request(
+            "/api/activities/",
+            method="POST",
+            data=payload
+        )
+
+        if result.get("_error"):
+            flash(
+                f"Tạo hoạt động thất bại: {result.get('message')}",
+                "danger"
             )
 
-        try:
-            cruise_day = _cruise_day()
-            if not cruise_day:
-                raise RuntimeError("Chưa có ngày chuyến trong bảng cruise_days.")
-            payload = _activity_payload(request.form, cruise_day)
-            get_supabase_client().table("activities").insert(_with_cruise_day(payload)).execute()
-            flash("Đã tạo hoạt động mới trên Supabase.", "success")
-        except Exception as error:
-            flash(f"Không thể lưu hoạt động vào Supabase: {error}", "danger")
             return render_template(
-                "activities/new_activity.html",
-                ship_areas=_live_ship_areas(),
-                page_title="Thêm hoạt động mới",
+                "activities/activity_form.html",
+                edit_mode=False
             )
-        return redirect(url_for("activities.activities"))
+
+        flash(
+            "Tạo hoạt động thành công.",
+            "success"
+        )
+
+        return redirect(
+            url_for("activities.activities")
+        )
 
     return render_template(
-        "activities/new_activity.html",
-        ship_areas=_live_ship_areas(),
-        page_title="Thêm hoạt động mới",
+        "activities/activity_form.html",
+        edit_mode=False
     )
 
 
-@activities_bp.route("/<activity_id>/guests")
-@login_required
+@activities_bp.route("/<int:activity_id>")
 @activity_access
-def activity_guests(activity_id):
-    activity = get_activity_by_id(activity_id)
-    if not activity:
-        flash("Không tìm thấy hoạt động.", "danger")
-        return redirect(url_for("activities.activities"))
-    return render_template("activities/activity_detail.html", activity=activity, page_title="Danh sách khách")
+def activity_detail(activity_id):
+    result = api_request(
+        f"/api/activities/{activity_id}",
+        method="GET"
+    )
 
+    if result.get("_error"):
+        flash(
+            "Không tìm thấy hoạt động.",
+            "danger"
+        )
 
-@activities_bp.route("/<activity_id>/edit", methods=["GET", "POST"])
-@login_required
-@activity_access
-def edit_activity(activity_id):
-    activity = get_activity_by_id(activity_id) or next((item for item in _live_activities() if item["id"] == activity_id), None)
-    if not activity:
-        flash("Không tìm thấy hoạt động.", "danger")
-        return redirect(url_for("activities.activities"))
+        return redirect(
+            url_for("activities.activities")
+        )
 
-    if request.method == "POST":
-        payload = _activity_payload(request.form, _cruise_day(activity.get("cruise_day_id")))
-        try:
-            get_supabase_client().table("activities").update(payload).eq("id", activity_id).execute()
-            flash("Đã cập nhật hoạt động trên Supabase.", "success")
-        except Exception:
-            activity.update(payload)
-            flash("Chưa cập nhật được Supabase, thay đổi chỉ có hiệu lực trong phiên hiện tại.", "warning")
-        return redirect(url_for("activities.activity_guests", activity_id=activity_id))
+    activity = normalize_activity(result)
 
     return render_template(
-        "activities/edit_activity.html",
+        "activities/activity_detail.html",
+        activity=activity
+    )
+
+
+@activities_bp.route(
+    "/<int:activity_id>/edit",
+    methods=["GET", "POST"]
+)
+@manager_access
+def edit_activity(activity_id):
+    result = api_request(
+        f"/api/activities/{activity_id}",
+        method="GET"
+    )
+
+    if result.get("_error"):
+        flash(
+            "Không tìm thấy hoạt động.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("activities.activities")
+        )
+
+    activity = normalize_activity(result)
+
+    if request.method == "POST":
+        start_time = request.form.get(
+            "start_time",
+            ""
+        )
+
+        end_time = request.form.get(
+            "end_time",
+            ""
+        )
+
+        activity_type = request.form.get(
+            "type",
+            activity.get(
+                "activity_type",
+                "Miễn phí"
+            )
+        )
+
+        description = request.form.get(
+            "description",
+            ""
+        ).strip()
+
+        if start_time or end_time:
+            description = (
+                description
+                + f"\nThời gian: {start_time} - {end_time}"
+            )
+
+        payload = {
+            "name": request.form.get(
+                "name",
+                ""
+            ).strip(),
+
+            "location": request.form.get(
+                "location",
+                ""
+            ).strip(),
+
+            "description": description,
+
+            "status": request.form.get(
+                "status",
+                "Sắp diễn ra"
+            ),
+
+            "capacity": int(
+                request.form.get(
+                    "capacity",
+                    0
+                ) or 0
+            ),
+
+            "registered": activity.get(
+                "registered",
+                0
+            ),
+
+            "price": int(
+                request.form.get(
+                    "price",
+                    0
+                ) or 0
+            ),
+
+            "activity_type": activity_type
+        }
+
+        update_result = api_request(
+            f"/api/activities/{activity_id}",
+            method="PUT",
+            data=payload
+        )
+
+        if update_result.get("_error"):
+            flash(
+                f"Cập nhật thất bại: {update_result.get('message')}",
+                "danger"
+            )
+
+            return render_template(
+                "activities/activity_form.html",
+                activity=activity,
+                edit_mode=True
+            )
+
+        flash(
+            "Cập nhật hoạt động thành công.",
+            "success"
+        )
+
+        return redirect(
+            url_for(
+                "activities.activity_detail",
+                activity_id=activity_id
+            )
+        )
+
+    return render_template(
+        "activities/activity_form.html",
         activity=activity,
-        ship_areas=_live_ship_areas(),
-        page_title="Sửa hoạt động",
+        edit_mode=True
+    )
+
+
+@activities_bp.route("/<int:activity_id>/registrations")
+@activity_access
+def registrations(activity_id):
+    result = api_request(
+        f"/api/activities/{activity_id}",
+        method="GET"
+    )
+
+    if result.get("_error"):
+        flash(
+            "Không tìm thấy hoạt động.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("activities.activities")
+        )
+
+    activity = normalize_activity(result)
+
+    registrations = registrations_data.get(
+        activity_id,
+        []
+    )
+
+    return render_template(
+        "activities/registrations.html",
+        activity=activity,
+        registrations=registrations
+    )
+
+
+@activities_bp.route(
+    "/<int:activity_id>/registrations/<int:registration_id>/checkin",
+    methods=["POST"]
+)
+@activity_access
+def checkin(activity_id, registration_id):
+    registrations = registrations_data.get(
+        activity_id,
+        []
+    )
+
+    registration = next(
+        (
+            item
+            for item in registrations
+            if item["id"] == registration_id
+        ),
+        None
+    )
+
+    if registration is None:
+        flash(
+            "Không tìm thấy đăng ký.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "activities.registrations",
+                activity_id=activity_id
+            )
+        )
+
+    registration["checked_in"] = True
+
+    flash(
+        "Check-in thành công.",
+        "success"
+    )
+
+    return redirect(
+        url_for(
+            "activities.registrations",
+            activity_id=activity_id
+        )
+    )
+
+
+@activities_bp.route(
+    "/<int:activity_id>/delete",
+    methods=["POST"]
+)
+@manager_access
+def delete_activity(activity_id):
+    result = api_request(
+        f"/api/activities/{activity_id}",
+        method="DELETE"
+    )
+
+    if result.get("_error"):
+        flash(
+            f"Xóa hoạt động thất bại: {result.get('message')}",
+            "danger"
+        )
+
+        return redirect(
+            url_for("activities.activities")
+        )
+
+    registrations_data.pop(
+        activity_id,
+        None
+    )
+
+    flash(
+        "Xóa hoạt động thành công.",
+        "success"
+    )
+
+    return redirect(
+        url_for("activities.activities")
     )

@@ -1,5 +1,3 @@
-# Configuration settings for the Flask application
-
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -28,7 +26,11 @@ class Config:
 class DevelopmentConfig(Config):
     """Development configuration."""
     DEBUG = True
-    DATABASE_URI = os.environ.get('POSTGREE_DATABASE_URL')
+    DATABASE_URI = (
+        os.environ.get("POSTGREE_DATABASE_URL")
+        or os.environ.get("DATABASE_URI")
+        or "sqlite:///src/default.db"
+    )
 
 
 class TestingConfig(Config):
