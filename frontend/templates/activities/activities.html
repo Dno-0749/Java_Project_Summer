@@ -4,11 +4,11 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h4 class="fw-bold mb-1"><i class="bi bi-music-note-list text-primary me-2"></i>Quản lý Hoạt động trên tàu</h4>
-        <small class="text-muted">Cấu hình thời gian, sức chứa và danh sách khách tham gia (UC15, UC16)</small>
+        <small class="text-muted">Cấu hình thời gian, sức chứa và danh sách khách tham gia (UC15, UC16) - {{ cruise.name if cruise else '' }}</small>
     </div>
-    <button class="btn btn-primary shadow-sm">
+    <a href="{{ url_for('activities.create_activity') }}" class="btn btn-primary shadow-sm">
         <i class="bi bi-plus-lg me-1"></i> Thêm hoạt động mới
-    </button>
+    </a>
 </div>
 
 <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
@@ -34,10 +34,10 @@
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 <div class="progress flex-grow-1" style="height: 6px; width: 80px;">
-                                    <div class="progress-bar {% if act.registered >= act.capacity %}bg-danger{% else %}bg-primary{% endif %}" 
-                                         style="width: {{ (act.registered / act.capacity * 100) }}%;"></div>
+                                    <div class="progress-bar {% if act.capacity and act.registered >= act.capacity %}bg-danger{% else %}bg-primary{% endif %}"
+                                         style="width: {{ (act.registered / act.capacity * 100) if act.capacity else 0 }}%;"></div>
                                 </div>
-                                <span class="small text-muted">{{ act.registered }}/{{ act.capacity }}</span>
+                                <span class="small text-muted">{{ act.registered }}/{{ act.capacity or '∞' }}</span>
                             </div>
                         </td>
                         <td>
@@ -48,10 +48,15 @@
                             {% endif %}
                         </td>
                         <td class="text-end pe-4">
-                            <button class="btn btn-sm btn-outline-primary me-1">Danh sách khách</button>
-                            <button class="btn btn-sm btn-outline-secondary">Sửa</button>
+                            <a href="{{ url_for('activities.registrations', activity_id=act.id) }}" class="btn btn-sm btn-outline-primary me-1">Danh sách khách</a>
+                            <a href="{{ url_for('activities.edit_activity', activity_id=act.id) }}" class="btn btn-sm btn-outline-secondary me-1">Sửa</a>
+                            <form method="POST" action="{{ url_for('activities.delete_activity', activity_id=act.id) }}" class="d-inline" onsubmit="return confirm('Xóa hoạt động này?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+                            </form>
                         </td>
                     </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-center text-muted py-4">Chưa có hoạt động nào. Bấm "Thêm hoạt động mới" để bắt đầu.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

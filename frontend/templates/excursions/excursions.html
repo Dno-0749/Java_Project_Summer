@@ -4,11 +4,11 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h4 class="fw-bold mb-1"><i class="bi bi-geo-alt text-primary me-2"></i>Quản lý Tham quan bờ (Shore Excursions)</h4>
-        <small class="text-muted">Tạo tour, quản lý đơn vị đối tác địa phương và chia nhóm hành khách (UC18, UC19)</small>
+        <small class="text-muted">Tạo tour, cấu hình giờ tập trung/quay lại/sức chứa/giá (UC21, UC23) - {{ cruise.name if cruise else '' }}</small>
     </div>
-    <button class="btn btn-primary shadow-sm">
+    <a href="{{ url_for('excursions.create_excursion') }}" class="btn btn-primary shadow-sm">
         <i class="bi bi-plus-lg me-1"></i> Tạo tour bờ mới
-    </button>
+    </a>
 </div>
 
 <div class="row g-3">
@@ -22,13 +22,30 @@
                 </span>
             </div>
             <div class="small text-muted mb-2"><i class="bi bi-calendar-event me-1"></i>Ngày: {{ ex.date }}</div>
-            <div class="small mb-2"><i class="bi bi-people me-1"></i>Đăng ký: {{ ex.registered }} / {{ ex.capacity }} khách</div>
+            <div class="small mb-2"><i class="bi bi-people me-1"></i>Đăng ký: {{ ex.registered }} / {{ ex.capacity or "∞" }} khách</div>
             <div class="fw-bold text-primary mb-3">{{ "{:,.0f}".format(ex.price) }} đ / vé</div>
+
+            <form method="POST" action="{{ url_for('excursions.update_status', excursion_id=ex.id) }}" class="mb-2">
+                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="scheduled" {% if ex.raw_status == 'scheduled' %}selected{% endif %}>Đã lên lịch</option>
+                    <option value="completed" {% if ex.raw_status == 'completed' %}selected{% endif %}>Đã hoàn thành</option>
+                    <option value="delayed" {% if ex.raw_status == 'delayed' %}selected{% endif %}>Trì hoãn</option>
+                    <option value="cancelled" {% if ex.raw_status == 'cancelled' %}selected{% endif %}>Đã hủy</option>
+                </select>
+            </form>
+
             <div class="mt-auto border-top pt-3 d-flex gap-2">
-                <button class="btn btn-sm btn-outline-primary flex-fill">Danh sách xe</button>
-                <button class="btn btn-sm btn-outline-secondary flex-fill">Sửa tour</button>
+                <a href="{{ url_for('excursions.registrations', excursion_id=ex.id) }}" class="btn btn-sm btn-outline-primary flex-fill">Danh sách khách</a>
+                <a href="{{ url_for('excursions.edit_excursion', excursion_id=ex.id) }}" class="btn btn-sm btn-outline-secondary flex-fill">Sửa</a>
             </div>
+            <form method="POST" action="{{ url_for('excursions.delete_excursion', excursion_id=ex.id) }}" class="mt-2" onsubmit="return confirm('Xóa tour này?');">
+                <button type="submit" class="btn btn-sm btn-outline-danger w-100">Xóa tour</button>
+            </form>
         </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="text-center text-muted py-5">Chưa có tour tham quan bờ nào. Bấm "Tạo tour bờ mới" để bắt đầu.</div>
     </div>
     {% endfor %}
 </div>

@@ -17,6 +17,14 @@ class ActivityService:
             raise ValueError("Sức chứa phải lớn hơn 0")
         return self.repository.add_activity(data)
 
+    def update_activity(self, activity_id: int, data: dict):
+        if data.get("capacity") is not None and data["capacity"] <= 0:
+            raise ValueError("Sức chứa phải lớn hơn 0")
+        return self.repository.update_activity(activity_id, data)
+
+    def delete_activity(self, activity_id: int):
+        return self.repository.delete_activity(activity_id)
+
     # ---------- ShoreExcursion ----------
     def list_excursions(self, cruise_day_id: int):
         return self.repository.list_excursions(cruise_day_id)
@@ -34,6 +42,16 @@ class ActivityService:
         if gathering and return_time and return_time <= gathering:
             raise ValueError("Giờ quay lại tàu phải sau giờ tập trung")
         return self.repository.add_excursion(data)
+
+    def update_excursion(self, excursion_id: int, data: dict):
+        gathering = data.get("gathering_time")
+        return_time = data.get("return_time")
+        if gathering and return_time and return_time <= gathering:
+            raise ValueError("Giờ quay lại tàu phải sau giờ tập trung")
+        return self.repository.update_excursion(excursion_id, data)
+
+    def delete_excursion(self, excursion_id: int):
+        return self.repository.delete_excursion(excursion_id)
 
     def update_excursion_status(self, excursion_id: int, status: str):
         valid_statuses = ["scheduled", "completed", "cancelled", "delayed"]

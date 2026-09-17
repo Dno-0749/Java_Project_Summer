@@ -136,16 +136,44 @@ def list_activities(cruise_id):
     return _request("GET", f"/cruises/{cruise_id}/activities")
 
 
+def get_activity(activity_id):
+    return _request("GET", f"/activities/{activity_id}")
+
+
 def create_activity(cruise_id, data):
     return _request("POST", f"/cruises/{cruise_id}/activities", json=data)
+
+
+def update_activity(activity_id, data):
+    return _request("PUT", f"/activities/{activity_id}", json=data)
+
+
+def delete_activity(activity_id):
+    return _request("DELETE", f"/activities/{activity_id}")
 
 
 def list_excursions(cruise_day_id):
     return _request("GET", f"/cruise-days/{cruise_day_id}/excursions")
 
 
+def get_excursion(excursion_id):
+    return _request("GET", f"/excursions/{excursion_id}")
+
+
 def create_excursion(cruise_day_id, data):
     return _request("POST", f"/cruise-days/{cruise_day_id}/excursions", json=data)
+
+
+def update_excursion(excursion_id, data):
+    return _request("PUT", f"/excursions/{excursion_id}", json=data)
+
+
+def delete_excursion(excursion_id):
+    return _request("DELETE", f"/excursions/{excursion_id}")
+
+
+def update_excursion_status(excursion_id, status):
+    return _request("PUT", f"/excursions/{excursion_id}/status", json={"status": status})
 
 
 def register_activity(passenger_id, activity_id=None, excursion_id=None):

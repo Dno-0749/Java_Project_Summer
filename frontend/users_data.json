@@ -68,5 +68,15 @@
     "role_name": "Hành khách",
     "status": "Active",
     "passenger_id": null
+  },
+  {
+    "id": "8",
+    "username": "hoangvand",
+    "password": "123456",
+    "full_name": "Hoang Van D",
+    "role": "passenger",
+    "role_name": "Hành khách",
+    "status": "Active",
+    "passenger_id": 19
   }
 ]

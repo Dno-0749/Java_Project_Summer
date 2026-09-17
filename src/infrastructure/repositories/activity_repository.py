@@ -115,6 +115,38 @@ class ActivityRepository:
         finally:
             session.close()
 
+    def update_excursion(self, excursion_id: int, data: dict) -> Optional[ShoreExcursionModel]:
+        session = self._new_session()
+        try:
+            excursion = session.query(ShoreExcursionModel).filter_by(id=excursion_id).first()
+            if not excursion:
+                return None
+            for key, value in data.items():
+                setattr(excursion, key, value)
+            session.commit()
+            session.refresh(excursion)
+            return excursion
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    def delete_excursion(self, excursion_id: int) -> bool:
+        session = self._new_session()
+        try:
+            excursion = session.query(ShoreExcursionModel).filter_by(id=excursion_id).first()
+            if not excursion:
+                return False
+            session.delete(excursion)
+            session.commit()
+            return True
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
     # ---------- Registration ----------
     def count_registrations(self, activity_id: int = None, excursion_id: int = None) -> int:
         session = self._new_session()

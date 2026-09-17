@@ -121,6 +121,74 @@ def create_activity(cruise_id):
     return jsonify(activity_res.dump(activity)), 201
 
 
+@bp.route("/activities/<int:activity_id>", methods=["PUT"])
+def update_activity(activity_id):
+    """
+    Sửa hoạt động
+    ---
+    put:
+      summary: Cập nhật thông tin hoạt động (Quản lý hoạt động trên tàu)
+      tags:
+        - Activity
+      parameters:
+        - name: activity_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityRequest'
+      responses:
+        200:
+          description: Cập nhật thành công
+        400:
+          description: Dữ liệu không hợp lệ
+        404:
+          description: Không tìm thấy hoạt động
+    """
+    data = request.get_json() or {}
+    errors = activity_req.validate(data, partial=True)
+    if errors:
+        return jsonify(errors), 400
+    try:
+        activity = service.update_activity(activity_id, activity_req.load(data, partial=True))
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    if not activity:
+        return jsonify({"error": "Không tìm thấy hoạt động"}), 404
+    return jsonify(activity_res.dump(activity)), 200
+
+
+@bp.route("/activities/<int:activity_id>", methods=["DELETE"])
+def delete_activity(activity_id):
+    """
+    Xóa hoạt động
+    ---
+    delete:
+      summary: Xóa hoạt động (Quản lý hoạt động trên tàu)
+      tags:
+        - Activity
+      parameters:
+        - name: activity_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Xóa thành công
+        404:
+          description: Không tìm thấy hoạt động
+    """
+    if not service.delete_activity(activity_id):
+        return jsonify({"error": "Không tìm thấy hoạt động"}), 404
+    return jsonify({"message": "Đã xóa hoạt động"}), 200
+
+
 # ==================== SHORE EXCURSION ====================
 @bp.route("/cruise-days/<int:cruise_day_id>/excursions", methods=["GET"])
 def list_excursions(cruise_day_id):
@@ -149,6 +217,37 @@ def list_excursions(cruise_day_id):
     """
     excursions = service.list_excursions(cruise_day_id)
     return jsonify(excursion_res.dump(excursions, many=True)), 200
+
+
+@bp.route("/excursions/<int:excursion_id>", methods=["GET"])
+def get_excursion(excursion_id):
+    """
+    Chi tiết tour trên bờ
+    ---
+    get:
+      summary: Lấy chi tiết 1 tour trên bờ
+      tags:
+        - Activity
+      parameters:
+        - name: excursion_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Thông tin tour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExcursionResponse'
+        404:
+          description: Không tìm thấy tour
+    """
+    excursion = service.get_excursion(excursion_id)
+    if not excursion:
+        return jsonify({"error": "Không tìm thấy tour"}), 404
+    return jsonify(excursion_res.dump(excursion)), 200
 
 
 @bp.route("/cruise-days/<int:cruise_day_id>/excursions", methods=["POST"])
@@ -239,6 +338,74 @@ def update_excursion_status(excursion_id):
     if not excursion:
         return jsonify({"message": "Excursion not found"}), 404
     return jsonify(excursion_res.dump(excursion)), 200
+
+
+@bp.route("/excursions/<int:excursion_id>", methods=["PUT"])
+def update_excursion(excursion_id):
+    """
+    Sửa tour trên bờ
+    ---
+    put:
+      summary: Cập nhật đầy đủ thông tin tour trên bờ (Quản lý tham quan bờ)
+      tags:
+        - Activity
+      parameters:
+        - name: excursion_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExcursionRequest'
+      responses:
+        200:
+          description: Cập nhật thành công
+        400:
+          description: Dữ liệu không hợp lệ
+        404:
+          description: Không tìm thấy tour
+    """
+    data = request.get_json() or {}
+    errors = excursion_req.validate(data, partial=True)
+    if errors:
+        return jsonify(errors), 400
+    try:
+        excursion = service.update_excursion(excursion_id, excursion_req.load(data, partial=True))
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    if not excursion:
+        return jsonify({"error": "Không tìm thấy tour"}), 404
+    return jsonify(excursion_res.dump(excursion)), 200
+
+
+@bp.route("/excursions/<int:excursion_id>", methods=["DELETE"])
+def delete_excursion(excursion_id):
+    """
+    Xóa tour trên bờ
+    ---
+    delete:
+      summary: Xóa tour trên bờ (Quản lý tham quan bờ)
+      tags:
+        - Activity
+      parameters:
+        - name: excursion_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Xóa thành công
+        404:
+          description: Không tìm thấy tour
+    """
+    if not service.delete_excursion(excursion_id):
+        return jsonify({"error": "Không tìm thấy tour"}), 404
+    return jsonify({"message": "Đã xóa tour"}), 200
 
 
 # ==================== REGISTRATION ====================
