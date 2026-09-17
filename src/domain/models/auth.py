@@ -1,10 +1,10 @@
-﻿from datetime import date
+from datetime import date
 
 
 class Auth:
-    def __init__(self, username: str, password: str, passwordcomfirm: str, email:str):
+    def __init__(self, username: str, password: str, passwordcomfirm: str, email: str, id: int = None):
         self.username = username
         self.password = password
         self.passwordcomfirm = passwordcomfirm
         self.email = email
-        self.id = None
+        self.id = id

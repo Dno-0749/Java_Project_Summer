@@ -3,7 +3,7 @@ Flask-Cors>=3.0
 Flask-SQLAlchemy>=2.5
 SQLAlchemy>=1.4
 marshmallow>=3.0
-pymssql>=2.2
+psycopg2-binary>=2.9
 python-dotenv>=0.21 
 Flask-RESTX>=1.1.0 
 flasgger
@@ -11,7 +11,5 @@ fastapi
 apispec
 apispec_webframeworks
 flask-swagger-ui
-
-# Supabase client (Python)
-supabase
-psycopg[binary]
+PyJWT>=2.8
+supabase>=2.0

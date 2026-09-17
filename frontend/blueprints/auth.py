@@ -1,10 +1,19 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, login_required, current_user
-from models import authenticate, get_all_users
+from models import authenticate, get_all_users, ROLE_DISPLAY_NAMES
 
 auth_bp = Blueprint("auth", __name__)
 
-ROLE_REDIRECT_MAP = {"operations": "operations.dashboard"}
+# Bản đồ điều hướng thông minh theo chuyên môn của từng vai trò
+ROLE_REDIRECT_MAP = {
+    "admin": "system_admin.users",              # Nguyễn Chí Hải -> Trang Quản lý & Phân quyền
+    "operations": "operations.dashboard",       # Nguyễn Hoàng Phát -> Dashboard Vận hành
+    "coordinator": "coordinator.itinerary",     # Nguyễn Trọng Hải -> Quản lý Lịch trình
+    "activity_manager": "activities.activities",# Lê Đình Quý -> Quản lý Hoạt động trên tàu
+    "finance": "finance.finance",               # Nguyễn Thị Thi -> Tài chính & Đối soát
+    "sales_staff": "pos.sales",                  # Nhân viên POS -> Màn bán hàng
+    "passenger": "passenger.home",               # Hành khách -> Trang chủ mobile
+}
 
 @auth_bp.route("/")
 def index():
@@ -24,12 +33,15 @@ def login():
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
 
+        # Xác thực qua models.authenticate() - tự động thử Supabase (nếu đã
+        # cấu hình SUPABASE_URL/SUPABASE_KEY) trước, rơi về kho local
+        # (users_data.json) nếu không tìm thấy/chưa cấu hình. Áp dụng đồng
+        # nhất cho MỌI role (admin/operations/coordinator/activity_manager/
+        # finance/sales_staff/passenger) - không phụ thuộc bảng user riêng
+        # của Backend (vốn chỉ seed sẵn 1 vài tài khoản demo).
         user = authenticate(username, password)
-        if user:
-            if user.role != "operations":
-                flash("Tài khoản này không thuộc Operations Control Center.", "danger")
-                return render_template("auth/login.html")
 
+        if user:
             if not user.is_active:
                 flash("Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ Quản trị viên.", "danger")
                 return render_template("auth/login.html", demo_users=get_all_users())
@@ -45,7 +57,7 @@ def login():
             target_endpoint = ROLE_REDIRECT_MAP.get(user.role, "operations.dashboard")
             return redirect(url_for(target_endpoint))
         else:
-            flash("Tên đăng nhập hoặc mật khẩu không đúng. Mật khẩu mặc định là 123456.", "danger")
+            flash("Tên đăng nhập hoặc mật khẩu không đúng.", "danger")
 
     return render_template("auth/login.html", demo_users=get_all_users())
 

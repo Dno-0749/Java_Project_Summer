@@ -59,6 +59,13 @@ class AccountRepository:
     def create_transaction(self, account_id: int, amount, description: str,
                             staff_id: int = None, local_id: str = None,
                             sync_status: str = "synced") -> TransactionModel:
+        from decimal import Decimal
+        # Luôn ép về Decimal trước khi tính với account.balance (cũng là
+        # Decimal từ Postgres NUMERIC) - tránh lỗi "unsupported operand
+        # type(s) for -: 'decimal.Decimal' and 'float'" khi amount đến từ
+        # JSON request (float) thay vì đã qua marshmallow Decimal field.
+        amount = Decimal(str(amount))
+
         session = self._new_session()
         try:
             tx = TransactionModel(
@@ -74,7 +81,7 @@ class AccountRepository:
             # Cập nhật số dư tài khoản ngay trong CÙNG session/transaction này
             account = session.query(OnboardAccountModel).filter_by(id=account_id).first()
             if account:
-                account.balance = (account.balance or 0) - amount
+                account.balance = (account.balance or Decimal("0")) - amount
 
             session.commit()
             session.refresh(tx)

@@ -1,5 +1,4 @@
 import os
-import sys
 import json
 from urllib.error import URLError, HTTPError
 from urllib.request import Request, urlopen
@@ -9,12 +8,7 @@ from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 from functools import wraps
 from config import Config
-
-SRC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
-if SRC_DIR not in sys.path:
-    sys.path.insert(0, SRC_DIR)
-
-from supabase_client import get_supabase_client
+from supabase_client import get_supabase_client, is_supabase_configured
 
 operations_bp = Blueprint("operations", __name__, url_prefix="/operations")
 
@@ -88,6 +82,9 @@ def _fetch_checkin_monitor_data():
             },
         }
 
+    if not is_supabase_configured():
+        return {"checkins": [], "summary": {"total": 0, "returned": 0, "outside": 0, "late": 0, "not_checked_in": 0}}
+
     client = get_supabase_client()
     rows = _fetch_table(client, "checkins")
     checkins = _normalise_checkins(rows)
@@ -116,6 +113,16 @@ def _fetch_live_dashboard_data():
                 "capacity_total": api_data.get("capacity", 0),
                 "capacity_used": api_data.get("capacity_used", 0),
                 "pending_registrations": 0,
+            },
+            "recent_activities": [],
+        }
+
+    if not is_supabase_configured():
+        return {
+            "stats": {
+                "passengers": 0, "activities_today": 0, "excursions_today": 0,
+                "revenue_today": 0, "checkins_today": 0, "capacity_total": 0,
+                "capacity_used": 0, "pending_registrations": 0,
             },
             "recent_activities": [],
         }

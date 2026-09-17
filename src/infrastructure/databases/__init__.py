@@ -24,6 +24,7 @@ from infrastructure.models.cruise import (
     invoice_model,
     feedback_model,
     notification_model,
+    booking_model,
 )
 
 def init_db(app):
