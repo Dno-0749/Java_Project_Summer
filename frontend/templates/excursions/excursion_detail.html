@@ -1,0 +1,300 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+{{ excursion.name }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                {{ excursion.name }}
+            </h2>
+
+            <p class="text-muted mb-0">
+                Chi tiết hoạt động tham quan trên bờ
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a
+                href="{{ url_for('excursions.excursion_registrations_list', excursion_id=excursion.id) }}"
+                class="btn btn-outline-primary"
+            >
+                <i class="bi bi-people"></i>
+                Danh sách đăng ký
+            </a>
+
+            <a
+                href="{{ url_for('excursions.edit_excursion', excursion_id=excursion.id) }}"
+                class="btn btn-primary"
+            >
+                <i class="bi bi-pencil"></i>
+                Chỉnh sửa
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm mb-4">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-4">
+                        Thông tin tour
+                    </h5>
+
+                    <div class="row g-4">
+
+                        <div class="col-md-6">
+
+                            <div class="text-muted">
+                                Địa điểm
+                            </div>
+
+                            <strong>
+                                {{ excursion.location }}
+                            </strong>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="text-muted">
+                                Nhà cung cấp
+                            </div>
+
+                            <strong>
+                                {{ excursion.provider or "-" }}
+                            </strong>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="text-muted">
+                                Ngày
+                            </div>
+
+                            <strong>
+                                {{ excursion.date }}
+                            </strong>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="text-muted">
+                                Thời gian
+                            </div>
+
+                            <strong>
+                                {{ excursion.time }}
+                            </strong>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="text-muted">
+                                Sức chứa
+                            </div>
+
+                            <strong>
+                                {{ excursion.registered }}
+                                /
+                                {{ excursion.capacity }}
+                            </strong>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="text-muted">
+                                Giá tour
+                            </div>
+
+                            <strong>
+                                {{ "{:,.0f}".format(excursion.price or 0) }}
+                                VNĐ
+                            </strong>
+
+                        </div>
+
+                        <div class="col-12">
+
+                            <div class="text-muted mb-2">
+                                Trạng thái
+                            </div>
+
+                            {% if excursion.status == "Hoàn thành" %}
+
+                                <span class="badge bg-success">
+                                    Hoàn thành
+                                </span>
+
+                            {% elif excursion.status == "Hủy" %}
+
+                                <span class="badge bg-danger">
+                                    Hủy
+                                </span>
+
+                            {% elif excursion.status == "Trì hoãn" %}
+
+                                <span class="badge bg-warning text-dark">
+                                    Trì hoãn
+                                </span>
+
+                            {% elif excursion.status == "Đang diễn ra" %}
+
+                                <span class="badge bg-primary">
+                                    Đang diễn ra
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-info">
+                                    Sắp diễn ra
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-3">
+                        Mô tả
+                    </h5>
+
+                    <p class="mb-0">
+                        {{ excursion.description or "Chưa có mô tả." }}
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-4">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-4">
+                        Đăng ký tour
+                    </h5>
+
+                    <form
+                        method="POST"
+                        action="{{ url_for('excursions.register_excursion', excursion_id=excursion.id) }}"
+                    >
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Mã khách
+                            </label>
+
+                            <input
+                                type="text"
+                                name="guest_code"
+                                class="form-control"
+                                required
+                                placeholder="Ví dụ: G001"
+                            >
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Tên hành khách
+                            </label>
+
+                            <input
+                                type="text"
+                                name="passenger_name"
+                                class="form-control"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Phòng
+                            </label>
+
+                            <input
+                                type="text"
+                                name="room"
+                                class="form-control"
+                                placeholder="Ví dụ: 1205"
+                            >
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Ghi chú
+                            </label>
+
+                            <textarea
+                                name="notes"
+                                class="form-control"
+                                rows="3"
+                            ></textarea>
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100"
+                        >
+                            <i class="bi bi-person-plus"></i>
+                            Đăng ký tour
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
