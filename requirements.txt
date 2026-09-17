@@ -13,3 +13,5 @@ apispec_webframeworks
 flask-swagger-ui
 PyJWT>=2.8
 supabase>=2.0
+Flask-Login>=0.6
+requests>=2.31

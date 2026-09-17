@@ -1,0 +1,50 @@
+{% extends "layouts/passenger_base.html" %}
+
+{% block content %}
+<a href="{{ url_for('passenger.activities') }}" class="small d-inline-block mb-2"><i class="bi bi-arrow-left"></i> Quay lại danh sách</a>
+
+<div class="p-card">
+    <h5 class="fw-bold">{{ activity.name }}</h5>
+    <div class="text-muted small mb-3">
+        {% if activity.type == 'excursion' %}Tham quan bờ{% else %}Hoạt động trên tàu{% endif %}
+    </div>
+
+    <div class="d-flex justify-content-between py-2 border-bottom small">
+        <span class="text-muted">Địa điểm</span><span class="fw-semibold">{{ activity.location }}</span>
+    </div>
+    <div class="d-flex justify-content-between py-2 border-bottom small">
+        <span class="text-muted">Thời gian</span><span class="fw-semibold">{{ activity.time }}</span>
+    </div>
+    <div class="d-flex justify-content-between py-2 border-bottom small">
+        <span class="text-muted">Sức chứa</span><span class="fw-semibold">{{ activity.registered }}/{{ activity.capacity }}</span>
+    </div>
+    <div class="d-flex justify-content-between py-2 small">
+        <span class="text-muted">Chi phí</span>
+        <span class="fw-semibold">{% if activity.price == 0 %}Miễn phí{% else %}{{ "{:,.0f}".format(activity.price) }}đ{% endif %}</span>
+    </div>
+
+    <div class="mt-3">
+        {% if is_checked_in %}
+            <button class="btn btn-success w-100 mb-2" disabled><i class="bi bi-patch-check-fill me-2"></i>Đã check-in</button>
+            <a href="{{ url_for('passenger.feedback_new', kind=activity.kind, item_id=activity.id) }}" class="btn btn-outline-primary w-100">
+                <i class="bi bi-star me-2"></i>Gửi đánh giá
+            </a>
+        {% elif is_registered %}
+            <div class="d-flex gap-2">
+                <form method="POST" action="{{ url_for('passenger.self_checkin', registration_id=registration_id) }}" class="flex-grow-1">
+                    <button type="submit" class="btn btn-success w-100"><i class="bi bi-qr-code-scan me-2"></i>Check-in ngay</button>
+                </form>
+                <form method="POST" action="{{ url_for('passenger.cancel_registration_route', registration_id=registration_id) }}">
+                    <button type="submit" class="btn btn-outline-danger">Hủy</button>
+                </form>
+            </div>
+        {% elif is_full %}
+            <button class="btn btn-secondary w-100" disabled>Đã đầy chỗ</button>
+        {% else %}
+            <form method="POST" action="{{ url_for('passenger.register_activity', kind=activity.kind, item_id=activity.id) }}">
+                <button type="submit" class="btn btn-primary w-100">Đăng ký tham gia</button>
+            </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

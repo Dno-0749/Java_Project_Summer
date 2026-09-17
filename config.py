@@ -29,6 +29,7 @@ class Config:
     TESTING = os.environ.get('TESTING', 'False').lower() in ['true', '1']
     DATABASE_URI = os.environ.get('DATABASE_URI') or os.environ.get('POSTGREE_DATABASE_URL')
     CORS_HEADERS = 'Content-Type'
+    API_BASE_URL = os.environ.get('API_BASE_URL') or 'http://localhost:9999'
 
 class DevelopmentConfig(Config):
     """Development configuration."""
