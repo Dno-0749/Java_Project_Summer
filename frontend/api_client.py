@@ -53,6 +53,26 @@ def create_cruise(data):
     return _request("POST", "/cruises", json=data)
 
 
+def list_bookings():
+    return _request("GET", "/bookings")
+
+
+def create_booking(data):
+    return _request("POST", "/bookings", json=data)
+
+
+def update_booking(booking_id, data):
+    return _request("PUT", f"/bookings/{booking_id}", json=data)
+
+
+def update_booking_status(booking_id, status):
+    return _request("PATCH", f"/bookings/{booking_id}/status", json={"status": status})
+
+
+def delete_booking(booking_id):
+    return _request("DELETE", f"/bookings/{booking_id}")
+
+
 def list_ports():
     return _request("GET", "/ports")
 
@@ -63,6 +83,14 @@ def list_cruise_days(cruise_id):
 
 def create_cruise_day(cruise_id, data):
     return _request("POST", f"/cruises/{cruise_id}/days", json=data)
+
+
+def update_cruise_day(day_id, data):
+    return _request("PUT", f"/cruise-days/{day_id}", json=data)
+
+
+def create_port(data):
+    return _request("POST", "/ports", json=data)
 
 
 # ==================== PASSENGER ====================

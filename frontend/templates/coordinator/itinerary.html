@@ -1,0 +1,233 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <div class="text-uppercase small fw-bold text-primary">Operations planning</div>
+        <h4 class="fw-bold mb-1">Quản lý lịch trình booking</h4>
+        <div class="text-muted">Theo dõi tàu, khách hàng và trạng thái đặt lịch trên cùng một lịch.</div>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bookingModal"><i class="bi bi-plus-lg me-1"></i> Thêm booking</button>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-muted small">Tổng booking</div><div class="fs-3 fw-bold">{{ bookings|length }}</div></div></div></div>
+    <div class="col-sm-4"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-muted small">Chờ xác nhận</div><div class="fs-3 fw-bold text-warning">{{ bookings|selectattr('status', 'equalto', 'pending')|list|length }}</div></div></div></div>
+    <div class="col-sm-4"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-muted small">Đã xác nhận</div><div class="fs-3 fw-bold text-success">{{ bookings|selectattr('status', 'equalto', 'confirmed')|list|length }}</div></div></div></div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div>
+                <div class="text-uppercase small fw-bold text-primary">Điểm dừng và thời gian</div>
+                <h5 class="mb-1">Quản lý cảng ghé thăm</h5>
+                <div class="text-muted small">Thiết lập cảng, giờ cập bến và giờ rời bến cho từng ngày của cruise.</div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-lg-6">
+                <form method="post" action="{{ url_for('coordinator.create_port') }}" class="border rounded p-3 h-100">
+                    <h6 class="fw-bold">Thêm cảng hoặc điểm dừng</h6>
+                    <div class="row g-2">
+                        <div class="col-md-6"><label class="form-label small">Tên cảng</label><input class="form-control" name="name" required placeholder="Ví dụ: Cảng Tuần Châu"></div>
+                        <div class="col-md-6"><label class="form-label small">Quốc gia</label><input class="form-control" name="country" placeholder="Việt Nam"></div>
+                        <div class="col-12"><label class="form-label small">Mô tả</label><input class="form-control" name="description" placeholder="Thông tin điểm dừng"></div>
+                        <div class="col-12 d-flex justify-content-end"><button class="btn btn-outline-primary" type="submit"><i class="bi bi-geo-alt me-1"></i>Thêm cảng</button></div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-lg-6">
+                <div class="border rounded p-3 h-100">
+                    <h6 class="fw-bold">Danh sách cảng hiện có</h6>
+                    {% if ports %}<div class="d-flex flex-wrap gap-2">{% for port in ports %}<span class="badge text-bg-light border">{{ port.name }}{% if port.country %} - {{ port.country }}{% endif %}</span>{% endfor %}</div>{% else %}<div class="small text-muted">Chưa có cảng nào.</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if selected_cruise_id %}
+        <form id="createCruiseDayForm" method="post" action="{{ url_for('coordinator.create_cruise_day', cruise_id=selected_cruise_id) }}" class="border rounded p-3 mb-3 bg-light">
+            <h6 class="fw-bold">Thêm cảng vào lịch trình</h6>
+            <div class="mb-3"><label class="form-label fw-semibold">Chọn cruise để thêm lịch ghé cảng</label><select id="createCruiseSelector" class="form-select" onchange="window.location.href='{{ url_for('coordinator.itinerary') }}?cruise_id=' + this.value"><option value="">-- Chọn cruise --</option>{% for cruise in cruises %}<option value="{{ cruise.id }}" data-start="{{ cruise.start_date }}" {% if cruise.id == selected_cruise_id %}selected{% endif %}>{{ cruise.name }} ({{ cruise.start_date }} - {{ cruise.end_date }})</option>{% endfor %}</select></div>
+            <div class="row g-2 align-items-end">
+                <div class="col-md-2"><label class="form-label small">Ngày trong chuyến</label><input class="form-control day-number-input" type="number" min="1" name="day_number" form="createCruiseDayForm" required></div>
+                <div class="col-md-2"><label class="form-label small">Ngày</label><input class="form-control day-date-display" type="text" placeholder="dd/mm/yyyy" readonly><input class="day-date-input" type="hidden" name="date" form="createCruiseDayForm" required></div>
+                <div class="col-md-3"><label class="form-label small">Cảng/điểm dừng</label><select class="form-select" name="port_id"><option value="">Không chọn</option>{% for port in ports %}<option value="{{ port.id }}">{{ port.name }}</option>{% endfor %}</select></div>
+                <div class="col-md-2"><label class="form-label small">Giờ cập bến</label><div class="time-picker"><select class="form-select time-hour" aria-label="Giờ cập bến"><option value="">Giờ</option>{% for hour in range(24) %}<option value="{{ '%02d'|format(hour) }}">{{ '%02d'|format(hour) }}</option>{% endfor %}</select><span>:</span><select class="form-select time-minute" aria-label="Phút cập bến"><option value="">Phút</option>{% for minute in range(60) %}<option value="{{ '%02d'|format(minute) }}">{{ '%02d'|format(minute) }}</option>{% endfor %}</select><input class="time-value" type="hidden" name="arrival_time" form="createCruiseDayForm"></div></div>
+                <div class="col-md-2"><label class="form-label small">Giờ rời bến</label><div class="time-picker"><select class="form-select time-hour" aria-label="Giờ rời bến"><option value="">Giờ</option>{% for hour in range(24) %}<option value="{{ '%02d'|format(hour) }}">{{ '%02d'|format(hour) }}</option>{% endfor %}</select><span>:</span><select class="form-select time-minute" aria-label="Phút rời bến"><option value="">Phút</option>{% for minute in range(60) %}<option value="{{ '%02d'|format(minute) }}">{{ '%02d'|format(minute) }}</option>{% endfor %}</select><input class="time-value" type="hidden" name="departure_time" form="createCruiseDayForm"></div></div>
+                <div class="col-md-1"><button class="btn btn-primary w-100" type="submit" title="Thêm điểm dừng"><i class="bi bi-plus-lg"></i></button></div>
+            </div>
+        </form>
+
+        <div class="card border-0 shadow-sm mt-3">
+            <div class="p-3 border-bottom">
+                <h5 class="mb-3">Danh sách lịch ghé cảng</h5>
+                <form method="get" action="{{ url_for('coordinator.itinerary') }}" class="row g-2 align-items-end">
+                    <div class="col-md-8"><label class="form-label fw-semibold">Chọn cruise cần chỉnh lịch ghé cảng</label><select id="cruiseSelector" class="form-select" name="cruise_id" onchange="this.form.submit()"><option value="">-- Chọn cruise --</option>{% for cruise in cruises %}<option value="{{ cruise.id }}" data-start="{{ cruise.start_date }}" {% if cruise.id == selected_cruise_id %}selected{% endif %}>{{ cruise.name }} ({{ cruise.start_date }} - {{ cruise.end_date }})</option>{% endfor %}</select></div>
+                </form>
+            </div>
+            <div class="table-responsive"><table class="table align-middle mb-0">
+            <thead><tr><th>Ngày trong chuyến</th><th>Ngày</th><th>Cảng/điểm dừng</th><th>Giờ cập</th><th>Giờ rời</th><th class="text-end">Lưu</th></tr></thead>
+            <tbody>
+            {% for day in cruise_days %}
+            <tr>
+                <form id="updateDay{{ day.id }}" method="post" action="{{ url_for('coordinator.update_cruise_day', day_id=day.id) }}"><input type="hidden" name="cruise_id" value="{{ selected_cruise_id }}"></form>
+                <td><input class="form-control form-control-sm day-number-input" type="number" min="1" name="day_number" value="{{ day.day_number }}" form="updateDay{{ day.id }}" required></td>
+                <td><input class="form-control form-control-sm day-date-display" type="text" value="{{ day.date }}" placeholder="dd/mm/yyyy" readonly><input class="day-date-input" type="hidden" name="date" value="{{ day.date }}" form="updateDay{{ day.id }}" required></td>
+                <td><select class="form-select form-select-sm" name="port_id" form="updateDay{{ day.id }}"><option value="">Không chọn</option>{% for port in ports %}<option value="{{ port.id }}" {% if port.id == day.port_id %}selected{% endif %}>{{ port.name }}</option>{% endfor %}</select></td>
+                <td><div class="time-picker"><select class="form-select form-select-sm time-hour" aria-label="Giờ cập bến"><option value="">Giờ</option>{% for hour in range(24) %}<option value="{{ '%02d'|format(hour) }}">{{ '%02d'|format(hour) }}</option>{% endfor %}</select><span>:</span><select class="form-select form-select-sm time-minute" aria-label="Phút cập bến"><option value="">Phút</option>{% for minute in range(60) %}<option value="{{ '%02d'|format(minute) }}">{{ '%02d'|format(minute) }}</option>{% endfor %}</select><input class="time-value" type="hidden" name="arrival_time" value="{{ day.arrival_time[:5] if day.arrival_time else '' }}" form="updateDay{{ day.id }}"></div></td>
+                <td><div class="time-picker"><select class="form-select form-select-sm time-hour" aria-label="Giờ rời bến"><option value="">Giờ</option>{% for hour in range(24) %}<option value="{{ '%02d'|format(hour) }}">{{ '%02d'|format(hour) }}</option>{% endfor %}</select><span>:</span><select class="form-select form-select-sm time-minute" aria-label="Phút rời bến"><option value="">Phút</option>{% for minute in range(60) %}<option value="{{ '%02d'|format(minute) }}">{{ '%02d'|format(minute) }}</option>{% endfor %}</select><input class="time-value" type="hidden" name="departure_time" value="{{ day.departure_time[:5] if day.departure_time else '' }}" form="updateDay{{ day.id }}"></div></td>
+                <td class="text-end"><button class="btn btn-sm btn-outline-primary" type="submit" form="updateDay{{ day.id }}" title="Lưu giờ và cảng"><i class="bi bi-save"></i></button></td>
+            </tr>
+            {% else %}<tr><td colspan="6" class="text-center text-muted py-3">Chưa có điểm dừng nào trong cruise này.</td></tr>{% endfor %}
+            </tbody>
+            </table></div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-secondary" id="previousPeriod" title="Kỳ trước"><i class="bi bi-chevron-left"></i></button>
+                <button class="btn btn-sm btn-outline-secondary" id="todayPeriod">Hôm nay</button>
+                <button class="btn btn-sm btn-outline-secondary" id="nextPeriod" title="Kỳ sau"><i class="bi bi-chevron-right"></i></button>
+                <h5 class="mb-0 ms-2" id="calendarTitle"></h5>
+            </div>
+            <div class="btn-group" role="group" aria-label="Kiểu lịch"><button class="btn btn-sm btn-primary" data-view="month">Tháng</button><button class="btn btn-sm btn-outline-primary" data-view="week">Tuần</button></div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="p-3 border-bottom"><h5 class="mb-0">Danh sách booking</h5></div>
+        <div class="table-responsive"><table class="table align-middle mb-0">
+            <thead><tr><th class="ps-3">Tàu</th><th>Khách hàng</th><th>Thời gian</th><th>Trạng thái</th><th class="text-end pe-3">Thao tác</th></tr></thead>
+            <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td class="ps-3 fw-semibold">{{ booking.ship_name }}</td><td>{{ booking.customer_name }}</td><td>{{ booking.start_date }} <span class="text-muted">→</span> {{ booking.end_date }}</td>
+                <td><span class="badge status-{{ booking.status }}">{{ {'pending':'Chờ xác nhận','confirmed':'Đã xác nhận','completed':'Hoàn thành','cancelled':'Đã hủy'}.get(booking.status, booking.status) }}</span></td>
+                <td class="text-end pe-3">
+                    <button class="btn btn-sm btn-outline-secondary edit-booking" title="Sửa booking" data-id="{{ booking.id }}" data-ship="{{ booking.ship_name or '' }}" data-customer="{{ booking.customer_name or '' }}" data-start="{{ booking.start_date or '' }}" data-end="{{ booking.end_date or '' }}" data-status="{{ booking.status }}"><i class="bi bi-pencil"></i></button>
+                    <select class="form-select form-select-sm" name="status_{{ booking.id }}" form="bulkStatusForm" aria-label="Trạng thái booking">{% for value, label in [('pending','Chờ xác nhận'),('confirmed','Đã xác nhận'),('completed','Hoàn thành'),('cancelled','Đã hủy')] %}<option value="{{ value }}" {% if booking.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+                    <form class="d-inline" method="post" action="{{ url_for('coordinator.delete_booking', booking_id=booking.id) }}" onsubmit="return confirm('Xóa booking này?');"><button class="btn btn-sm btn-outline-danger" title="Xóa booking"><i class="bi bi-trash"></i></button></form>
+                </td>
+            </tr>
+            {% else %}<tr><td colspan="5" class="text-center text-muted py-5">Chưa có booking nào. Hãy thêm booking đầu tiên.</td></tr>{% endfor %}
+            </tbody>
+        </table></div>
+        <form id="bulkStatusForm" method="post" action="{{ url_for('coordinator.update_booking_statuses') }}" class="d-flex justify-content-end p-3 border-top">
+            <button class="btn btn-primary px-3 py-2" type="submit"><i class="bi bi-save me-2"></i>Lưu thay đổi</button>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <form method="post" action="{{ url_for('coordinator.create_booking') }}">
+        <div class="modal-header"><h5 class="modal-title" id="bookingModalLabel">Thêm booking</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+        <div class="modal-body"><div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Tàu</label><input class="form-control" name="ship_name" required placeholder="Ví dụ: Heritage Bình Chuẩn"></div>
+            <div class="col-md-6"><label class="form-label">Khách hàng</label><input class="form-control" name="customer_name" required placeholder="Tên khách hàng / đoàn"></div>
+            <div class="col-md-6"><label class="form-label">Ngày bắt đầu</label><input class="form-control" type="date" name="start_date" required></div>
+            <div class="col-md-6"><label class="form-label">Ngày kết thúc</label><input class="form-control" type="date" name="end_date" required></div>
+            <div class="col-md-6"><label class="form-label">Trạng thái</label><select class="form-select" name="status"><option value="pending">Chờ xác nhận</option><option value="confirmed">Đã xác nhận</option><option value="completed">Hoàn thành</option><option value="cancelled">Đã hủy</option></select></div>
+        </div><div class="alert alert-info small mt-3 mb-0"><i class="bi bi-info-circle me-1"></i>Booking cùng tàu không được trùng khoảng ngày. Booking đã hủy không khóa lịch.</div></div>
+        <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button><button class="btn btn-primary" type="submit">Lưu booking</button></div>
+    </form>
+</div></div></div>
+
+<div class="modal fade" id="editBookingModal" tabindex="-1" aria-labelledby="editBookingModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <form id="editBookingForm" method="post">
+        <div class="modal-header"><h5 class="modal-title" id="editBookingModalLabel">Sửa booking</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+        <div class="modal-body"><div class="row g-3">
+            <div class="col-md-6"><label class="form-label">Tàu</label><input id="editShip" class="form-control" name="ship_name" required></div>
+            <div class="col-md-6"><label class="form-label">Khách hàng</label><input id="editCustomer" class="form-control" name="customer_name" required></div>
+            <div class="col-md-6"><label class="form-label">Ngày bắt đầu</label><input id="editStart" class="form-control" type="date" name="start_date" required></div>
+            <div class="col-md-6"><label class="form-label">Ngày kết thúc</label><input id="editEnd" class="form-control" type="date" name="end_date" required></div>
+            <div class="col-md-6"><label class="form-label">Trạng thái</label><select id="editStatus" class="form-select" name="status"><option value="pending">Chờ xác nhận</option><option value="confirmed">Đã xác nhận</option><option value="completed">Hoàn thành</option><option value="cancelled">Đã hủy</option></select></div>
+        </div></div>
+        <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button><button class="btn btn-primary" type="submit">Lưu thay đổi</button></div>
+    </form>
+</div></div></div>
+
+<style>
+.calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border-top: 1px solid #e9ecef; border-left: 1px solid #e9ecef; }
+.calendar-cell { min-height: 108px; padding: .55rem; border-right: 1px solid #e9ecef; border-bottom: 1px solid #e9ecef; background: #fff; }
+.calendar-head { min-height: auto; background: #f8f9fa; font-size: .75rem; font-weight: 700; color: #6c757d; text-transform: uppercase; }
+.calendar-cell.muted { background: #fbfbfc; color: #adb5bd; }.calendar-cell.today { box-shadow: inset 0 3px 0 #0d6efd; }.calendar-number { font-size: .85rem; font-weight: 700; }
+.calendar-booking { display: block; margin-top: .35rem; padding: .25rem .35rem; border-radius: 4px; font-size: .72rem; line-height: 1.25; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.time-picker { display: flex; align-items: center; gap: .2rem; }.time-picker select { min-width: 0; padding-left: .4rem; padding-right: .4rem; }.time-picker span { font-weight: 700; }
+.booking-pending, .status-pending { background: #fff3cd; color: #856404; }.booking-confirmed, .status-confirmed { background: #d1e7dd; color: #0f5132; }.booking-completed, .status-completed { background: #dbeafe; color: #1e40af; }.booking-cancelled, .status-cancelled { background: #e9ecef; color: #6c757d; text-decoration: line-through; }
+@media (max-width: 768px) { .calendar-cell { min-height: 84px; padding: .35rem; } .calendar-booking { font-size: .65rem; } }
+</style>
+<script>
+const bookings = {{ bookings|tojson }}; let calendarDate = new Date(); let calendarView = 'month';
+const monthFormatter = new Intl.DateTimeFormat('vi-VN', { month: 'long', year: 'numeric' }); const dayFormatter = new Intl.DateTimeFormat('vi-VN', { weekday: 'short', day: 'numeric', month: 'numeric' });
+const dateKey = date => date.toISOString().slice(0, 10); const bookingOnDate = (booking, date) => booking.start_date <= dateKey(date) && booking.end_date >= dateKey(date);
+function renderCalendar() {
+    const grid = document.getElementById('calendarGrid'); grid.innerHTML = ''; ['T2','T3','T4','T5','T6','T7','CN'].forEach(label => grid.insertAdjacentHTML('beforeend', `<div class="calendar-cell calendar-head">${label}</div>`));
+    const year = calendarDate.getFullYear(); const month = calendarDate.getMonth(); let start; let count;
+    if (calendarView === 'month') { const first = new Date(year, month, 1); start = new Date(year, month, 1 - ((first.getDay() + 6) % 7)); count = 42; document.getElementById('calendarTitle').textContent = monthFormatter.format(calendarDate); }
+    else { const mondayOffset = (calendarDate.getDay() + 6) % 7; start = new Date(year, month, calendarDate.getDate() - mondayOffset); count = 7; document.getElementById('calendarTitle').textContent = `Tuần của ${dayFormatter.format(calendarDate)}`; }
+    for (let index = 0; index < count; index += 1) { const date = new Date(start); date.setDate(start.getDate() + index); const items = bookings.filter(booking => bookingOnDate(booking, date)); const events = items.map(booking => `<span class="calendar-booking booking-${booking.status}" title="${booking.ship_name} - ${booking.customer_name}">${booking.ship_name} · ${booking.customer_name}</span>`).join(''); grid.insertAdjacentHTML('beforeend', `<div class="calendar-cell ${calendarView === 'month' && date.getMonth() !== month ? 'muted' : ''} ${dateKey(date) === dateKey(new Date()) ? 'today' : ''}"><div class="calendar-number">${date.getDate()}</div>${events}</div>`); }
+}
+document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => { calendarView = button.dataset.view; document.querySelectorAll('[data-view]').forEach(item => item.className = item === button ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-outline-primary'); renderCalendar(); }));
+document.getElementById('todayPeriod').addEventListener('click', () => { calendarDate = new Date(); renderCalendar(); });
+document.getElementById('previousPeriod').addEventListener('click', () => { if (calendarView === 'month') calendarDate.setMonth(calendarDate.getMonth() - 1); else calendarDate.setDate(calendarDate.getDate() - 7); renderCalendar(); });
+document.getElementById('nextPeriod').addEventListener('click', () => { if (calendarView === 'month') calendarDate.setMonth(calendarDate.getMonth() + 1); else calendarDate.setDate(calendarDate.getDate() + 7); renderCalendar(); }); renderCalendar();
+document.querySelectorAll('.edit-booking').forEach(button => button.addEventListener('click', () => {
+    document.getElementById('editBookingForm').action = `/coordinator/bookings/${button.dataset.id}/update`;
+    document.getElementById('editShip').value = button.dataset.ship; document.getElementById('editCustomer').value = button.dataset.customer;
+    document.getElementById('editStart').value = button.dataset.start; document.getElementById('editEnd').value = button.dataset.end; document.getElementById('editStatus').value = button.dataset.status;
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('editBookingModal')).show();
+}));
+const cruiseSelector = document.getElementById('cruiseSelector');
+const selectedCruiseStart = () => cruiseSelector?.selectedOptions[0]?.dataset.start || '';
+const dateForCruiseDay = (startDate, dayNumber) => {
+    if (!startDate || !Number.isInteger(dayNumber) || dayNumber < 1) return '';
+    const [year, month, day] = startDate.split('-').map(Number);
+    const calculatedDate = new Date(year, month - 1, day);
+    calculatedDate.setDate(calculatedDate.getDate() + dayNumber - 1);
+    return [calculatedDate.getFullYear(), String(calculatedDate.getMonth() + 1).padStart(2, '0'), String(calculatedDate.getDate()).padStart(2, '0')].join('-');
+};
+const displayDate = isoDate => {
+    if (!isoDate) return '';
+    const [year, month, day] = isoDate.split('-');
+    return `${day}/${month}/${year}`;
+};
+document.querySelectorAll('.day-number-input').forEach(dayNumberInput => {
+    const formId = dayNumberInput.getAttribute('form');
+    const dateInput = document.querySelector(`.day-date-input[form="${formId}"]`) || document.querySelector('.day-date-input');
+    const dateDisplay = document.querySelector(`.day-date-display[form="${formId}"]`) || dateInput?.previousElementSibling;
+    const updateCalculatedDate = () => {
+        const dayNumber = Number.parseInt(dayNumberInput.value, 10);
+        const calculatedDate = dateForCruiseDay(selectedCruiseStart(), dayNumber);
+        if (calculatedDate && dateInput) {
+            dateInput.value = calculatedDate;
+            if (dateDisplay) dateDisplay.value = displayDate(calculatedDate);
+        }
+    };
+    dayNumberInput.addEventListener('input', updateCalculatedDate);
+    if (dateInput && dateDisplay) dateDisplay.value = displayDate(dateInput.value);
+});
+document.querySelectorAll('.time-picker').forEach(timePicker => {
+    const hourInput = timePicker.querySelector('.time-hour');
+    const minuteInput = timePicker.querySelector('.time-minute');
+    const timeValue = timePicker.querySelector('.time-value');
+    const [savedHour = '', savedMinute = ''] = (timeValue.value || '').split(':');
+    hourInput.value = savedHour;
+    minuteInput.value = savedMinute;
+    const updateTimeValue = () => {
+        timeValue.value = hourInput.value && minuteInput.value ? `${hourInput.value}:${minuteInput.value}` : '';
+    };
+    hourInput.addEventListener('change', updateTimeValue);
+    minuteInput.addEventListener('change', updateTimeValue);
+});
+</script>
+{% endblock %}
