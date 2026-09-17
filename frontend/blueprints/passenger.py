@@ -5,7 +5,6 @@ from datetime import datetime
 import uuid
 import api_client
 import models
-import store
 
 passenger_bp = Blueprint("passenger", __name__, url_prefix="/passenger")
 
@@ -136,6 +135,7 @@ def _load_all_activities_and_excursions(cruise):
     if not err:
         for a in activities or []:
             regs, _ = api_client.list_activity_registrations(a["id"])
+            start = a.get("start_time") or ""
             result.append({
                 "id": a["id"], "kind": "activity", "type": "activity",
                 "name": a["name"], "location": a.get("location") or "-",
@@ -143,6 +143,7 @@ def _load_all_activities_and_excursions(cruise):
                 "capacity": a.get("capacity") or 0,
                 "registered": len(regs or []),
                 "price": float(a.get("fee") or 0),
+                "day_label": start[:10] if start else "Chưa xếp lịch",
             })
 
     days, err = api_client.list_cruise_days(cruise["id"])
@@ -160,6 +161,7 @@ def _load_all_activities_and_excursions(cruise):
                     "capacity": e.get("capacity") or 0,
                     "registered": len(regs or []),
                     "price": float(e.get("price") or 0),
+                    "day_label": d.get("date") or "Chưa xếp lịch",
                 })
     return result
 
@@ -186,7 +188,7 @@ def activities():
     cruise, passenger = _current_cruise_and_passenger()
     filter_type = request.args.get("filter", "all")
     if not cruise:
-        return render_template("passenger/activities.html", activities=[], filter_type=filter_type,
+        return render_template("passenger/activities.html", grouped_activities=[], filter_type=filter_type,
                                 registrations=set(), page_title="Hoạt động & Tham quan bờ")
 
     items = _load_all_activities_and_excursions(cruise)
@@ -195,9 +197,19 @@ def activities():
     elif filter_type == "paid":
         items = [a for a in items if a["price"] > 0]
 
+    # Nhóm theo ngày (day_label) - checklist mục B: "Xem thông tin hoạt
+    # động theo từng ngày", thay vì dồn hết vào 1 danh sách phẳng.
+    groups = {}
+    for item in items:
+        groups.setdefault(item["day_label"], []).append(item)
+    grouped_activities = [
+        {"day_label": day, "activities_list": groups[day]}
+        for day in sorted(groups.keys())
+    ]
+
     return render_template(
         "passenger/activities.html",
-        activities=items,
+        grouped_activities=grouped_activities,
         filter_type=filter_type,
         registrations=set(),  # đơn giản hoá: badge "đã đăng ký" tính theo is_registered ở trang chi tiết
         page_title="Hoạt động & Tham quan bờ",
@@ -280,7 +292,8 @@ def bill():
     view_transactions = [{
         "id": t["id"], "item": t.get("description") or "-",
         "amount": float(t["amount"]), "time": (t.get("created_at") or "")[:16],
-        "sync_status": t["sync_status"],
+        "sync_status": t["sync_status"], "local_id": t.get("local_id") or "-",
+        "staff_id": t.get("staff_id"),
     } for t in transactions]
 
     return render_template(
@@ -381,20 +394,37 @@ def self_checkin(registration_id):
 # (chưa có bước NV POS/Finance duyệt) - nếu cần workflow duyệt sau này, có
 # thể mở rộng thêm trạng thái riêng.
 
+def _get_real_services(cruise):
+    """Danh mục "Dịch vụ" cho Passenger = CÙNG bảng Activity thật mà POS
+    đang bán (đồng nhất 1 nguồn dữ liệu, không còn store.py giả nữa)."""
+    if not cruise:
+        return []
+    activities, err = api_client.list_activities(cruise["id"])
+    if err:
+        return []
+    return [{
+        "id": a["id"],
+        "name": a["name"],
+        "price": float(a.get("fee") or 0),
+    } for a in activities or []]
+
+
 @passenger_bp.route("/services")
 @login_required
 @passenger_access
 def services():
-    """Xem danh sách dịch vụ có thể mua (dùng chung danh mục với POS)."""
-    return render_template("passenger/services.html", services=store.POS_ITEMS, page_title="Dịch vụ trên tàu")
+    """Xem danh sách dịch vụ có thể mua (dùng chung dữ liệu Activity thật với POS)."""
+    cruise, passenger = _current_cruise_and_passenger()
+    return render_template("passenger/services.html", services=_get_real_services(cruise), page_title="Dịch vụ trên tàu")
 
 
 @passenger_bp.route("/services/<int:item_id>")
 @login_required
 @passenger_access
 def service_detail(item_id):
-    """Xem chi tiết 1 dịch vụ (tên, giá, danh mục)."""
-    item = next((i for i in store.POS_ITEMS if i["id"] == item_id), None)
+    """Xem chi tiết 1 dịch vụ (tên, giá)."""
+    cruise, passenger = _current_cruise_and_passenger()
+    item = next((i for i in _get_real_services(cruise) if i["id"] == item_id), None)
     if not item:
         flash("Không tìm thấy dịch vụ này.", "danger")
         return redirect(url_for("passenger.services"))
@@ -408,7 +438,7 @@ def purchase_service(item_id):
     """Tạo yêu cầu sử dụng/mua dịch vụ - ghi nhận thành giao dịch thật vào
     tài khoản chi tiêu trên tàu của chính hành khách này."""
     cruise, passenger = _current_cruise_and_passenger()
-    item = next((i for i in store.POS_ITEMS if i["id"] == item_id), None)
+    item = next((i for i in _get_real_services(cruise) if i["id"] == item_id), None)
     if not item or not passenger:
         flash("Không thể thực hiện yêu cầu. Vui lòng thử lại.", "danger")
         return redirect(url_for("passenger.services"))
@@ -435,7 +465,7 @@ def feedback_new(kind, item_id):
     cruise, passenger = _current_cruise_and_passenger()
 
     if kind == "service":
-        item = next((i for i in store.POS_ITEMS if i["id"] == item_id), None)
+        item = next((i for i in _get_real_services(cruise) if i["id"] == item_id), None)
         target_name = item["name"] if item else "Dịch vụ"
     else:
         items = _load_all_activities_and_excursions(cruise) if cruise else []
@@ -557,7 +587,13 @@ def change_password():
     new_password = request.form.get("new_password", "")
     new_password_confirm = request.form.get("new_password_confirm", "")
 
-    if current_password != current_user.password:
+    if current_user.password_hash:
+        from werkzeug.security import check_password_hash
+        password_ok = check_password_hash(current_user.password_hash, current_password)
+    else:
+        password_ok = (current_password == current_user.password)
+
+    if not password_ok:
         flash("Mật khẩu hiện tại không đúng.", "danger")
     elif len(new_password) < 6:
         flash("Mật khẩu mới phải có ít nhất 6 ký tự.", "danger")

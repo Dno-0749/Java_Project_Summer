@@ -130,6 +130,19 @@ class ReportRepository:
         finally:
             session.close()
 
+    def list_all_transactions_for_anomaly_scan(self):
+        """Lấy toàn bộ transaction (mọi tài khoản) kèm đủ dữ liệu để phát
+        hiện bất thường: số tiền, thời gian tạo, tài khoản."""
+        session = self._new_session()
+        try:
+            return (
+                session.query(TransactionModel)
+                .order_by(TransactionModel.onboard_account_id, TransactionModel.created_at)
+                .all()
+            )
+        finally:
+            session.close()
+
     # ---------- Dashboard vận hành ----------
     def revenue_by_cruise(self, cruise_id: int):
         """UC30: Tổng doanh thu của 1 chuyến cruise (join qua Activity/Passenger)."""

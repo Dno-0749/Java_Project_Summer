@@ -247,3 +247,29 @@ def list_transactions(passenger_id):
     """
     transactions = service.list_transactions(passenger_id)
     return jsonify(tx_res.dump(transactions, many=True)), 200
+
+
+@bp.route("/transactions/anomalies", methods=["GET"])
+def anomalies():
+    """Return transactions that violate basic reconciliation invariants.
+
+    This endpoint intentionally uses only objective data-quality checks; it
+    does not invent business thresholds. It keeps the FE reconciliation page
+    compatible with the current backend contract.
+    """
+    try:
+        transactions = service.list_all_transactions(limit=1000)
+        result = []
+        for tx in transactions:
+            reasons = []
+            if tx.amount is None or float(tx.amount) <= 0:
+                reasons.append("Số tiền giao dịch không hợp lệ")
+            if not tx.description or not str(tx.description).strip():
+                reasons.append("Thiếu mô tả giao dịch")
+            if tx.staff_id is None:
+                reasons.append("Thiếu nhân viên thực hiện giao dịch")
+            if reasons:
+                result.append({"transaction_id": tx.id, "reasons": reasons})
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

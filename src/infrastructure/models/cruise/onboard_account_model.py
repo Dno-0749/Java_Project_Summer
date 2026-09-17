@@ -12,5 +12,8 @@ class OnboardAccountModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     passenger_id = Column(Integer, ForeignKey('passengers.id'), unique=True, nullable=False)
     balance = Column(Numeric(12, 2), default=0)
+    # Hạn mức chi tiêu tối đa (credit limit) - số dư không được âm quá
+    # ngưỡng này. Mặc định 20 triệu theo yêu cầu nghiệp vụ.
+    credit_limit = Column(Numeric(12, 2), default=20000000)
     # open, settled
     status = Column(String(50), nullable=False, default='open')

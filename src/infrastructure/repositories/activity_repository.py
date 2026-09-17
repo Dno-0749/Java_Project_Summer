@@ -38,6 +38,38 @@ class ActivityRepository:
         finally:
             session.close()
 
+    def update_activity(self, activity_id: int, data: dict) -> Optional[ActivityModel]:
+        session = self._new_session()
+        try:
+            activity = session.query(ActivityModel).filter_by(id=activity_id).first()
+            if not activity:
+                return None
+            for key, value in data.items():
+                setattr(activity, key, value)
+            session.commit()
+            session.refresh(activity)
+            return activity
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    def delete_activity(self, activity_id: int) -> bool:
+        session = self._new_session()
+        try:
+            activity = session.query(ActivityModel).filter_by(id=activity_id).first()
+            if not activity:
+                return False
+            session.delete(activity)
+            session.commit()
+            return True
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
     # ---------- ShoreExcursion ----------
     def list_excursions(self, cruise_day_id: int) -> List[ShoreExcursionModel]:
         session = self._new_session()
