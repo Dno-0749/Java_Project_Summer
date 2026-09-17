@@ -1,0 +1,50 @@
+{% extends "layouts/passenger_base.html" %}
+
+{% block content %}
+<div class="p-card text-center">
+    <i class="bi bi-person-circle text-primary" style="font-size: 3rem;"></i>
+    <div class="fw-bold fs-5 mt-2">{{ user.full_name }}</div>
+    <div class="text-muted small">@{{ user.username }}</div>
+</div>
+
+<div class="p-card">
+    <div class="fw-bold mb-2 small text-muted text-uppercase">Thông tin hành khách</div>
+    <div class="d-flex justify-content-between py-2 border-bottom small">
+        <span class="text-muted">Cabin</span><span class="fw-semibold">{{ passenger.cabin }}</span>
+    </div>
+    <div class="d-flex justify-content-between py-2 border-bottom small">
+        <span class="text-muted">Mã thẻ (QR)</span><span class="fw-semibold">{{ passenger.card_id }}</span>
+    </div>
+    <div class="d-flex justify-content-between py-2 small">
+        <span class="text-muted">Số dư tài khoản</span>
+        <span class="fw-semibold">{{ "{:,.0f}".format(passenger.balance) }}đ</span>
+    </div>
+</div>
+
+<div class="p-card">
+    <div class="fw-bold mb-3 small text-muted text-uppercase">Đổi mật khẩu</div>
+    <form method="POST" action="{{ url_for('passenger.change_password') }}">
+        <div class="mb-2">
+            <label class="form-label small">Mật khẩu hiện tại</label>
+            <input type="password" name="current_password" class="form-control form-control-sm" required>
+        </div>
+        <div class="mb-2">
+            <label class="form-label small">Mật khẩu mới</label>
+            <input type="password" name="new_password" class="form-control form-control-sm" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label small">Xác nhận mật khẩu mới</label>
+            <input type="password" name="new_password_confirm" class="form-control form-control-sm" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm w-100">Cập nhật mật khẩu</button>
+    </form>
+</div>
+
+<a href="{{ url_for('passenger.my_feedback') }}" class="btn btn-outline-primary w-100 mb-2">
+    <i class="bi bi-star me-2"></i>Đánh giá của tôi
+</a>
+
+<a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger w-100">
+    <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+</a>
+{% endblock %}

@@ -1,0 +1,183 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+    {{ "Chỉnh sửa hoạt động" if edit_mode else "Tạo hoạt động mới" }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                {{ "Chỉnh sửa hoạt động" if edit_mode else "Tạo hoạt động mới" }}
+            </h2>
+            <p class="text-muted mb-0">
+                {{ "Cập nhật thông tin hoạt động trên tàu" if edit_mode else "Thiết lập hoạt động mới trên tàu" }}
+            </p>
+        </div>
+
+        <a href="{{ url_for('activities.activities') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+
+            <form method="POST"
+                  action="{% if edit_mode and activity %}{{ url_for('activities.edit_activity', activity_id=activity.id) }}{% else %}{{ url_for('activities.create_activity') }}{% endif %}">
+
+                <div class="row g-4">
+
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold">Tên hoạt động</label>
+                        <input
+                            type="text"
+                            name="name"
+                            class="form-control"
+                            required
+                            value="{{ activity.name if edit_mode and activity else '' }}"
+                            placeholder="Ví dụ: Yoga buổi sáng">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Loại hoạt động</label>
+                        <select name="type" class="form-select">
+                            <option value="Miễn phí"
+                                {% if edit_mode and activity and activity.type == "Miễn phí" %}selected{% endif %}>
+                                Miễn phí
+                            </option>
+                            <option value="Trả phí"
+                                {% if edit_mode and activity and activity.type == "Trả phí" %}selected{% endif %}>
+                                Trả phí
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Địa điểm</label>
+                        <input
+                            type="text"
+                            name="location"
+                            class="form-control"
+                            required
+                            value="{{ activity.location if edit_mode and activity else '' }}"
+                            placeholder="Ví dụ: Sundeck">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Ngày tổ chức</label>
+                        <input
+                            type="date"
+                            name="date"
+                            class="form-control"
+                            required
+                            value="{{ activity.date if edit_mode and activity else '' }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Thời gian bắt đầu</label>
+                        <input
+                            type="time"
+                            name="start_time"
+                            class="form-control"
+                            required
+                            value="{% if edit_mode and activity and activity.time %}{{ activity.time.split(' - ')[0] }}{% endif %}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Thời gian kết thúc</label>
+                        <input
+                            type="time"
+                            name="end_time"
+                            class="form-control"
+                            required
+                            value="{% if edit_mode and activity and activity.time %}{{ activity.time.split(' - ')[1] }}{% endif %}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Sức chứa tối đa</label>
+                        <input
+                            type="number"
+                            name="capacity"
+                            class="form-control"
+                            min="1"
+                            required
+                            value="{{ activity.capacity if edit_mode and activity else '' }}"
+                            placeholder="Ví dụ: 40">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Phí tham gia</label>
+                        <div class="input-group">
+                            <input
+                                type="number"
+                                name="price"
+                                class="form-control"
+                                min="0"
+                                value="{{ activity.price if edit_mode and activity else '0' }}"
+                                placeholder="0">
+                            <span class="input-group-text">VNĐ</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Trạng thái</label>
+                        <select name="status" class="form-select">
+
+                            <option value="Sắp diễn ra"
+                                {% if edit_mode and activity and activity.status == "Sắp diễn ra" %}selected{% endif %}>
+                                Sắp diễn ra
+                            </option>
+
+                            <option value="Đang diễn ra"
+                                {% if edit_mode and activity and activity.status == "Đang diễn ra" %}selected{% endif %}>
+                                Đang diễn ra
+                            </option>
+
+                            <option value="Đã kết thúc"
+                                {% if edit_mode and activity and activity.status == "Đã kết thúc" %}selected{% endif %}>
+                                Đã kết thúc
+                            </option>
+
+                            <option value="Đã hủy"
+                                {% if edit_mode and activity and activity.status == "Đã hủy" %}selected{% endif %}>
+                                Đã hủy
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Mô tả</label>
+                        <textarea
+                            name="description"
+                            class="form-control"
+                            rows="4"
+                            placeholder="Mô tả nội dung hoạt động...">{{ activity.description if edit_mode and activity else '' }}</textarea>
+                    </div>
+
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+
+                    <a href="{{ url_for('activities.activities') }}"
+                       class="btn btn-outline-secondary">
+                        Hủy
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i>
+                        {{ "Lưu thay đổi" if edit_mode else "Tạo hoạt động" }}
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

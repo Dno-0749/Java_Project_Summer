@@ -1,0 +1,86 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1"><i class="bi bi-person-check text-primary me-2"></i>Check-in hành khách</h4>
+            <small class="text-muted">Chọn tên hành khách, sau đó chọn phương thức check-in thẻ hoặc QR</small>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body">
+            <form method="post" action="{{ url_for('finance.checkin') }}" id="checkinForm">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label">Tên hành khách</label>
+                        <select class="form-select" name="guest_id" required>
+                            {% for p in passengers %}
+                            <option value="{{ p.id }}">{{ p.name }} - Cabin {{ p.cabin }} - {{ p.card_id }}</option>
+                            {% else %}
+                            <option value="">Không có hành khách chờ check-in</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Cách check-in</label>
+                        <select class="form-select" name="method" id="methodSelect" required>
+                            <option value="card">Thẻ</option>
+                            <option value="qr">Quét QR</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4" id="tokenField">
+                        <label class="form-label">Mã thẻ</label>
+                        <input type="text" class="form-control" name="token" placeholder="Nhập mã thẻ">
+                    </div>
+
+                    <div class="col-md-4 d-none" id="qrPanel">
+                        <div class="border rounded-3 bg-light p-2 text-center">
+                            <div class="mx-auto" style="width:120px;height:120px;border:2px dashed #0d6efd;display:flex;align-items:center;justify-content:center;background:#fff">
+                                <i class="bi bi-upc-scan fs-1 text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary mt-3" type="submit"><i class="bi bi-check2-circle me-1"></i>Check-in</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body">
+            <h6 class="fw-bold">Lịch sử check-in</h6>
+            <table class="table table-sm table-hover">
+                <thead><tr><th>Guest</th><th>Card / QR</th><th>Cabin</th><th>Method</th></tr></thead>
+                <tbody>
+                    {% for item in checkin_logs %}
+                    <tr><td>{{ item.guest_name }}</td><td>{{ item.card_id }}</td><td>{{ item.cabin }}</td><td>{{ item.method }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+const form = document.getElementById('checkinForm');
+const methodSelect = document.getElementById('methodSelect');
+const tokenField = document.getElementById('tokenField');
+const qrPanel = document.getElementById('qrPanel');
+
+methodSelect.addEventListener('change', function () {
+    if (methodSelect.value === 'qr') {
+        tokenField.classList.add('d-none');
+        qrPanel.classList.remove('d-none');
+        setTimeout(function () {
+            form.submit();
+        }, 300);
+    } else {
+        tokenField.classList.remove('d-none');
+        qrPanel.classList.add('d-none');
+    }
+});
+</script>
+{% endblock %}
